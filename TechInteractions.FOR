@@ -6120,3 +6120,8 @@ C     +,BioOut, Recruit, Hrate ') THEN
 !      !CALL FIT(X,... 
 !      END SUBROUTINE FindFMSY
 !======================================================================
+      
+! NOtes and trials
+      !Carey is working in the branch C_Pstar_Bisection
+      !For real carey is working in the branch C_Pstar_Bisection and using Git within Visual Studio.
+      !How do you commit a change?
