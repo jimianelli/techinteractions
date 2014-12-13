@@ -5990,8 +5990,8 @@ C     +,BioOut, Recruit, Hrate ') THEN
           CareyGRD2 = 1.2
           
           Y(1) = LOG(SeedQuota)
-          !CALL FIT2(Y,...)
-          CALL FIT2(Y,SSS,1,CareyGRD2)
+           CALL Bisect(Y,SSS,0.01,1.5,1000)
+!          CALL FIT2(Y,SSS,1,CareyGRD2) !This used to be used (AMOEBA optimization)
           SSS = FUNK2(Y) !Y might not be the best variable either, as it appears within other functions, but probably ok in that it's a local variable.
           
 !          !Below is cut and pasted into FUNK2 with global year and global ispec.
@@ -6120,7 +6120,38 @@ C     +,BioOut, Recruit, Hrate ') THEN
 !      !CALL FIT(X,... 
 !      END SUBROUTINE FindFMSY
 !======================================================================
+
+!======================================================================
+      SUBROUTINE Bisect(Y,SSS,Tol,GridSize,NIter)
+      USE ShareDataRatioSubs
+      IMPLICIT NONE      
       
+      !Global variables
+      REAL(8),DIMENSION(100) :: Y
+      REAL(8) :: FUNK2
+      REAL(8) :: SSS
+      REAL :: Tol,GridSize
+      INTEGER :: NIter
+      
+      EXTERNAL FUNK2
+      
+      !Local variables
+      REAL(8),DIMENSION(100):: Ysmall,Ybig
+      REAL(8) :: SSSsmall, SSSbig
+      
+      SSS = FUNK2(Y)
+      Ysmall(1) = (1/GridSize)*Y(1)
+      Ybig(1) = GridSize*Y(1)
+      
+      SSSsmall = FUNK2(Ysmall)
+      SSSbig = FUNK2(Ybig)
+      
+      
+      
+      RETURN
+      END SUBROUTINE Bisect
+!======================================================================
+
 ! NOtes and trials
       !Carey is working in the branch C_Pstar_Bisection
       !For real carey is working in the branch C_Pstar_Bisection and using Git within Visual Studio.
