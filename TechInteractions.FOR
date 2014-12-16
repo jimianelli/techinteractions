@@ -6175,26 +6175,6 @@ C     +,BioOut, Recruit, Hrate ') THEN
            RETURN  
        ENDIF
         
-        !Choose the Y's producing the smallest SSS's as the new upper and lower search limits.
-        !min(SSSsmall, SSSbig, SSS)
-      
-        !if SSSsmall < SSSbig then Ybig(1) = Yinit(1) and Yinit = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
-        !else if SSSsmall > SSSbig then Ysmall(1) = Yinit(1) and Yinit(1) = Ysmall(1) and Yinit = same statement as above.
-        !else write out SSSsmall = SSSbig and Ysmall(1) = 0, Ybig = Yinit(1)*GridSize*2
-      
- !       IF (SSSsmall < SSSbig) THEN
- !           Ybig(1) = Yinit(1)
- !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
- !       ELSEIF (SSSsmall > SSSbig) THEN
- !           Ysmall(1) = Yinit(1)
- !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2    
- !       ELSE
- !           WRITE(*,*) 'SSSsmall = SSSbig'
- !           Ysmall(1) = 0
- !           Ybig(1) = Yinit(1)*GridSize*2
- !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
- !       ENDIF
- !       SSSfinal = MIN(SSSsmall,SSS,SSSbig)
       END DO
       
       
@@ -6208,3 +6188,4 @@ C     +,BioOut, Recruit, Hrate ') THEN
       !How do you commit a change?
       !How do you push and pull with gitlab?
       !showing kotaro
+      !Carey worked up a branch called Replace_FIT2 and then merged it into C_Pstar_Bisection
