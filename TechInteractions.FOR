@@ -4138,7 +4138,8 @@ C	    Carey is calculating Catch in numbers
       
           TrialP = WeightedOverfishNum/WeightedAllNum 
 
-          FUNK2 = ((TrialP-Pstar)**2)*10000
+ !         FUNK2 = ((TrialP-Pstar)**2)*10000
+           FUNK2 = TrialP
           
       ENDIF
       
@@ -5990,7 +5991,7 @@ C     +,BioOut, Recruit, Hrate ') THEN
           CareyGRD2 = 1.2
           
           Y(1) = LOG(SeedQuota)
-           CALL Bisect(Y,SSS,0.01,1.5,1000)
+           CALL Bisect(Y,SSS,0.01,3.0,1000)
 !          CALL FIT2(Y,SSS,1,CareyGRD2) !This used to be used (AMOEBA optimization)
           SSS = FUNK2(Y) !Y might not be the best variable either, as it appears within other functions, but probably ok in that it's a local variable.
           
@@ -6122,12 +6123,13 @@ C     +,BioOut, Recruit, Hrate ') THEN
 !======================================================================
 
 !======================================================================
-      SUBROUTINE Bisect(Y,SSS,Tol,GridSize,NIter)
+      SUBROUTINE Bisect(Yinit,SSS,Tol,GridSize,NIter)
       USE ShareDataRatioSubs
       IMPLICIT NONE      
       
+      !works for monotonic relatioships.
       !Global variables
-      REAL(8),DIMENSION(100) :: Y
+      REAL(8),DIMENSION(100) :: Yinit
       REAL(8) :: FUNK2
       REAL(8) :: SSS
       REAL :: Tol,GridSize
@@ -6138,17 +6140,65 @@ C     +,BioOut, Recruit, Hrate ') THEN
       !Local variables
       REAL(8),DIMENSION(100):: Ysmall,Ybig
       REAL(8) :: SSSsmall, SSSbig
+      INTEGER :: i
+      REAL(8) :: SSSfinal
+ 
+
+      !Calculate smaller and larger catch guesses based on GridSize
+ !     Ysmall(1) = (1/GridSize)*Yinit(1)
+      Ysmall(1) = 0.0
+      Ybig(1) = GridSize*Yinit(1)
+ 
+      !Loop over Niter times or until tolerance is reached:
+      i = 0
+      DO WHILE ((i.LE.Niter).OR.(SSSfinal.LE.Tol))
+         SSSsmall = 1.0E+20
+         SSSbig = 1.0E+20
+         SSS = 1.0E+20
+         i = i+1
+        !Calculate objective function values for difference between p and p* under each catch guess (small, init, large)
+        SSS = FUNK2(Yinit)
+ !       SSSsmall = FUNK2(Ysmall)
+ !       SSSbig = FUNK2(Ybig)   
+
+        IF (SSS.LT.Pstar) THEN
+            !search the upper half of the range: find the mid-point of upper half of range
+            Ysmall(1) = Yinit(1)
+            Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2   
+        ELSEIF (SSS.GT.Pstar) THEN
+            !search the lower half of the range: find the mid-point of the lower half of range
+            Ybig(1) = Yinit(1)
+            Yinit(1) = Ybig(1) - (Ybig(1)-Ysmall(1))/2   
+        ELSE
+            !you already found p = p*; return SSS and Yinit
+                
+           RETURN  
+       ENDIF
+        
+        !Choose the Y's producing the smallest SSS's as the new upper and lower search limits.
+        !min(SSSsmall, SSSbig, SSS)
       
-      SSS = FUNK2(Y)
-      Ysmall(1) = (1/GridSize)*Y(1)
-      Ybig(1) = GridSize*Y(1)
+        !if SSSsmall < SSSbig then Ybig(1) = Yinit(1) and Yinit = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
+        !else if SSSsmall > SSSbig then Ysmall(1) = Yinit(1) and Yinit(1) = Ysmall(1) and Yinit = same statement as above.
+        !else write out SSSsmall = SSSbig and Ysmall(1) = 0, Ybig = Yinit(1)*GridSize*2
       
-      SSSsmall = FUNK2(Ysmall)
-      SSSbig = FUNK2(Ybig)
+ !       IF (SSSsmall < SSSbig) THEN
+ !           Ybig(1) = Yinit(1)
+ !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
+ !       ELSEIF (SSSsmall > SSSbig) THEN
+ !           Ysmall(1) = Yinit(1)
+ !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2    
+ !       ELSE
+ !           WRITE(*,*) 'SSSsmall = SSSbig'
+ !           Ysmall(1) = 0
+ !           Ybig(1) = Yinit(1)*GridSize*2
+ !           Yinit(1) = Ysmall(1) + (Ybig(1)-Ysmall(1))/2
+ !       ENDIF
+ !       SSSfinal = MIN(SSSsmall,SSS,SSSbig)
+      END DO
       
       
       
-      RETURN
       END SUBROUTINE Bisect
 !======================================================================
 
