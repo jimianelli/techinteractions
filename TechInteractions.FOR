@@ -532,6 +532,7 @@ C     Debugging variables:
 !      REAL(8),DIMENSION(1:MaxSpec) :: SeedQuota
       REAL(8) :: SeedQuota
       REAL(8) :: Pstar
+      REAL(8) :: EstimatedP
       INTEGER :: Nconfigs
       REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: ConfigWts !,hConfigs, MConfigs
       REAL(8) :: TheM,TheX
@@ -3687,8 +3688,10 @@ C     Summation limits for aggregating results
        Iarea2a = Iarea2
       ENDIF
      	Write(*,'(1x,A)') 'About to call CAB.EXE'
+      Write(*,*) 'Sim: ', Isim, 'Year: ', Year2, 'Config: ', Iconfig
       !CALL SYSTEM("CAB.EXE -est -nox >output.log")
       CALL SYSTEM("CAB.EXE -nox >output.log")
+      Write(*,*) 'Finished cab assessment'
       !Option 2: Potentially rename important output files to be config-specific here.
       !Option 2: Potentially end Iconfig loop here.
 
@@ -3708,17 +3711,24 @@ C     Summation limits for aggregating results
       !put a stop to further processing if the .cor file doesn't actually exist.
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
       IF (cor_exists) THEN
-        CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
+          Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', Year2, 
+     +' Config ', Iconfig
+          CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
       ENDIF
       !Make a flag
       IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation') THEN
         WRITE(402,*) Isim,GlobalProjYr,Ispec,Iconfig,TestMVN
         !return without re-calculating the quota (auto-sets quota to last year's)
         QuotaAct(Ispec) = CatBio(Ispec,1,GlobalProjYr-1)
+        Write(*,*) 'Using last years catch as the quota:'
+        Write(*,*) '.cor file DNE or prob with MVN process for Sim ',
+     +Isim,', Year ',Year2,', Config ', Iconfig
         !cleanup from this config 
         !Call a batch file to copy cab.rep to cab.rep_YrXX_configYY and delete extra cab files
         CALL SYSTEM(cstring)
         CALL SYSTEM("DeleteCabStuff")
+        
+        !1/6/15: need to delete mvninput files and EstNatAge,EstStdNatAge,EstNatCor here??
         
         !Return and run through annual proj, etc with last year's quota. Don't bother with control rule calculations
         RETURN !no use in continuing with the making of Nvecs as plan is to set quota to last year's, make a flag, and continue on.
@@ -5351,6 +5361,9 @@ C     +,BioOut, Recruit, Hrate ') THEN
       
       !This probably needs to be global?? Yep
  !     REAL(8),DIMENSION(1:Nspec,1:Nmvn,0:Amax(Ispec)) :: Nvec
+      EstNatAge = 0.0
+      EstStdNatage = 0.0
+      EstNatAgeCor= 0.0
       
       NumAges = AINT((Amax(Ispec) + 1)/12.0)
       IF (MOD((Amax(Ispec) + 1),12).GT.0) THEN
@@ -6011,7 +6024,8 @@ C     +,BioOut, Recruit, Hrate ') THEN
        
       
           !QuotaAct(Ispec) = X-type results from new FIT function
-          QuotaAct(Ispec) = EXP(Y(1))  !Dummy line until numerical integration is a reality.
+          QuotaAct(Ispec) = EXP(Y(1))  
+          EstimatedP = SSS
 !114    CONTINUE
        
        RETURN !What does RETURN get you anyway?
@@ -6050,10 +6064,10 @@ C     +,BioOut, Recruit, Hrate ') THEN
       
       !----------------------------------------------------------------
       !Pstar1.OUT (UNIT = 400):
-      IF (IYear.EQ.(FinDepYr+1)) THEN
+      IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
       WRITE(400,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
      + FDistn SSFDistn
-     + EstFOFL TrueF SSTrueF TrueFOFL'
+     + EstFOFL TrueF SSTrueF TrueFOFL EstimatedP Pstar QuotaAct'
       WRITE(400,*) Nsim,NProjYr,Nspec,Nconfigs,Nmvn
       ENDIF
       
@@ -6065,7 +6079,8 @@ C     +,BioOut, Recruit, Hrate ') THEN
      +             SSFDistn(Ispec,IYear-1,Iconfig,Ivec),
      +             EstFOFL(ISpec,Iconfig,Ivec),
      +             TrueF(Ispec,IYear-1),SSTrueF(Ispec,IYear-1),
-     +             TrueFOFL(Ispec,IYear-1)
+     +             TrueFOFL(Ispec,IYear-1),
+     +             EstimatedP,Pstar,QuotaAct(Ispec)
 100   CONTINUE
       !----------------------------------------------------------------
 !         TrueF(Ispec,IYear) = X(1)
@@ -6073,7 +6088,7 @@ C     +,BioOut, Recruit, Hrate ') THEN
 
       !----------------------------------------------------------------
       !Pstar2.OUT (UNIT 401): Write out optimization info for estimated F35% and F40% (all configuration-specific)
-      IF (IYear.EQ.(FinDepYr+1)) THEN
+      IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
       WRITE(401,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
      +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
      +SSTruSPR35,TruSPR40,SSTruSPR40'
@@ -6096,7 +6111,7 @@ C     +,BioOut, Recruit, Hrate ') THEN
       !----------------------------------------------------------------
       
 1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.5,1x,F17.10,1x,F17.10,1x,F20.5,
-     +1x,F17.10)
+     +1x,F17.10,2(1x,F15.12),1x,F15.5)
 2     FORMAT(4(1x,I4),8(1x,F10.8,1x,F10.4))
 !3     FORMAT(20(25x,1x))
 
