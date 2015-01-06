@@ -734,6 +734,12 @@ C     Carey: Add a file for analyzing movement characteristics
       OPEN(UNIT = 400,FILE = "Pstar1.OUT") !FDistn,FOFL information by vector, configuration, year,simulation
       OPEN(UNIT = 401,FILE = "Pstar2.OUT") !EstF35,EstF40 and associated optimization info to check if FOFL-related optimizations worked. QAQC, mostly.
       OPEN(UNIT = 402,FILE = "Pstar3.OUT") !Flags simulation, year, and configuration that didn't converge (defined as no .cor file)
+      OPEN(UNIT = 4000,FILE = "Pstar1_Old.OUT")
+      OPEN(UNIT = 4001,FILE = "Pstar2_Old.OUT")
+      OPEN(UNIT = 4002,FILE = "Pstar3_Old.OUT")
+
+
+      
       WRITE(402,*) "The_following_assessments_didnt_produce_cor_or_MVNn"
       WRITE(402,*) "Isim, GlobalProjYr, Ispec, Iconfig, TestMVN"
       !Make character variables of historical assessment years to then string together file names containing info on assessment year
@@ -975,6 +981,7 @@ C       Conduct stock assessments
         CALL GenData(TheProjYear) !TheProjYear is now the current year
         CALL Summary2(TheProjYear)
         CALL SummaryPstar(TheProjYear)
+        CALL SummaryPstar_Old(TheProjYear)
 
 12000  CONTINUE 
    
@@ -1022,6 +1029,9 @@ C This CONTINUE refers to SuperSim = 1,2, which does not optimize, but performs 
       CLOSE(400) !Pstar1.out
       CLOSE(401) !Pstar2.out
       CLOSE(402) !Pstar3.out
+      CLOSE(4000)
+      CLOSE(4001)
+      CLOSE(4002)
 
       total = etime(elapsed)
 	WRITE(*,*)
@@ -6117,7 +6127,70 @@ C     +,BioOut, Recruit, Hrate ') THEN
 
       END SUBROUTINE SummaryPstar
 !======================================================================
+   
+      !===================================================================
+      SUBROUTINE SummaryPstar_Old(IYear) !IYear = Year2 within DoCab2 (can change this to something more clear)
+      USE ShareDataRatioSubs
+      IMPLICIT NONE
+  
+      !Global variables
+      INTEGER :: IYear,Ispec,Iconfig,Ivec
       
+      !----------------------------------------------------------------
+      !Pstar1.OUT (UNIT = 400):
+      IF (IYear.EQ.(FinDepYr+1)) THEN
+      WRITE(4000,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
+     + FDistn SSFDistn
+     + EstFOFL TrueF SSTrueF TrueFOFL EstimatedP Pstar QuotaAct'
+      WRITE(4000,*) Nsim,NProjYr,Nspec,Nconfigs,Nmvn
+      ENDIF
+      
+      DO 100 Ispec = 1,Nspec
+          DO 100 Iconfig = 1,Nconfigs
+              DO 100 Ivec = 1,Nmvn
+      WRITE(4000,1) Isim,IYear-1,Ispec,Iconfig,Ivec,
+     +             FDistn(Ispec,IYear-1,Iconfig,Ivec),
+     +             SSFDistn(Ispec,IYear-1,Iconfig,Ivec),
+     +             EstFOFL(ISpec,Iconfig,Ivec),
+     +             TrueF(Ispec,IYear-1),SSTrueF(Ispec,IYear-1),
+     +             TrueFOFL(Ispec,IYear-1)
+100   CONTINUE
+      !----------------------------------------------------------------
+!         TrueF(Ispec,IYear) = X(1)
+!         SSTrueF(Ispec,IYear) = SS !As a check.      
+
+      !----------------------------------------------------------------
+      !Pstar2.OUT (UNIT 401): Write out optimization info for estimated F35% and F40% (all configuration-specific)
+      IF (IYear.EQ.(FinDepYr+1)) THEN
+      WRITE(4001,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
+     +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
+     +SSTruSPR35,TruSPR40,SSTruSPR40'
+      WRITE(4001,*) Nsim,NProjYr,Nspec,Nconfigs
+      ENDIF
+      
+      DO 101 Ispec = 1,Nspec
+          DO 101 Iconfig = 1,Nconfigs
+      WRITE(4001,2) Isim,IYear-1,Ispec,Iconfig,EstF35(Ispec,Iconfig),
+     +EstB35(Ispec,Iconfig),EstSPR35(Ispec,Iconfig),
+     +SSEstSPR35(Ispec,Iconfig),EstF40(Ispec,Iconfig),
+     +EstB40(Ispec,Iconfig),EstSPR40(Ispec,Iconfig),
+     +SSEstSPR40(Ispec,Iconfig),TrueSPR35(Ispec),SSTrueSPR35(Ispec),
+     +TrueSPR40(Ispec),SSTrueSPR40(Ispec)
+
+101   CONTINUE
+
+      
+      
+      !----------------------------------------------------------------
+      
+1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.5,1x,F17.10,1x,F17.10,1x,F20.5,
+     +1x,F17.10)
+2     FORMAT(4(1x,I4),8(1x,F10.8,1x,F10.4))
+!3     FORMAT(20(25x,1x))
+
+      END SUBROUTINE SummaryPstar_Old
+!======================================================================
+
 !!======================================================================
  !     SUBROUTINE FindFMSY(Ispec) !IYear = Year2 within DoCab2 (can change this to something more clear)
 !      USE ShareDataRatioSubs
