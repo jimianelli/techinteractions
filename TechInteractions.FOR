@@ -3749,9 +3749,9 @@ C     Summation limits for aggregating results
         CALL SYSTEM(cstring)
         CALL SYSTEM("DeleteCabStuff")
       
-        CLOSE(957)
-        CLOSE(958)
-        CLOSE(959)
+  !      CLOSE(957)  !not used outside of ReadCabRep,so closed at the end of that function
+ !       CLOSE(958)  !not used outside of ReadCabRep,so closed at the end of that function
+ !       CLOSE(959)  !needed to be closed within ReadCabRep or else weird mistakes when something doesn't converge.
         
 1298  CONTINUE !End Iconfig loop.
 
@@ -5298,6 +5298,9 @@ C     +,BioOut, Recruit, Hrate ') THEN
  !     SigmaRCAest(Ispec,Carea1) = SQRT(SigmaRCAEst(ISpec,Carea1))
       
       CLOSE(99)
+      CLOSE(957)
+      CLOSE(958)
+      CLOSE(959)
  
 801   FORMAT(3(1x,I5),1x,2(F15.5,1x),2(F15.6,1x))
 802   FORMAT(3(1x,I5),1x,F20.9,1x)
