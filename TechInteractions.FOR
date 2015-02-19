@@ -2545,7 +2545,9 @@ C
 	  
       SUBROUTINE AnnualProj
 C
-C	This subroutine finds the effort value that produces the quota
+C	This is an important subroutine because it projects the population forward one year. 
+C	This function is used within FUNK and it is the main function that advances the pop by one
+C	year in the MSE
 C      
 	USE ShareDataRatioSubs
       IMPLICIT NONE
@@ -3373,9 +3375,12 @@ C
       !------------------------------------------------------------
 C      
 C     Extract the catch-rate index    
-C     Kotaro modified a few things so that the CPUE (catch) follows a lognormal distribution
-C     There was a controversy on whether to add the error on the catch or the effort (discussion between CRM, AEP, RM)
-C     However, we decided to do this way because the CAB model assumes that fishery CPUE is lognromally distributed + only one strata      
+C     Kotaro modified a few things so that the CPUE (catch) follows a lognormal distribution in EACH area
+C     There was a controversy on whether to add the error on the catch (numerator) or the effort (denomiator) (discussion between CRM, AEP, RM)
+C     However, we decided to add error on catch because the technical interaction model will be essentially used with ONE strata (area)
+C 	  and the EM assumes that fishery CPUE is lognormally distributed
+C     Need to modify this code if one want to use multiple area with different assumption (right now lognormality is assumed for each strata)
+C
       DO 20000 Ispec = 1,Nspec
        Top = 0
        Bot = 0
@@ -3583,7 +3588,7 @@ C
 C This subroutine sets up a run using CAB.TPL and conducts the assessment for a single configuration run
 C Steps:
 C 	1. Set the CAB.dat file
-C 	2. Set the CAB.tpl file --> this is influenced by the model specification
+C 	2. Set the CAB.ctl file --> this is influenced by the model specification
 C 	3. Call CAB.exe
 C 	4. Read the cab report file 
 C 	5. Read the cab par file
