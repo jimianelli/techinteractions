@@ -1742,7 +1742,7 @@ C commenting out the next two lines should remove the existence of the plus grou
                 Aplus = AmaxM
                ENDIF
 C             DO 12210 Iage = AmaxM-1,1,-1
-			DO 12210 Iage = Aplus,1,-1                               ! changed Aplus to Amax
+			DO 12210 Iage = Aplus,1,-1                               !Equals AmaxM if no plus group and AmaxM-1 otherwise (because plus group is updated before this line)
               Temp1(IBlkNS,IBlkEW,Iage) = Temp1(IBlkNS,IBlkEW,Iage-1) 
 12210        CONTINUE  !Small loop over ages          
              Temp1(IBlkNS,IBlkEW,0) = RecVirg(Ispec,IBlkNS,IBlkEW)
