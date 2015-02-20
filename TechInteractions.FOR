@@ -676,11 +676,11 @@ C     !---------------------------------------------------------------------
       CALL mydate('Start time and date      ')
 
 C     Clear some files
-	!CALL SYSTEM("Del SUMM1.OUT")
-      !CALL SYSTEM("Del SUMM1.EST") 
-      !CALL SYSTEM("Del SUMM2.EST") 
-      !CALL SYSTEM("Del REC.EST")
-	!CALL SYSTEM("Del SUMM29.OUT")
+	CALL SYSTEM("Del SUMM1.OUT")
+      CALL SYSTEM("Del SUMM1.EST") 
+      CALL SYSTEM("Del SUMM2.EST") 
+      CALL SYSTEM("Del REC.EST")
+	CALL SYSTEM("Del SUMM29.OUT")
 C
 C     Read in the specifications for the run
       CALL ReadSpec()

@@ -372,7 +372,7 @@ PARAMETER_SECTION
   !!cout<<"end of parameter section"<<endl;
  
   //likelihood profile numbers
-  likeprof_number S0_lprof
+  likeprof_number S0_lprof // CRM commented out 2/4/15 because interfering with techinteractions tasks
   sdreport_number Depl;
   sdreport_matrix LogTheNatAge(1,sex,0,nages);  //Carey added this
   //sdreport_vector LogTheNatAgeMale(0,nages);  //Carey added this
@@ -775,7 +775,7 @@ FUNCTION get_initial_conditions
   
   //Virgin_Recruitment (by population)
   S0 = mfexp(ln_S0);
-  S0_lprof = S0; //for likelihood profile
+  S0_lprof = S0; // for likelihood profile CRM commented this out because interering with techinteractions tasks
    
   //Calculate R0 from S0 and fecundity at age
   sum_fec = Fec(nages)*mfexp(-M*double(nages))/(1-mfexp(-M));
