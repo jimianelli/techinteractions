@@ -1749,7 +1749,7 @@ C             DO 12210 Iage = AmaxM-1,1,-1
 12200      CONTINUE !Small loop over NS and EW space
 C
 
-C          Calculate SSB (well it is not quite SSB but instead it is Spawning stock number per recruit because RecVirg=1)
+C          Calculate SSB (Note: Fec(ISpec,Iage) = Maturity(Ispec,Iage)*BegWtAtAge(Ispec,Iage)
            IF (ISex.EQ.1) THEN
             SSBT = 0
             DO 12220 IBlkNS = 1,NNSBlock
