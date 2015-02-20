@@ -6452,7 +6452,10 @@ C 1. line 1745: changed Aplus to Amax because it doesn't make sense if not
 C 2. line 2492: included the statement about process error = recruit deviation
 C 3. subroutine getYield is WRONG (the calculation of recruitment)
 C 4. line 4775: refined the increment value for E
-C 5.
+C 5. CRM: line 1745: changed modification 1 back to be Aplus (which has a different meaning depending on whether there's a plus group or not) - Kotaro and Carey discussed.
+C 6. CRM: Uncommented lines 3884 and 3885 to correct inconsistency between Carey and Kotaro's code and make sure old simulation files get cleaned up properly
+C 7. CRM: added back in lines 679-683 to delete old files (again to avoid mix-ups between old and new simulation results)
+C 8. CRM: 
 C
 C TO DO:
 C 0. Be sure to use AFSC_SPR in the MPA_model (the main program) instead of the P* controle rule for the multispecies MSE
