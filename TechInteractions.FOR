@@ -3886,8 +3886,8 @@ C     Summation limits for aggregating results
       
         !cleanup from this config 
         !Call a batch file to copy cab.rep to cab.rep_YrXX_configYY and delete extra cab files
-        !CALL SYSTEM(cstring)
-        !CALL SYSTEM("DeleteCabStuff")
+        CALL SYSTEM(cstring)
+        CALL SYSTEM("DeleteCabStuff")
       
  !       CLOSE(957)  !not used outside of ReadCabRep,so closed at the end of that function
  !       CLOSE(958)  !not used outside of ReadCabRep,so closed at the end of that function
