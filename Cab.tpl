@@ -372,7 +372,7 @@ PARAMETER_SECTION
   !!cout<<"end of parameter section"<<endl;
  
   //likelihood profile numbers
-  likeprof_number S0_lprof // CRM commented out 2/4/15 because interfering with techinteractions tasks
+  likeprof_number S0_lprof
   sdreport_number Depl;
   sdreport_matrix LogTheNatAge(1,sex,0,nages);  //Carey added this
   //sdreport_vector LogTheNatAgeMale(0,nages);  //Carey added this
@@ -775,7 +775,7 @@ FUNCTION get_initial_conditions
   
   //Virgin_Recruitment (by population)
   S0 = mfexp(ln_S0);
-  S0_lprof = S0; // for likelihood profile CRM commented this out because interering with techinteractions tasks
+  S0_lprof = S0; //for likelihood profile
    
   //Calculate R0 from S0 and fecundity at age
   sum_fec = Fec(nages)*mfexp(-M*double(nages))/(1-mfexp(-M));
@@ -1176,7 +1176,7 @@ GLOBALS_SECTION
   
 //---------------------------------------------------------------------------------------
 
-FUNCTION dmatrix SizeTrans(_CONST double& Lbeg,_CONST double& Lmax,_CONST double& K,_CONST double& CVLmin,_CONST double& CVLmax,_CONST int& m)
+FUNCTION dmatrix SizeTrans(const double& Lbeg,const double& Lmax,const double& K,const double& CVLmin,const double& CVLmax,const int& m)
   { 
    RETURN_ARRAYS_INCREMENT(); //Need this statement because the function
    // m is a switch, if m==0, the function will calculate the length transition for the beginning of the year,
@@ -1216,9 +1216,9 @@ FUNCTION dmatrix SizeTrans(_CONST double& Lbeg,_CONST double& Lmax,_CONST double
   }
   
 //-----------------------------------------------------------------------------------
-// SEE if we have any problem because I didn't declare the arguments to be _CONST
+// SEE if we have any problem because I didn't declare the arguments to be const
 // According to Jim this may cause the arguments to be changed within the function
-// But there is a limit to the number of strings I can pass, so if I include the _CONST will exceed the limit
+// But there is a limit to the number of strings I can pass, so if I include the const will exceed the limit
 
 FUNCTION dvar_vector DoubLogistic(dvariable& pk,dvariable& in,dvariable& infl,dvariable& sl,dvariable& fin,dvariable& infl2,dvariable& sl2)
   {
