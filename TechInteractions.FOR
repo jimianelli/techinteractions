@@ -676,11 +676,11 @@ C     !---------------------------------------------------------------------
       CALL mydate('Start time and date      ')
 
 C     Clear some files
-	!CALL SYSTEM("Del SUMM1.OUT")
-      !CALL SYSTEM("Del SUMM1.EST") 
-      !CALL SYSTEM("Del SUMM2.EST") 
-      !CALL SYSTEM("Del REC.EST")
-	!CALL SYSTEM("Del SUMM29.OUT")
+	CALL SYSTEM("Del SUMM1.OUT")
+      CALL SYSTEM("Del SUMM1.EST") 
+      CALL SYSTEM("Del SUMM2.EST") 
+      CALL SYSTEM("Del REC.EST")
+	CALL SYSTEM("Del SUMM29.OUT")
 C
 C     Read in the specifications for the run
       CALL ReadSpec()
@@ -1742,14 +1742,14 @@ C commenting out the next two lines should remove the existence of the plus grou
                 Aplus = AmaxM
                ENDIF
 C             DO 12210 Iage = AmaxM-1,1,-1
-			DO 12210 Iage = Aplus,1,-1                               ! changed Aplus to Amax
+			DO 12210 Iage = Aplus,1,-1                               !Equals AmaxM if no plus group and AmaxM-1 otherwise (because plus group is updated before this line)
               Temp1(IBlkNS,IBlkEW,Iage) = Temp1(IBlkNS,IBlkEW,Iage-1) 
 12210        CONTINUE  !Small loop over ages          
              Temp1(IBlkNS,IBlkEW,0) = RecVirg(Ispec,IBlkNS,IBlkEW)
 12200      CONTINUE !Small loop over NS and EW space
 C
 
-C          Calculate SSB (well it is not quite SSB but instead it is Spawning stock number per recruit because RecVirg=1)
+C          Calculate SSB (Note: Fec(ISpec,Iage) = Maturity(Ispec,Iage)*BegWtAtAge(Ispec,Iage)
            IF (ISex.EQ.1) THEN
             SSBT = 0
             DO 12220 IBlkNS = 1,NNSBlock
@@ -3886,8 +3886,8 @@ C     Summation limits for aggregating results
       
         !cleanup from this config 
         !Call a batch file to copy cab.rep to cab.rep_YrXX_configYY and delete extra cab files
-        !CALL SYSTEM(cstring)
-        !CALL SYSTEM("DeleteCabStuff")
+        CALL SYSTEM(cstring)
+        CALL SYSTEM("DeleteCabStuff")
       
  !       CLOSE(957)  !not used outside of ReadCabRep,so closed at the end of that function
  !       CLOSE(958)  !not used outside of ReadCabRep,so closed at the end of that function
@@ -6452,7 +6452,10 @@ C 1. line 1745: changed Aplus to Amax because it doesn't make sense if not
 C 2. line 2492: included the statement about process error = recruit deviation
 C 3. subroutine getYield is WRONG (the calculation of recruitment)
 C 4. line 4775: refined the increment value for E
-C 5.
+C 5. CRM: line 1745: changed modification 1 back to be Aplus (which has a different meaning depending on whether there's a plus group or not) - Kotaro and Carey discussed.
+C 6. CRM: Uncommented lines 3884 and 3885 to correct inconsistency between Carey and Kotaro's code and make sure old simulation files get cleaned up properly
+C 7. CRM: added back in lines 679-683 to delete old files (again to avoid mix-ups between old and new simulation results)
+C 8. CRM: 
 C
 C TO DO:
 C 0. Be sure to use AFSC_SPR in the MPA_model (the main program) instead of the P* controle rule for the multispecies MSE

@@ -1176,7 +1176,7 @@ GLOBALS_SECTION
   
 //---------------------------------------------------------------------------------------
 
-FUNCTION dmatrix SizeTrans(_CONST double& Lbeg,_CONST double& Lmax,_CONST double& K,_CONST double& CVLmin,_CONST double& CVLmax,_CONST int& m)
+FUNCTION dmatrix SizeTrans(const double& Lbeg,const double& Lmax,const double& K,const double& CVLmin,const double& CVLmax,const int& m)
   { 
    RETURN_ARRAYS_INCREMENT(); //Need this statement because the function
    // m is a switch, if m==0, the function will calculate the length transition for the beginning of the year,
@@ -1216,9 +1216,9 @@ FUNCTION dmatrix SizeTrans(_CONST double& Lbeg,_CONST double& Lmax,_CONST double
   }
   
 //-----------------------------------------------------------------------------------
-// SEE if we have any problem because I didn't declare the arguments to be _CONST
+// SEE if we have any problem because I didn't declare the arguments to be const
 // According to Jim this may cause the arguments to be changed within the function
-// But there is a limit to the number of strings I can pass, so if I include the _CONST will exceed the limit
+// But there is a limit to the number of strings I can pass, so if I include the const will exceed the limit
 
 FUNCTION dvar_vector DoubLogistic(dvariable& pk,dvariable& in,dvariable& infl,dvariable& sl,dvariable& fin,dvariable& infl2,dvariable& sl2)
   {
