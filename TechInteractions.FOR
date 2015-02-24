@@ -521,6 +521,8 @@ C     Debugging variables:
       REAL(8) :: ABC
       REAL(8),DIMENSION(1:MaxSpec,1:Nsex,1:MaxMVN,0:MaxAge,
      +  0:MaxConfigs) :: Nvec
+      REAL(8),DIMENSION(1:MaxSpec,1:Nsex,0:MaxAge,
+     +  0:MaxConfigs) :: Natage
       REAL(8),DIMENSION(1:MaxSpec,1:MaxMVN,0:MaxConfigs) :: 
      +SSB_MVNvec
       REAL(8) :: pCatBio
@@ -3909,7 +3911,7 @@ C---------------------------------------------------
       !This function sets the quota:
         !Will only get to Pstar calcs if all configs converged:
       IF (UsePstar.EQ.1) THEN 
-         CALL FindPstarQuota(Year2,Ispec) !The above two subroutines are called within FindPstarQuota.
+         CALL FindPstarQuota(Year2,Ispec) 
  !      FindFforCatchReg(Year2), FindFofl() both done within FindPstarQuota
       ENDIF
      
@@ -3918,9 +3920,9 @@ C-----------------------------------------------------
 C---------------------------------------------------
 !This is the AFSC tier system quota
       !This function sets the quota:
-        !Will only get to Pstar calcs if all configs converged:
-    !  IF (UsePstar.EQ.0) THEN 
-    ! +     CALL FindPstarQuota(Year2,Ispec) !The above two subroutines are called within FindPstarQuota.
+      IF (UsePstar.EQ.0) THEN 
+          CALL  FindquotaF(Ispec, Year2) !FindquotaF(Year2,Ispec) 
+      ENDIF
  !      FindFforCatchReg(Year2), FindFofl() both done within FindPstarQuota
 C-----------------------------------------------------
         RETURN
@@ -5677,6 +5679,11 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       
       !Likewise run minopt for finding the FOFL associated with each vector (do you mean FOFL or FMSY?) FOFL for Tier 3; ow could use a pdf of FOFL for this?
       
+      ! Save the estimated number at age for each configuration
+       DO 1062 Iage = 0,Amax(Ispec)
+           Natage(Ispec,1,Iage,Iconfig) = EstNatAge(1,Iage) 
+           Natage(Ispec,2,Iage,Iconfig) = EstNatAge(2,Iage) 
+1062  CONTINUE
       
       
       !Shertzer 2008 numerical integration to find Pr(Ft > FOFL) = p* for estimated Ft and FOFL
@@ -5901,6 +5908,51 @@ C
 C ===========================================================================
 C
 
+      SUBROUTINE FindquotaF(Ispec,Iyear)
+C This subroutine calculates the quota associated with the Fofl level
+C It uses CalcCatchFromF to calculate the quota associated with the Fofl level
+C      
+      USE ShareDataRatioSubs
+      IMPLICIT NONE
+      
+       !Global variables
+       INTEGER :: IYear,Ispec
+            
+       !Local variables
+       INTEGER :: Iconfig,Ivec,Isex,Iage
+       REAL(8) :: XX
+              
+       DO 100 Iconfig = 1,Nconfigs
+       ! Loading the estimates from CAB.rep and else
+          MyWeight(:,:) = Wght(Ispec,:,:,1) 
+          TheM = EstM(Ispec,Iconfig)
+       
+       !Define the inputs that will be used for CalcCatchFromF as global variables that are reset for each iteration of this big loop
+          DO 2117 Isex = 1,Nsex
+            DO 2117 Iage = 0,Amax(Ispec)
+             ThoseNs(Isex,Iage) = exp(Natage(Ispec,Isex,Iage,Iconfig)) 
+2117      CONTINUE !End Isex and Iage loop
+          TheSelex = EstS(Ispec,1,:,:,Iconfig) 
+                   
+       !Here you should cal FIT.
+           CALL FindFofl(Ispec,Iyear) 
+       
+          TheX = TrueFOFL(Ispec,IYear)
+           CALL CalcCatchFromF(TheX,TheM,
+     +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
+      
+100        CONTINUE !end loop over Iconfig
+
+      ! to retun the result I want
+      QuotaAct(Ispec) = pCatBio
+       
+      RETURN       
+      END SUBROUTINE FindquotaF
+
+C
+C ===========================================================================
+C
+
 !      SUBROUTINE AFSC_SPR(Fval,Mval,Fecvec,Recvec,Ispec,Iconfig)
       SUBROUTINE AFSC_SPR(Fval,Mval,Fecvec,Recvec,SelexVec,PlusAge)
 C Find the SPR rate and SSB_SPR given an F (Fval) and other population numbers
@@ -6070,8 +6122,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
 1033  CONTINUE !End loop over Iconfig  
        ! TheNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,Iage))
       
-
-      
+     
       
       !----------------------------------------------------------------------------------------------      
       !Find the true FOFL for each species and year - can always move this to another subroutine if it's too much here.
@@ -6098,7 +6149,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       TrueSPR35(Ispec) = EstSPR
       SSTrueSPR35(Ispec) = SS
       
-       !----------------------------------------------------------------------------------------------      
+      !----------------------------------------------------------------------------------------------      
       MinOpt = 15 !Find F40% and B40%
       X = 0.0
       X(1) = TrueF35(Ispec) !Might as well use a good seed to speed things up
@@ -6112,6 +6163,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       TrueSPR40(Ispec) = EstSPR
       SSTrueSPR40(Ispec) = SS
       
+      !----------------------------------------------------------------------------------------------      
       !TrueFOFL calculations:
         Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
 
@@ -6448,7 +6500,6 @@ C
 C NOTES on the tech int model 
 C
 C Modifications:
-C 1. line 1745: changed Aplus to Amax because it doesn't make sense if not
 C 2. line 2492: included the statement about process error = recruit deviation
 C 3. subroutine getYield is WRONG (the calculation of recruitment)
 C 4. line 4775: refined the increment value for E
@@ -6471,5 +6522,7 @@ C 	7.2. use the above information and build the capacity to have a time varying 
 C 	7.3. include the harvest cap into the model (that is about 1.7 millions based on 2 million - the three species TAC)
 C 8. include the control rule (how to calculate TAC) into the model
 C 9. include an option to generate recdevs based on multivariate time series model
+C 10. the recvec in the "AFSC_SPR" subroutine needs to be changed so that the recvec is only from 1978 onward
+
 
 C MERGE to cbisection  
