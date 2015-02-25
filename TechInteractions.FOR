@@ -678,11 +678,13 @@ C     !---------------------------------------------------------------------
       CALL mydate('Start time and date      ')
 
 C     Clear some files
-	CALL SYSTEM("Del SUMM1.OUT")
-      CALL SYSTEM("Del SUMM1.EST") 
+	  !CALL SYSTEM("Del SUMM1.OUT")   ! this file is not used anymore so commenting out
+      CALL SYSTEM("cd results")		  ! to specify where this file is located
+	CALL SYSTEM("Del SUMM1.EST") 
       CALL SYSTEM("Del SUMM2.EST") 
       CALL SYSTEM("Del REC.EST")
 	CALL SYSTEM("Del SUMM29.OUT")
+	CALL SYSTEM("cd ..")			  ! to go back at the working directory
 C
 C     Read in the specifications for the run
       CALL ReadSpec()
@@ -5920,7 +5922,6 @@ C
             
        !Local variables
        INTEGER :: Iconfig,Ivec,Isex,Iage
-       REAL(8) :: XX
               
        DO 100 Iconfig = 1,Nconfigs
        ! Loading the estimates from CAB.rep and else
@@ -5937,7 +5938,7 @@ C
        !Here you should cal FIT.
            CALL FindFofl(Ispec,Iyear) 
        
-          TheX = TrueFOFL(Ispec,IYear)
+          TheX = EstFOFL(Ispec,Iconfig,1)
            CALL CalcCatchFromF(TheX,TheM,
      +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
       
@@ -6091,9 +6092,10 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         !Need an estimate of current SSB for each of NMVN numbers-at-age vectors generated
         !Need an estimate SSB0 that is configuration-specific (with MCMC it would be vector-specific)
       
-        !THE AFSC TIER 3 CONTROL RULE:
+        !THE AFSC TIER 3 CONTROL RULE (different output depending on whether it is for the P* HCR or simple tier 3 rule):
         Depl = 0.0
       
+        IF (UsePstar.EQ.1) THEN
         DO 200 Ivec = 1,Nmvn
           Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
 
@@ -6119,9 +6121,28 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
 !     +    EstS(Ispec,1,:,:))!subroutine doesn't work because EstFOFL is a different type of argument than needed (??)
           !Est_OFL(Ispec,Ivec,Iconfig) = pCatBio(Ispec) !Still need to define Est_OFL (maybe use a different name if this one gets used for something else).
 200     CONTINUE !End loop over Ivec (Ivec loop will need to be expanded to include calls to FIT and FUNK above if switch to MCMC method.
+        ENDIF
+		
+        IF (UsePstar.EQ.0) THEN
+          Depl = EstSB(Ispec,1,Iyear)/EstSB(Ispec,1,1)
+
+          IF ((Depl.GT.0.40)) THEN
+            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
+
+          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
+     +      ((EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig))
+     +      -AFSC_alpha)*(1-AFSC_alpha)
+
+          ELSE
+            EstFOFL(Ispec,Iconfig,1) = 0.0
+          ENDIF
+		  
+        ENDIF	
+		
 1033  CONTINUE !End loop over Iconfig  
        ! TheNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,Iage))
-      
+     
      
       
       !----------------------------------------------------------------------------------------------      
@@ -6506,7 +6527,7 @@ C 4. line 4775: refined the increment value for E
 C 5. CRM: line 1745: changed modification 1 back to be Aplus (which has a different meaning depending on whether there's a plus group or not) - Kotaro and Carey discussed.
 C 6. CRM: Uncommented lines 3884 and 3885 to correct inconsistency between Carey and Kotaro's code and make sure old simulation files get cleaned up properly
 C 7. CRM: added back in lines 679-683 to delete old files (again to avoid mix-ups between old and new simulation results)
-C 8. CRM: 
+C 9. KO: commenting out line 681 because not used anymore in the code
 C
 C TO DO:
 C 0. Be sure to use AFSC_SPR in the MPA_model (the main program) instead of the P* controle rule for the multispecies MSE
