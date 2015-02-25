@@ -672,7 +672,9 @@ C     Carey: EXTERNAL means to use the user-defined definition of this function 
 C     !---------------------------------------------------------------------
 
       
-
+C     create the "results" directory in the techninteraction directory if it doesn't exist
+      CALL SYSTEM("CreateFolder")    
+      
 ! What time did we start?
       OPEN(UNIT=2001,FILE='results/TimeDateStamp.OUT')
       CALL mydate('Start time and date      ')
@@ -685,7 +687,8 @@ C     Clear some files
       CALL SYSTEM("Del REC.EST")
 	CALL SYSTEM("Del SUMM29.OUT")
 	CALL SYSTEM("cd ..")			  ! to go back at the working directory
-C
+
+C      
 C     Read in the specifications for the run
       CALL ReadSpec()
       CALL Summary() !reads out fecundity and weight at age
