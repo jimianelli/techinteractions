@@ -521,6 +521,8 @@ C     Debugging variables:
       REAL(8) :: ABC
       REAL(8),DIMENSION(1:MaxSpec,1:Nsex,1:MaxMVN,0:MaxAge,
      +  0:MaxConfigs) :: Nvec
+      REAL(8),DIMENSION(1:MaxSpec,1:Nsex,0:MaxAge,
+     +  0:MaxConfigs) :: Natage
       REAL(8),DIMENSION(1:MaxSpec,1:MaxMVN,0:MaxConfigs) :: 
      +SSB_MVNvec
       REAL(8) :: pCatBio
@@ -670,18 +672,23 @@ C     Carey: EXTERNAL means to use the user-defined definition of this function 
 C     !---------------------------------------------------------------------
 
       
-
+C     create the "results" directory in the techninteraction directory if it doesn't exist
+      CALL SYSTEM("CreateFolder")    
+      
 ! What time did we start?
       OPEN(UNIT=2001,FILE='results/TimeDateStamp.OUT')
       CALL mydate('Start time and date      ')
 
 C     Clear some files
-	CALL SYSTEM("Del SUMM1.OUT")
-      CALL SYSTEM("Del SUMM1.EST") 
+	  !CALL SYSTEM("Del SUMM1.OUT")   ! this file is not used anymore so commenting out
+      CALL SYSTEM("cd results")		  ! to specify where this file is located
+	CALL SYSTEM("Del SUMM1.EST") 
       CALL SYSTEM("Del SUMM2.EST") 
       CALL SYSTEM("Del REC.EST")
 	CALL SYSTEM("Del SUMM29.OUT")
-C
+	CALL SYSTEM("cd ..")			  ! to go back at the working directory
+
+C      
 C     Read in the specifications for the run
       CALL ReadSpec()
       CALL Summary() !reads out fecundity and weight at age
@@ -3909,7 +3916,7 @@ C---------------------------------------------------
       !This function sets the quota:
         !Will only get to Pstar calcs if all configs converged:
       IF (UsePstar.EQ.1) THEN 
-         CALL FindPstarQuota(Year2,Ispec) !The above two subroutines are called within FindPstarQuota.
+         CALL FindPstarQuota(Year2,Ispec) 
  !      FindFforCatchReg(Year2), FindFofl() both done within FindPstarQuota
       ENDIF
      
@@ -3918,9 +3925,9 @@ C-----------------------------------------------------
 C---------------------------------------------------
 !This is the AFSC tier system quota
       !This function sets the quota:
-        !Will only get to Pstar calcs if all configs converged:
-    !  IF (UsePstar.EQ.0) THEN 
-    ! +     CALL FindPstarQuota(Year2,Ispec) !The above two subroutines are called within FindPstarQuota.
+      IF (UsePstar.EQ.0) THEN 
+          CALL  FindquotaF(Ispec, Year2) !FindquotaF(Year2,Ispec) 
+      ENDIF
  !      FindFforCatchReg(Year2), FindFofl() both done within FindPstarQuota
 C-----------------------------------------------------
         RETURN
@@ -5677,6 +5684,11 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       
       !Likewise run minopt for finding the FOFL associated with each vector (do you mean FOFL or FMSY?) FOFL for Tier 3; ow could use a pdf of FOFL for this?
       
+      ! Save the estimated number at age for each configuration
+       DO 1062 Iage = 0,Amax(Ispec)
+           Natage(Ispec,1,Iage,Iconfig) = EstNatAge(1,Iage) 
+           Natage(Ispec,2,Iage,Iconfig) = EstNatAge(2,Iage) 
+1062  CONTINUE
       
       
       !Shertzer 2008 numerical integration to find Pr(Ft > FOFL) = p* for estimated Ft and FOFL
@@ -5901,6 +5913,50 @@ C
 C ===========================================================================
 C
 
+      SUBROUTINE FindquotaF(Ispec,Iyear)
+C This subroutine calculates the quota associated with the Fofl level
+C It uses CalcCatchFromF to calculate the quota associated with the Fofl level
+C      
+      USE ShareDataRatioSubs
+      IMPLICIT NONE
+      
+       !Global variables
+       INTEGER :: IYear,Ispec
+            
+       !Local variables
+       INTEGER :: Iconfig,Ivec,Isex,Iage
+              
+       DO 100 Iconfig = 1,Nconfigs
+       ! Loading the estimates from CAB.rep and else
+          MyWeight(:,:) = Wght(Ispec,:,:,1) 
+          TheM = EstM(Ispec,Iconfig)
+       
+       !Define the inputs that will be used for CalcCatchFromF as global variables that are reset for each iteration of this big loop
+          DO 2117 Isex = 1,Nsex
+            DO 2117 Iage = 0,Amax(Ispec)
+             ThoseNs(Isex,Iage) = exp(Natage(Ispec,Isex,Iage,Iconfig)) 
+2117      CONTINUE !End Isex and Iage loop
+          TheSelex = EstS(Ispec,1,:,:,Iconfig) 
+                   
+       !Here you should cal FIT.
+           CALL FindFofl(Ispec,Iyear) 
+       
+          TheX = EstFOFL(Ispec,Iconfig,1)
+           CALL CalcCatchFromF(TheX,TheM,
+     +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
+      
+100        CONTINUE !end loop over Iconfig
+
+      ! to retun the result I want
+      QuotaAct(Ispec) = pCatBio
+       
+      RETURN       
+      END SUBROUTINE FindquotaF
+
+C
+C ===========================================================================
+C
+
 !      SUBROUTINE AFSC_SPR(Fval,Mval,Fecvec,Recvec,Ispec,Iconfig)
       SUBROUTINE AFSC_SPR(Fval,Mval,Fecvec,Recvec,SelexVec,PlusAge)
 C Find the SPR rate and SSB_SPR given an F (Fval) and other population numbers
@@ -6039,9 +6095,10 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         !Need an estimate of current SSB for each of NMVN numbers-at-age vectors generated
         !Need an estimate SSB0 that is configuration-specific (with MCMC it would be vector-specific)
       
-        !THE AFSC TIER 3 CONTROL RULE:
+        !THE AFSC TIER 3 CONTROL RULE (different output depending on whether it is for the P* HCR or simple tier 3 rule):
         Depl = 0.0
       
+        IF (UsePstar.EQ.1) THEN
         DO 200 Ivec = 1,Nmvn
           Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
 
@@ -6067,11 +6124,29 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
 !     +    EstS(Ispec,1,:,:))!subroutine doesn't work because EstFOFL is a different type of argument than needed (??)
           !Est_OFL(Ispec,Ivec,Iconfig) = pCatBio(Ispec) !Still need to define Est_OFL (maybe use a different name if this one gets used for something else).
 200     CONTINUE !End loop over Ivec (Ivec loop will need to be expanded to include calls to FIT and FUNK above if switch to MCMC method.
+        ENDIF
+		
+        IF (UsePstar.EQ.0) THEN
+          Depl = EstSB(Ispec,1,Iyear)/EstSB(Ispec,1,1)
+
+          IF ((Depl.GT.0.40)) THEN
+            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
+
+          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
+     +      ((EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig))
+     +      -AFSC_alpha)*(1-AFSC_alpha)
+
+          ELSE
+            EstFOFL(Ispec,Iconfig,1) = 0.0
+          ENDIF
+		  
+        ENDIF	
+		
 1033  CONTINUE !End loop over Iconfig  
        ! TheNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,Iage))
-      
-
-      
+     
+     
       
       !----------------------------------------------------------------------------------------------      
       !Find the true FOFL for each species and year - can always move this to another subroutine if it's too much here.
@@ -6098,7 +6173,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       TrueSPR35(Ispec) = EstSPR
       SSTrueSPR35(Ispec) = SS
       
-       !----------------------------------------------------------------------------------------------      
+      !----------------------------------------------------------------------------------------------      
       MinOpt = 15 !Find F40% and B40%
       X = 0.0
       X(1) = TrueF35(Ispec) !Might as well use a good seed to speed things up
@@ -6112,6 +6187,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       TrueSPR40(Ispec) = EstSPR
       SSTrueSPR40(Ispec) = SS
       
+      !----------------------------------------------------------------------------------------------      
       !TrueFOFL calculations:
         Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
 
@@ -6448,14 +6524,13 @@ C
 C NOTES on the tech int model 
 C
 C Modifications:
-C 1. line 1745: changed Aplus to Amax because it doesn't make sense if not
 C 2. line 2492: included the statement about process error = recruit deviation
 C 3. subroutine getYield is WRONG (the calculation of recruitment)
 C 4. line 4775: refined the increment value for E
 C 5. CRM: line 1745: changed modification 1 back to be Aplus (which has a different meaning depending on whether there's a plus group or not) - Kotaro and Carey discussed.
 C 6. CRM: Uncommented lines 3884 and 3885 to correct inconsistency between Carey and Kotaro's code and make sure old simulation files get cleaned up properly
 C 7. CRM: added back in lines 679-683 to delete old files (again to avoid mix-ups between old and new simulation results)
-C 8. CRM: 
+C 9. KO: commenting out line 681 because not used anymore in the code
 C
 C TO DO:
 C 0. Be sure to use AFSC_SPR in the MPA_model (the main program) instead of the P* controle rule for the multispecies MSE
@@ -6471,5 +6546,7 @@ C 	7.2. use the above information and build the capacity to have a time varying 
 C 	7.3. include the harvest cap into the model (that is about 1.7 millions based on 2 million - the three species TAC)
 C 8. include the control rule (how to calculate TAC) into the model
 C 9. include an option to generate recdevs based on multivariate time series model
+C 10. the recvec in the "AFSC_SPR" subroutine needs to be changed so that the recvec is only from 1978 onward
+
 
 C MERGE to cbisection  
