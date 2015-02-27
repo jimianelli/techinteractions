@@ -5507,6 +5507,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       CHARACTER(12) :: varname
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec)) :: EstNatAge,EstStdNatage
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec),0:200) :: EstNatAgeCor
+      REAL(8),DIMENSION(40,100) :: EstCor
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
       
@@ -5514,6 +5515,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       INTEGER :: Iage,Ipar,Iagevec,Icolvec
       !These to be added to the rest of the code later (assessment config and assessment year+1):
       INTEGER :: NumAges
+      INTEGER :: Irow, Icol
       
       !This probably needs to be global?? Yep
  !     REAL(8),DIMENSION(1:Nspec,1:Nmvn,0:Amax(Ispec)) :: Nvec
@@ -5551,6 +5553,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !Get correlation information
       
       EstNatAgeCor = 0.0
+      EstCor = 0.0
+      Irow = 1
       OPEN(Unit = 552,FILE = 'cab.cor')
       READ(552,*) varname
       READ(552,*) varname
@@ -5558,14 +5562,30 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
           READ(552,1003) varnum,varname !,value,std,
 !     +(EstNatAgeCor(0,Iagevec),Iagevec=0,varnum-1) !this should be 200, not 2, but 200 doesn't work.
  
+          IF (varname.EQ.'ln_S0') THEN
+              BACKSPACE(UNIT=552)
+              READ(552,*) varnum,varname,stuff1,stuff2,
+     +          (EstCor(Irow,Icol),Icol=0,varnum-1)
+              Irow = Irow +1
+          ENDIF !varname.EQ.'ln_S0'
+          
+          IF (varname.EQ.'LogSelexPar') THEN
+             BACKSPACE(UNIT=552)
+             READ(552,*) varnum,varname,stuff1,stuff2,
+     +          (EstCor(Irow,Icol),Icol=0,varnum-1)
+             Irow = Irow + 1
+          ENDIF !varname.EQ.'LogSelexPar'
+          
           IF (varname.EQ.'LogTheNatAge') THEN
               BACKSPACE(UNIT = 552)
-              DO 103 Isex = 1,Nsex
+              !DO 103 Isex = 1,Nsex
+              Isex = 1
               DO 103 Iage = 0,Amax(Ispec)
-!                  READ(552,1002) varnum,varname,value,std,
-!     +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
-                  READ(552,*) varnum,varname,stuff1,stuff2,
-     +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
+ !                 READ(552,*) varnum,varname,stuff1,stuff2,
+ !    +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
+                   READ(552,*) varnum,varname,stuff1,stuff2,
+     +(EstCor(Irow,Icol),Icol=0,varnum-1)
+                   Irow = Irow + 1
 103          CONTINUE !end Iage loop
               EXIT
           ENDIF !varname.EQ.LogT
