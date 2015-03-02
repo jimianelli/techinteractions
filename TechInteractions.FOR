@@ -5507,7 +5507,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       CHARACTER(12) :: varname
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec)) :: EstNatAge,EstStdNatage
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec),0:200) :: EstNatAgeCor
-      REAL(8),DIMENSION(40,100) :: EstCor
+      REAL(8),DIMENSION(0:40,0:100) :: EstCor
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
       
@@ -5554,7 +5554,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       
       EstNatAgeCor = 0.0
       EstCor = 0.0
-      Irow = 1
+      Irow = 0
       OPEN(Unit = 552,FILE = 'cab.cor')
       READ(552,*) varname
       READ(552,*) varname
