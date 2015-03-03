@@ -5507,7 +5507,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       CHARACTER(12) :: varname
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec)) :: EstNatAge,EstStdNatage
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec),0:200) :: EstNatAgeCor
-      REAL(8),DIMENSION(0:40,0:100) :: EstCor
+      REAL(8),DIMENSION(0:40,1:100) :: EstCor
+      REAL(8),DIMENSION(1:40,1:100) :: mvn_cor
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
       
@@ -5515,7 +5516,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       INTEGER :: Iage,Ipar,Iagevec,Icolvec
       !These to be added to the rest of the code later (assessment config and assessment year+1):
       INTEGER :: NumAges
-      INTEGER :: Irow, Icol
+      INTEGER :: Irow, Icol,j
       
       !This probably needs to be global?? Yep
  !     REAL(8),DIMENSION(1:Nspec,1:Nmvn,0:Amax(Ispec)) :: Nvec
@@ -5561,20 +5562,22 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       DO 102 Ipar = 1,200
           READ(552,1003) varnum,varname !,value,std,
 !     +(EstNatAgeCor(0,Iagevec),Iagevec=0,varnum-1) !this should be 200, not 2, but 200 doesn't work.
- 
-          IF (varname.EQ.'ln_S0') THEN
+          !ln_S0 matters, but doesn't have its own row in the.cor file
+          IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
+     +THEN
               BACKSPACE(UNIT=552)
               READ(552,*) varnum,varname,stuff1,stuff2,
-     +          (EstCor(Irow,Icol),Icol=0,varnum-1)
+     +          (EstCor(Irow,Icol),Icol=1,varnum-1)
               Irow = Irow +1
           ENDIF !varname.EQ.'ln_S0'
           
-          IF (varname.EQ.'LogSelexPar') THEN
-             BACKSPACE(UNIT=552)
-             READ(552,*) varnum,varname,stuff1,stuff2,
-     +          (EstCor(Irow,Icol),Icol=0,varnum-1)
-             Irow = Irow + 1
-          ENDIF !varname.EQ.'LogSelexPar'
+!          IF (varname.EQ.'LogSelexPar') THEN
+!             BACKSPACE(UNIT=552)
+!             READ(552,*) varnum,varname,stuff1,stuff2,
+!     +          (EstCor(Irow,Icol),Icol=1,varnum)
+!             Irow = Irow + 1
+!          ENDIF !varname.EQ.'LogSelexPar'
+
           
           IF (varname.EQ.'LogTheNatAge') THEN
               BACKSPACE(UNIT = 552)
@@ -5584,13 +5587,23 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
  !                 READ(552,*) varnum,varname,stuff1,stuff2,
  !    +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
                    READ(552,*) varnum,varname,stuff1,stuff2,
-     +(EstCor(Irow,Icol),Icol=0,varnum-1)
+     +(EstCor(Irow,Icol),Icol=1,varnum-1)
                    Irow = Irow + 1
 103          CONTINUE !end Iage loop
               EXIT
           ENDIF !varname.EQ.LogT
-102   CONTINUE !end loop reading through std file
-      
+102           CONTINUE !end loop reading through cor file
+
+      !Create mvncor matrix (then go back and expand this to mvn_means, mvn_stds:
+      !get rid of columns 2-37
+      !new_col(2) = old_col(38)
+      !new_col(3) = old_col(39)
+      !...
+
+      mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
+      DO 1021 j = 2,(Irow-1)
+        mvn_cor(2:Irow,j) = EstCor(2:Irow,j+35)
+1021  CONTINUE
       CLOSE(552)
       
       !------------------------------------------------------
