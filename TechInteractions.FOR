@@ -5602,7 +5602,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 
       mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
       DO 1021 j = 2,(Irow-1)
-        mvn_cor(2:Irow,j) = EstCor(2:Irow,j+35)
+        mvn_cor(2:Irow,j) = EstCor(2:Irow,j+36)
 1021  CONTINUE
       CLOSE(552)
       
