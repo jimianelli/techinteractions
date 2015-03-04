@@ -5509,14 +5509,17 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec),0:200) :: EstNatAgeCor
       REAL(8),DIMENSION(0:40,1:100) :: EstCor
       REAL(8),DIMENSION(1:40,1:100) :: mvn_cor
+      REAL(8),DIMENSION(1:40) :: par_vec
+      REAL(8),DIMENSION(1:40) :: std_vec
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
+      
       
       INTEGER :: Isims,Isex
       INTEGER :: Iage,Ipar,Iagevec,Icolvec
       !These to be added to the rest of the code later (assessment config and assessment year+1):
       INTEGER :: NumAges
-      INTEGER :: Irow, Icol,j
+      INTEGER :: Irow, Icol,j,i
       
       !This probably needs to be global?? Yep
  !     REAL(8),DIMENSION(1:Nspec,1:Nmvn,0:Amax(Ispec)) :: Nvec
@@ -5566,7 +5569,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
           IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
      +THEN
               BACKSPACE(UNIT=552)
-              READ(552,*) varnum,varname,stuff1,stuff2,
+              READ(552,*) varnum,varname,par_vec(Irow+1),
+     +           std_vec(Irow+1),
      +          (EstCor(Irow,Icol),Icol=1,varnum-1)
               Irow = Irow +1
           ENDIF !varname.EQ.'ln_S0'
@@ -5586,7 +5590,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
               DO 103 Iage = 0,Amax(Ispec)
  !                 READ(552,*) varnum,varname,stuff1,stuff2,
  !    +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
-                   READ(552,*) varnum,varname,stuff1,stuff2,
+                   READ(552,*) varnum,varname,par_vec(Irow+1),
+     +std_vec(Irow+1),
      +(EstCor(Irow,Icol),Icol=1,varnum-1)
                    Irow = Irow + 1
 103          CONTINUE !end Iage loop
@@ -5609,8 +5614,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !------------------------------------------------------
       !Generate vectors of N-at-age for this configuration
       !Write the text file for MVN.exe and then call MVN.exe:
-      OPEN(Unit = 53,File = 'mvninputFem.txt')
-        WRITE(53,1004) Amax(Ispec)+1 !Number of variables
+      OPEN(Unit = 53,File = 'mvninputAll.txt')
+        WRITE(53,1004) Irow-1 !Number of variables
         WRITE(53,1005) Nmvn !Number of random vectors (need to add to input file)
         WRITE(53,1009) 500 !Random number seed - we want this to be the same for each scenario (the means, stds, cor will change)
         WRITE(53,1006) 1    !means are supplied
@@ -5618,14 +5623,22 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
         WRITE(53,1006) 1    !correlations are supplied
         
         !write out mean std of log-N-at-age
-        WRITE(53,1007) (EstNatAge(1,Iage),Iage=0,Amax(Ispec))
-        WRITE(53,1007) (EstStdNatAge(1,Iage),Iage=0,Amax(Ispec))
-      
-        !DO 104 Isex = 1,Nsex
-        DO 104 Iage = 1,Amax(Ispec)
-            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
-     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
-104     CONTINUE
+!        WRITE(53,1007) (EstNatAge(1,Iage),Iage=0,Amax(Ispec))
+!        WRITE(53,1007) (EstStdNatAge(1,Iage),Iage=0,Amax(Ispec))
+        WRITE(53,1007) (par_vec(i),i=1,Irow)
+        WRITE(53,1007) (std_vec(i),i=1,Irow)
+        
+!        !DO 104 Isex = 1,Nsex
+!        DO 104 I = 1,Amax(Ispec)
+!            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
+!     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
+!104     CONTINUE
+        
+        DO 104 i = 1,(Irow-1)
+            WRITE(53,1007) (mvn_cor(i,Icolvec),Icolvec = 
+     +1,i)
+104     CONTINUE       
+        
         
 !        !DO 1041 Isex = 1,Nsex
 !            DO 1041 Iage = 0,Amax(Ispec)
