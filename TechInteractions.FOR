@@ -5646,44 +5646,14 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 !     +(FirstVarNum-1),((FirstVarNum-1)+Amax(Ispec)+1 +(Iage-1)))
 !1041    CONTINUE
       CLOSE(53) !Close input file cabmvn.txt (input for MVN program)
-      CALL SYSTEM("(echo mvninputFem.txt& echo mvnoutputFem.txt&
+      CALL SYSTEM("(echo mvninputAll.txt& echo mvnoutputAll.txt&
      + echo .& echo .) | mvn") !Draw random log(N-at-age) vectors from the multivariate normal distribution.
       !------------------------------------------------------
       
-      !Generate male vector of random numbers:
-      !------------------------------------------------------
-      !Generate vectors of N-at-age for MALES for this configuration
-      !Write the text file for MVN.exe and then call MVN.exe:
-      OPEN(Unit = 53,File = 'mvninputMale.txt')
-        WRITE(53,1004) Amax(Ispec)+1 !Number of variables
-        WRITE(53,1005) Nmvn !Number of random vectors (need to add to input file)
-        WRITE(53,1009) 500 !Random number seed - we want this to be the same for each scenario (the means, stds, cor will change)
-        WRITE(53,1006) 1    !means are supplied
-        WRITE(53,1006) 1    !stds are supplied
-        WRITE(53,1006) 1    !correlations are supplied
-        
-        !write out mean std of log-N-at-age
-        WRITE(53,1007) (EstNatAge(2,Iage),Iage=0,Amax(Ispec))
-        WRITE(53,1007) (EstStdNatAge(2,Iage),Iage=0,Amax(Ispec))
-      
-!        !DO 104 Isex = 1,Nsex
-!        DO 104 Iage = 1,Amax(Ispec)
-!            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
-!     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
-!104     CONTINUE
-        
-        !Test this line carefully
-            DO 1041 Iage = 1,Amax(Ispec)
-              WRITE(53,1007) (EstNatAgeCor(2,Iage,Icolvec),Icolvec = 
-     +(FirstVarNum+Amax(Ispec)),((FirstVarNum+Amax(Ispec))+(Iage-1)))
-1041    CONTINUE
-      CLOSE(53) !Close input file cabmvn.txt (input for MVN program)
-      CALL SYSTEM("(echo mvninputMale.txt& echo mvnoutputMale.txt&
-     + echo .& echo .) | mvn") !Draw random log(N-at-age) vectors from the multivariate normal distribution.
-      !------------------------------------------------------      
+   
 
       !Test that MVN created the needed files ok
-      OPEN(Unit = 54,File = "mvnoutputFem.txt")
+      OPEN(Unit = 54,File = "mvnoutputAll.txt")
       READ(54,*)
       READ(54,*) TestMVN
       CLOSE(54)
@@ -5691,31 +5661,17 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
         RETURN    
       ENDIF
   
-      !Test that MVN created the needed files ok
-      OPEN(Unit = 54,File = "mvnoutputMale.txt")
-      READ(54,*)
-      READ(54,*) TestMVN
-      CLOSE(54)
-      IF (TestMVN.EQ.'Correlation') THEN
-        RETURN    
-      ENDIF
-      
+ !-------------------------need to start on reading in all params here----------------------
+!-------------------------------new variables/infrastructure needed------------------------------
       !Needs to be updated to read in female then male information into Nvec that accepts females and males separately.
       !Read in the vectors of N values
-      OPEN(Unit = 54,File = 'mvnoutputFem.txt')
-      DO 105 Isims = 1,Nmvn !program in this number - this has to stop now!
-        READ(54,1008) (Nvec(Ispec,1,Isims,Iage,Iconfig),
+      OPEN(Unit = 54,File = 'mvnoutputAll.txt')
+      DO 105 Isims = 1,Nmvn 
+        READ(54,1008)  (Nvec(Ispec,1,Isims,Iage,Iconfig),
      +Iage=0,Amax(Ispec)) !this is a prob bc only reads in to the end of a line, not all 31 obs for each Nvec.
 105   CONTINUE
       CLOSE(54)
 
-      OPEN(Unit = 54,File = 'mvnoutputMale.txt')
-      DO 1051 Isims = 1,Nmvn 
-        READ(54,1008) (Nvec(Ispec,2,Isims,Iage,Iconfig),
-     +Iage=0,Amax(Ispec)) !this is a prob bc only reads in to the end of a line, not all 31 obs for each Nvec.
-1051  CONTINUE
-      
-      CLOSE(54) !close mvnoutput.txt file
       
       !Calculate current SSB for each vector
       !Iconfig = 1 is the last dimension of SSB_MVNvec
