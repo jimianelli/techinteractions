@@ -525,6 +525,9 @@ C     Debugging variables:
      +  0:MaxConfigs) :: Natage
       REAL(8),DIMENSION(1:MaxSpec,1:MaxMVN,0:MaxConfigs) :: 
      +SSB_MVNvec
+      REAL(8),DIMENSION(1:MaxMVN) :: ln_S0_mvnvec
+      REAL(8),DIMENSION(1:MaxMVN) :: LogSelex1_mvnvec,LogSelex2_mvnvec,
+     +                               LogSelex3_mvnvec,LogSelex4_mvnvec
       REAL(8) :: pCatBio
       REAL, DIMENSION(1:MaxSpec,1:Nsex,0:Maxage) :: MyNs
       REAL(8), DIMENSION(1:MaxSpec) :: TrialCatch
@@ -5518,7 +5521,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       INTEGER :: Isims,Isex
       INTEGER :: Iage,Ipar,Iagevec,Icolvec
       !These to be added to the rest of the code later (assessment config and assessment year+1):
-      INTEGER :: NumAges
+!      INTEGER :: NumAges
+      INTEGER :: NumVars
       INTEGER :: Irow, Icol,j,i
       
       !This probably needs to be global?? Yep
@@ -5527,9 +5531,14 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       EstStdNatage = 0.0
       EstNatAgeCor= 0.0
       
-      NumAges = AINT((Amax(Ispec) + 1)/12.0)
-      IF (MOD((Amax(Ispec) + 1),12).GT.0) THEN
-        NumAges = NumAges + 1
+!      NumAges = AINT((Amax(Ispec) + 1)/12.0)
+!      IF (MOD((Amax(Ispec) + 1),12).GT.0) THEN
+!        NumAges = NumAges + 1
+!      ENDIF
+
+      NumVars = AINT((Amax(Ispec) + 1+5)/12.0) !number of variables in mvnoutput
+      IF (MOD((Amax(Ispec) + 1 + 5),12).GT.0) THEN
+        NumVars = NumVars + 1
       ENDIF
       !------------------------------------------------------
       !Get mean and std information from cab.std
@@ -5615,7 +5624,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !Generate vectors of N-at-age for this configuration
       !Write the text file for MVN.exe and then call MVN.exe:
       OPEN(Unit = 53,File = 'mvninputAll.txt')
-        WRITE(53,1004) Irow-1 !Number of variables
+        WRITE(53,1004) Irow !Number of variables
         WRITE(53,1005) Nmvn !Number of random vectors (need to add to input file)
         WRITE(53,1009) 500 !Random number seed - we want this to be the same for each scenario (the means, stds, cor will change)
         WRITE(53,1006) 1    !means are supplied
@@ -5667,11 +5676,16 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !Read in the vectors of N values
       OPEN(Unit = 54,File = 'mvnoutputAll.txt')
       DO 105 Isims = 1,Nmvn 
-        READ(54,1008)  (Nvec(Ispec,1,Isims,Iage,Iconfig),
-     +Iage=0,Amax(Ispec)) !this is a prob bc only reads in to the end of a line, not all 31 obs for each Nvec.
+        READ(54,1008) ln_S0_mvnvec(Isims),LogSelex1_mvnvec(Isims),
+     +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
+     +  LogSelex4_mvnvec(Isims),
+     +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
 105   CONTINUE
       CLOSE(54)
-
+      
+      !Set male vectors equal to female vectors (would need to change this if growth, nat mort were different by sex, but now they aren't, so this is ok - nothing makes males different from females in the current input file setup...)      
+      ! This is done because you can't have males and females in the correlation matrix when they are identical - the mvn random deviates cannot be generated if some variables are 100% correlated.
+      Nvec(Ispec,2,:,:,Iconfig) = Nvec(Ispec,2,:,:,Iconfig)
       
       !Calculate current SSB for each vector
       !Iconfig = 1 is the last dimension of SSB_MVNvec
@@ -5706,7 +5720,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 1005  FORMAT(I5,12x,"#Number of random vectors")
 1006  FORMAT(I2,15x, "#means, stds, and correlations are supplied")
 1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
-1008  FORMAT(<NumAges>(1x,12(F8.4,1x),/))
+1008  FORMAT(<NumVars-1>(1x,12(F8.4,1x),/),1x,12(F8.4,1x)) !if there's a line with fewer than 12 values, need the ,/ otherwise this messes things up
+!1008  FORMAT(<NumVars>(1x,12(F8.4,1x))) !not this exactly.
 1009  FORMAT(I5,12x,"#Random Number Seed")
         END SUBROUTINE IterateNvecsMVN 
 
