@@ -571,6 +571,11 @@ C     Debugging variables:
      +TrueSPR40,SSTrueSPR40
       LOGICAL :: cor_exists
       CHARACTER(11) :: TestMVN
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs,1:MaxMVN,1:Nsex,
+     +0:Maxage)::Selex_Curve_mvn
+      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs,1:MaxMVN) :: mvnF35,
+     +mvnB35,mvnSPR35,SSmvnSPR35
+      
       
       !Pstar                      - (1 = use the pstar approach, 0 = use AFSC Tier 3 HCR)
       !Nmvn                       - Number of multivariate normal draws of log(N-at-age) used for pstar control rule 
@@ -609,6 +614,9 @@ C     Debugging variables:
       !SSTrueSPR35,SSTrueSPR40    - Should be close to 0; SS values from optimizing to get SPR = 0.35 and 0.40
       !cor_exists                 - True = cab.cor exists (used if skipping over a run that didn't converge).
       !TestMVN                    - Will equal "Correlation" if MVN ran incorrectly.
+      !Selex_Curve_mvn            - A different selectivity curve based on parameter values drawn from a multivariate normal distribution (along with the other parameters) - a late addition
+      !mvnF35,mvnB35,mvnSPR35,SSmvnSPR35   - F35,B35,SPR35,and minimization accuracy (SS) that is specific to each vector drawn from the multivariate normal (MVN) process and configuration and species
+      
       END MODULE ShareDataRatioSubs
 C======================================================================
 
@@ -5516,6 +5524,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       REAL(8),DIMENSION(1:40) :: std_vec
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
+      REAL(8) :: Temp
       
       
       INTEGER :: Isims,Isex
@@ -5670,7 +5679,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
         RETURN    
       ENDIF
   
- !-------------------------need to start on reading in all params here----------------------
+!-------------------------need to start on reading in all params here----------------------
 !-------------------------------new variables/infrastructure needed------------------------------
       !Needs to be updated to read in female then male information into Nvec that accepts females and males separately.
       !Read in the vectors of N values
@@ -5680,6 +5689,23 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
      +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
      +  LogSelex4_mvnvec(Isims),
      +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
+        
+        !Make a selectivity curve for each Isim and config.
+      Isex = 1
+      DO 1055 Iage = 0,Amax(Ispec)  
+       Temp = -log(19.0)*(Iage-exp(LogSelex1_mvnvec(Isims)))/
+     +(exp(LogSelex2_mvnvec(Isims))) !change to be in terms of LogSelex params
+       Selex_Curve_mvn(Ispec,Iconfig,Isims,1,Iage) = 
+     +1.0/(1.0 + exp(Temp))
+ 
+       Temp = -log(19.0)*(Iage-exp(LogSelex3_mvnvec(Isims)))/
+     +(exp(LogSelex4_mvnvec(Isims))) !change to be in terms of LogSelex params
+       Selex_Curve_mvn(Ispec,Iconfig,Isims,2,Iage) = 
+     +1.0/(1.0 + exp(Temp))
+1055  CONTINUE
+        
+ !               Temp=-log(19.0)*(Iage-SCL50(Ispec))/(SCL95(Ispec)-SCL50(ISpec))
+ !       Sel(Ispec,Iage) = 1.0/(1.0+exp(Temp))
 105   CONTINUE
       CLOSE(54)
       
@@ -5694,6 +5720,9 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
              SSB_MVNvec(Ispec,Isims,Iconfig) = SSB_MVNvec(Ispec,Isims,
      +Iconfig) +
      +exp(Nvec(Ispec,1,Isims,Iage,Iconfig))*Fec(Ispec,Iage)
+             
+
+             
 1061  CONTINUE
       !Run minopt for finding the effort required to meet a trial quota, but run it on the dynamics with each Nvec with the output being estF(Ivec)
       !make a subroutine that does this, taking in Est Selex, Nvec, M, and a trial ABC
@@ -5704,10 +5733,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
        DO 1062 Iage = 0,Amax(Ispec)
            Natage(Ispec,1,Iage,Iconfig) = EstNatAge(1,Iage) 
            Natage(Ispec,2,Iage,Iconfig) = EstNatAge(2,Iage) 
-1062  CONTINUE
+1062   CONTINUE
       
-      
-      !Shertzer 2008 numerical integration to find Pr(Ft > FOFL) = p* for estimated Ft and FOFL
       
 
       
@@ -5891,8 +5918,8 @@ C
                     ThoseNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,
      +                                     Iage,Iconfig)) !Vector specific
 2117             CONTINUE !End Isex and Iage loop
-                 TheSelex = EstS(Ispec,1,:,:,Iconfig) !Not Ivec specific right now, but would be under MCMC
-                   
+!                 TheSelex = EstS(Ispec,1,:,:,Iconfig) !Not Ivec specific right now, but would be under MCMC
+                  TheSelex = Selex_Curve_mvn(Ispec,Iconfig,Ivec,:,:) 
        !Here you should cal FIT.
        CALL Fit(X,SS,1,CareyGRD)
        SS = FUNK(X) !X is the initial guess for F that produces a pre-specified amount of catch for the p* approach; 
@@ -6067,16 +6094,20 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       
 !      Ispec = 1  !eventually a loop
         MinOpt = 12 !Find F35% and B35%
+        !Option for just using the AFSC tier 3 control rule (which will not be vector-specific)
+
       DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
         !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
+
         X = 0.0
         X(1) = 0.05
         TheM = EstM(Ispec,Iconfig)
         TheFecVec = Fec(1,0:Maxage)
+        ThePlusAge = Amax(Ispec)
+       IF (UsePstar.EQ.0) THEN
         TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
      +1:IYear) !1 is area 1 (maybe get rid of this dimension later to clean things up)
         TheSelex = EstS(Ispec,1,:,:,Iconfig) 
-        ThePlusAge = Amax(Ispec)
         EstB_SPR = 0.0
         EstSPR = 0.0
 !Info on what goes into AFSC_SPR:      
@@ -6092,7 +6123,31 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         !Save info to check out whether optimization worked (written to file in PstarSummary) 
         EstSPR35(Ispec,Iconfig) = EstSPR
         SSEstSPR35(Ispec,Iconfig) = SS
+       !The ELSE statement here is in progress. CRM 3/5/15
+       ELSE !(IF (UsePstar.EQ.1) - here add in the ivec loop when calculating F35% and B35%
+         DO 2033 Ivec = 1,Nmvn
+             !----------------------------------
+             TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
+     +1:IYear) !This needs to be mvn recruitment (age 0's), but I don't have that over the years in mvn form...
+             !--------------------------------- 
+             TheSelex = Selex_Curve_mvn(Ispec,Iconfig,Ivec,:,:) 
+             EstB_SPR = 0.0
+             EstSPR = 0.0
+             
+            CALL Fit(X,SS,1,CareyGRD)
+            SS = FUNK(X)  
+            !the lines below need to have another dimension for ivec.
+            !mvnF35(Ispec,Iconfig,Ivec) = X(1)
+            !mvnB35(Ispec,Iconfig,Ivec) = EstB_SPR
         
+            !Save info to check out whether optimization worked (written to file in PstarSummary) 
+            !mvnSPR35(Ispec,Iconfig,Ivec) = EstSPR
+            !SSmvnSPR35(Ispec,Iconfig,Ivec) = SS            
+             
+2033     CONTINUE
+          
+       ENDIF !IF (UsePstar.EQ.0) statement ends here.
+          
  
         MinOpt = 13 !Find F40% and B40%
         X = 0.0
