@@ -6137,12 +6137,12 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
             CALL Fit(X,SS,1,CareyGRD)
             SS = FUNK(X)  
             !the lines below need to have another dimension for ivec.
-            !mvnF35(Ispec,Iconfig,Ivec) = X(1)
-            !mvnB35(Ispec,Iconfig,Ivec) = EstB_SPR
+            mvnF35(Ispec,Iconfig,Ivec) = X(1)
+            mvnB35(Ispec,Iconfig,Ivec) = EstB_SPR
         
             !Save info to check out whether optimization worked (written to file in PstarSummary) 
-            !mvnSPR35(Ispec,Iconfig,Ivec) = EstSPR
-            !SSmvnSPR35(Ispec,Iconfig,Ivec) = SS            
+            mvnSPR35(Ispec,Iconfig,Ivec) = EstSPR
+            SSmvnSPR35(Ispec,Iconfig,Ivec) = SS            
              
 2033     CONTINUE
           
