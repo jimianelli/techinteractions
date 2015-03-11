@@ -6093,18 +6093,20 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       EXTERNAL FUNK
       
 !      Ispec = 1  !eventually a loop
-        MinOpt = 12 !Find F35% and B35%
+        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
         !Option for just using the AFSC tier 3 control rule (which will not be vector-specific)
-
-      DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
-        !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
-
+       DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
         X = 0.0
         X(1) = 0.05
         TheM = EstM(Ispec,Iconfig)
         TheFecVec = Fec(1,0:Maxage)
         ThePlusAge = Amax(Ispec)
-       IF (UsePstar.EQ.0) THEN
+        
+        IF (UsePstar.EQ.0) THEN
+        !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
+
+
+
         TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
      +1:IYear) !1 is area 1 (maybe get rid of this dimension later to clean things up)
         TheSelex = EstS(Ispec,1,:,:,Iconfig) 
@@ -6124,12 +6126,15 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         EstSPR35(Ispec,Iconfig) = EstSPR
         SSEstSPR35(Ispec,Iconfig) = SS
        !The ELSE statement here is in progress. CRM 3/5/15
-       ELSE !(IF (UsePstar.EQ.1) - here add in the ivec loop when calculating F35% and B35%
+!1033   CONTINUE
+
+      ELSE !IF (UsePstar.EQ.1) (difference is that Pstar rule is vector specific.
+
+        TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
+     +1:IYear) !Later work on whether want this to be vector specific.
+             
          DO 2033 Ivec = 1,Nmvn
-             !----------------------------------
-             TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
-     +1:IYear) !This needs to be mvn recruitment (age 0's), but I don't have that over the years in mvn form...
-             !--------------------------------- 
+
              TheSelex = Selex_Curve_mvn(Ispec,Iconfig,Ivec,:,:) 
              EstB_SPR = 0.0
              EstSPR = 0.0
@@ -6144,9 +6149,12 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
             mvnSPR35(Ispec,Iconfig,Ivec) = EstSPR
             SSmvnSPR35(Ispec,Iconfig,Ivec) = SS            
              
-2033     CONTINUE
+2033       CONTINUE   !ivec loop       
+!10333    CONTINUE      !iconfig loop   
           
-       ENDIF !IF (UsePstar.EQ.0) statement ends here.
+          
+      ENDIF
+      
           
  
         MinOpt = 13 !Find F40% and B40%
@@ -6171,21 +6179,25 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         Depl = 0.0
       
         IF (UsePstar.EQ.1) THEN
-        DO 200 Ivec = 1,Nmvn
-          Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
-
-          IF ((Depl.GT.0.40)) THEN
-            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)
-
-          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
-            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)*
-     +      ((SSB_MVNvec(Ispec,Ivec,Iconfig)/EstB40(Ispec,Iconfig))
-     +      -AFSC_alpha)*(1-AFSC_alpha)
-
-          ELSE
-            EstFOFL(Ispec,Iconfig,Ivec) = 0.0
-          ENDIF
-        
+          DO 200 Ivec = 1,Nmvn
+             EstFOFL(Ispec,Iconfig,Ivec) = mvnF35(Ispec,Iconfig,Ivec)   
+                
+                
+!-----------OLD PSTAR Fofl: where Fofl is calculated based on Tier 3 regulations----------
+!          Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
+!
+!          IF ((Depl.GT.0.40)) THEN
+!            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)
+!
+!          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+!            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)*
+!     +      ((SSB_MVNvec(Ispec,Ivec,Iconfig)/EstB40(Ispec,Iconfig))
+!     +      -AFSC_alpha)*(1-AFSC_alpha)
+!
+!          ELSE
+!            EstFOFL(Ispec,Iconfig,Ivec) = 0.0
+!          ENDIF
+!-------------------------------------------------------------------------------------------      
         !Calculate estimated OFL for each random vector based on FOFL
           !This info is not really needed, but keep code just in case??
           !Need to calculate FOFL and OFL based on the single base assessment for comparison to AFSC control rule.
@@ -6279,6 +6291,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       !Don't need this right now, but might need it in the future
         !use CalcCatchFromF() for this calculation - straightforward (except for inability to enter in certain arguments for some reason).
       
+
+          
+      !--------------------------------------------------------------------------          
       MinOpt = 16 !Calculate the estimated FOFL and OFL based on the base assessment only using the correct M and h (?)
       !Fill this in later - not sure what exactly makes sense for comparison, as this rule would have more info on M and h inherently than the p* rule (which accounts for uncertainty in M and h).
       !Could be that estimating M and h and doing the AFSC OFL control rule would be the comparison?
