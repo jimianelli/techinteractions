@@ -1,6 +1,6 @@
 #try out the rmvnorm function in R:
 library(mvtnorm)
-rmvnorm(n = 10,mean = c(1,1))
+#rmvnorm(n = 10,mean = c(1,1))
 
 #first you need to convert a diagonal correlation table to a symmetrix matrix correlation table
 
@@ -43,3 +43,9 @@ mycor<-mycor+t(mycor)-diag(diag(mycor)) #this is the key line to copy from lower
 ## b is an n*n matrix whose generic term is stdev[i]*stdev[j] (n is your number of variables)
 #a_covariance <- b * a  #your covariance matrix
 
+b<-stdvec %*% t(stdvec)
+cov.matrix <-b * mycor
+
+#Ready for the mvn routine:
+dev.matrix <- rmvnorm(n = nreps,mean = parvec,sigma = cov.matrix) #default method is eigen
+write.table(x = format(dev.matrix,width = 15),file = "Z:\\GitProjects\\TechInteractions\\Non_Git\\mvnoutputR.txt",sep = ' ',row.names = F,col.names = F,quote = F)
