@@ -525,7 +525,7 @@ C     Debugging variables:
      +  0:MaxConfigs) :: Natage
       REAL(8),DIMENSION(1:MaxSpec,1:MaxMVN,0:MaxConfigs) :: 
      +SSB_MVNvec
-      REAL(8),DIMENSION(1:MaxMVN) :: ln_S0_mvnvec
+!      REAL(8),DIMENSION(1:MaxMVN) :: ln_S0_mvnvec
       REAL(8),DIMENSION(1:MaxMVN) :: LogSelex1_mvnvec,LogSelex2_mvnvec,
      +                               LogSelex3_mvnvec,LogSelex4_mvnvec
       REAL(8) :: pCatBio
@@ -3879,7 +3879,8 @@ C     Summation limits for aggregating results
       !put a stop to further processing if the .cor file doesn't actually exist.
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
       IF (cor_exists) THEN
-          Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', Year2, 
+          Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', 
+     +GlobalProjYr, 
      +' Config ', Iconfig
           CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
       ENDIF
@@ -5584,7 +5585,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
           READ(552,1003) varnum,varname !,value,std,
 !     +(EstNatAgeCor(0,Iagevec),Iagevec=0,varnum-1) !this should be 200, not 2, but 200 doesn't work.
           !ln_S0 matters, but doesn't have its own row in the.cor file
-          IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
+!          IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
+          IF (varname.EQ.'LogSelexPar')
      +THEN
               BACKSPACE(UNIT=552)
               READ(552,*) varnum,varname,par_vec(Irow+1),
@@ -5623,9 +5625,9 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !new_col(3) = old_col(39)
       !...
 
-      mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
-      DO 1021 j = 2,(Irow-1)
-        mvn_cor(2:Irow,j) = EstCor(2:Irow,j+36)
+!      mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
+      DO 1021 j = 1,(Irow-1)
+        mvn_cor(1:Irow,j) = EstCor(1:Irow,j+37)
 1021  CONTINUE
       CLOSE(552)
       
@@ -5685,10 +5687,14 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !Read in the vectors of N values
       OPEN(Unit = 54,File = 'mvnoutputAll.txt')
       DO 105 Isims = 1,Nmvn 
-        READ(54,1008) ln_S0_mvnvec(Isims),LogSelex1_mvnvec(Isims),
+        READ(54,1008) LogSelex1_mvnvec(Isims),
      +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
      +  LogSelex4_mvnvec(Isims),
      +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
+!        READ(54,1008) ln_S0_mvnvec(Isims),LogSelex1_mvnvec(Isims),
+!     +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
+!     +  LogSelex4_mvnvec(Isims),
+!     +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
         
         !Make a selectivity curve for each Isim and config.
       Isex = 1
@@ -5746,7 +5752,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 1004  FORMAT(I2,15x,"#Number of variables")
 1005  FORMAT(I5,12x,"#Number of random vectors")
 1006  FORMAT(I2,15x, "#means, stds, and correlations are supplied")
-1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
+!1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
+1007  FORMAT(100(F8.5,1x)) !don't overstate confidence - this is all that's in the .cor file.
 1008  FORMAT(<NumVars-1>(1x,12(F8.4,1x),/),1x,12(F8.4,1x)) !if there's a line with fewer than 12 values, need the ,/ otherwise this messes things up
 !1008  FORMAT(<NumVars>(1x,12(F8.4,1x))) !not this exactly.
 1009  FORMAT(I5,12x,"#Random Number Seed")
