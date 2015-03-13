@@ -3883,6 +3883,12 @@ C     Summation limits for aggregating results
      +GlobalProjYr, 
      +' Config ', Iconfig
           CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
+      ELSE
+          TestMVN = 'cor_dne'
+          Write(*,*)  'cab.cor does not exist for Sim ',Isim,', Year ', 
+     +GlobalProjYr, 
+     +' Config ', Iconfig
+
       ENDIF
       !Make a flag
       IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation') THEN
@@ -5514,7 +5520,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       INTEGER :: Ispec,Iarea,Iconfig,Iyear
       
       !Local variables
-      INTEGER :: varnum,FirstVarNum
+      INTEGER :: varnum,FirstVarNum,varnum0
       REAL(8) :: value,std
       CHARACTER(12) :: varname
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec)) :: EstNatAge,EstStdNatage
@@ -5586,8 +5592,10 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 !     +(EstNatAgeCor(0,Iagevec),Iagevec=0,varnum-1) !this should be 200, not 2, but 200 doesn't work.
           !ln_S0 matters, but doesn't have its own row in the.cor file
 !          IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
-          IF (varname.EQ.'LogSelexPar')
-     +THEN
+          IF (varname.EQ.'SelexPar[4]') THEN
+            varnum0 = varnum    
+          ENDIF
+          IF (varname.EQ.'LogSelexPar') THEN
               BACKSPACE(UNIT=552)
               READ(552,*) varnum,varname,par_vec(Irow+1),
      +           std_vec(Irow+1),
@@ -5627,7 +5635,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 
 !      mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
       DO 1021 j = 1,(Irow-1)
-        mvn_cor(1:Irow,j) = EstCor(1:Irow,j+37)
+        mvn_cor(1:Irow,j) = EstCor(1:Irow,j+varnum0)
 1021  CONTINUE
       CLOSE(552)
       
