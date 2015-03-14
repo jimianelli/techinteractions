@@ -20,7 +20,7 @@ library(mvtnorm)
 
 #function to take in same info as for mvn.exe:
 #read in mvninputAll.txt:
-thefile = "Z:\\GitProjects\\TechInteractions\\Non_Git\\mvninputAll.txt"
+thefile = "D:\\GitProjects\\TechInteractions\\NonGit\\mvninputAll.txt"
 stuff = as.numeric(scan(thefile,what = "integer",flush = T,n=2))
 nvar = stuff[1]
 nreps = stuff[2]
@@ -28,7 +28,7 @@ nreps = stuff[2]
 parvec = scan(thefile,nlines = 1,skip = 6)
 stdvec = scan(thefile,nlines = 1,skip = 7)
 corvec = scan(thefile,skip = 8)
-mycor = diag(36)
+mycor = diag(nvar)
 mycor[upper.tri(mycor)]<-corvec
 #This is the symmetric correlation matrix:
 mycor<-mycor+t(mycor)-diag(diag(mycor)) #this is the key line to copy from lower to upper diagonal for a symmetric matrix
@@ -48,4 +48,4 @@ cov.matrix <-b * mycor
 
 #Ready for the mvn routine:
 dev.matrix <- rmvnorm(n = nreps,mean = parvec,sigma = cov.matrix) #default method is eigen
-write.table(x = format(dev.matrix,width = 15),file = "Z:\\GitProjects\\TechInteractions\\Non_Git\\mvnoutputR.txt",sep = ' ',row.names = F,col.names = F,quote = F)
+write.table(x = format(dev.matrix,width = 15),file = "D:\\GitProjects\\TechInteractions\\NonGit\\mvnoutputR.txt",sep = ' ',row.names = F,col.names = F,quote = F)
