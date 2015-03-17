@@ -6252,7 +6252,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       !No Iconfigs and no vecs for the true FOFL.
       MinOpt = 14 !Find F35% and B35%
       X = 0.0
-      X(1) = EstF35(Ispec,1) !Might as well use a good seed to speed things up
+      X(1) = EstFOFL(Ispec,1,1) !Might as well use a good seed to speed things up
       TheRecVec = 0.0 !Re-initialize after the steps above.
       TheM = M(Ispec)
       TheFecVec = Fec(1,0:Maxage)
@@ -6288,6 +6288,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       
       !----------------------------------------------------------------------------------------------      
       !TrueFOFL calculations:
+      IF (UsePstar.EQ.0) THEN
         Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
 
         IF ((Depl.GT.0.40)) THEN
@@ -6301,6 +6302,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         ELSE
           TrueFOFL(Ispec,IYear) = 0.0
         ENDIF      
+      ELSE !UsePstar.EQ.1
+          TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
+      ENDIF !IF UsePstar.EQ.0
       
       !Calculate true OFL
       !Don't need this right now, but might need it in the future
@@ -6439,6 +6443,7 @@ C
 
       !----------------------------------------------------------------
       !Pstar2.OUT (UNIT 401): Write out optimization info for estimated F35% and F40% (all configuration-specific)
+      IF (UsePstar.EQ.0) THEN
       IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
       WRITE(401,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
      +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
@@ -6456,14 +6461,35 @@ C
      +TrueSPR40(Ispec),SSTrueSPR40(Ispec)
 
 101   CONTINUE
-
+      ENDIF
+!-----------------for pstar output--------------------
+      IF (UsePstar.EQ.1) THEN
+        IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
+      WRITE(401,*) 'Isim,IYr,Ispec,Icon,Ivec,mvnF35,mvnB35,mvnSPR35,
+     +SSmvnSPR35,TrueF35,TrueB35,TruSPR35,SSTruSPR35'
+      WRITE(401,*) Nsim,NProjYr,Nspec,Nconfigs
+      ENDIF
       
+      DO 1012 Ispec = 1,Nspec
+          DO 1012 Iconfig = 1,Nconfigs
+              DO 1012 Ivec = 1,Nmvn
+      WRITE(401,2) Isim,IYear-1,Ispec,Iconfig,Ivec,
+     +mvnF35(Ispec,Iconfig,Ivec),
+     +mvnB35(Ispec,Iconfig,Ivec),
+     +mvnSPR35(Ispec,Iconfig,Ivec),
+     +SSmvnSPR35(Ispec,Iconfig,Ivec),
+     +TrueF35(Ispec),TrueB35(Ispec,IYear-1),
+     +TrueSPR35(Ispec),SSTrueSPR35(Ispec)
+
+1012  CONTINUE
+      ENDIF
+!------------------------------------------------------------------    
       
       !----------------------------------------------------------------
       
 1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.5,1x,F17.10,1x,F17.10,1x,F20.5,
      +1x,F17.10,2(1x,F15.12),1x,F15.5)
-2     FORMAT(4(1x,I4),8(1x,F10.8,1x,F10.4))
+2     FORMAT(5(1x,I4),20(1x,F10.8,1x,F10.4))
 !3     FORMAT(20(25x,1x))
 
       END SUBROUTINE SummaryPstar
