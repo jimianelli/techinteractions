@@ -119,9 +119,9 @@ DATA_SECTION
   for (a=0;a<=nages;a++) Fec(a) = Maturity(a)*wt_input(1,1,a); //Maturity * weight-at-age for females at the beginning of the year  
  END_CALCS
  //End CareyFix: Now we have Fec, which is Fecundity = Maturity-at-age x Weight-at-age
-  !!cout << "Fec = " <<Fec << endl;
-  !!cout << "Maturity = " <<Maturity <<endl;
-  !!cout << "wt_input = " << wt_input(1,1) << endl;
+  //!!cout << "Fec = " <<Fec << endl;
+  //!!cout << "Maturity = " <<Maturity <<endl;
+  //!!cout << "wt_input = " << wt_input(1,1) << endl;
   //*******CATCH biomass
   init_matrix catch_bio(styr,endyr,0,fleet)
   !!log_input(catch_bio);
@@ -372,11 +372,15 @@ PARAMETER_SECTION
   !!cout<<"end of parameter section"<<endl;
  
   //likelihood profile numbers
-  likeprof_number S0_lprof
-  sdreport_number Depl;
+  //likeprof_number S0_lprof //Carey commented this out to get it out of the .cor file
+  //Carey changed Depl from an sdreport_number to a regular number to get it out of the .cor file
+  //sdreport_number Depl;
+
+  sdreport_vector LogSelexPar(1,NselexPar);
   sdreport_matrix LogTheNatAge(1,sex,0,nages);  //Carey added this
   //sdreport_vector LogTheNatAgeMale(0,nages);  //Carey added this
-  
+  number Depl;
+  sdreport_number logDepl;  
 // *=========================================================================*
 
 PRELIMINARY_CALCS_SECTION
@@ -501,6 +505,7 @@ PROCEDURE_SECTION
   //cout << "end of calculate obj fn" << endl;
   
   Depl = Spbio(endyr+1)/Spbio(styr)*100;
+  logDepl = log(Depl);
   LogTheNatAge = log(natage(1,endyr+1));  //Carey added this
   //LogTheNatAgeMale = log(natage(1,endyr+1,2));  //Carey added this
 
@@ -581,8 +586,8 @@ FUNCTION get_numbers_at_age
           // if (catage(t,f,g,a)<=0.0) {catage(t,f,g,a) = 0.0;}       // avoid negative catches
          catage_tot(pop,t,g) += catage(t,f,g);                     //catch at age for all fleets, this is summing the two fleets
         }
-       cout << "Find glitch in catch at age " << endl;
-       cout << "Year = " << t << ", fleet = "<< f <<", Hrate(f,t) = "<< Hrate(f,t) << ", vul_bio = " << vul_bio << endl;
+//       cout << "Find glitch in catch at age " << endl;
+//       cout << "Year = " << t << ", fleet = "<< f <<", Hrate(f,t) = "<< Hrate(f,t) << ", vul_bio = " << vul_bio << endl;
 
       }    
      else
@@ -616,8 +621,8 @@ FUNCTION get_numbers_at_age
     // Compute recruitment------------------------------------------------------------------------ 
     Recruits =  (4*h_steep*R0_pop*Spaw_bio) / ((S0/sex)*(1-h_steep)+(5*h_steep-1)*Spaw_bio) ; //deterministic 
     // add stochastics bits and store the quantities we need for the recruitment prior 
-    cout << "h_steep = " << h_steep << ", t = " << t << ", Spaw_bio = " << Spaw_bio << ", Fec = " << Fec << ", R0_pop = " << R0_pop << ", S0/sex = " << S0/sex << endl;
-    cout << "Spbio(t+1) = " << Spbio(t+1) << endl;
+//    cout << "h_steep = " << h_steep << ", t = " << t << ", Spaw_bio = " << Spaw_bio << ", Fec = " << Fec << ", R0_pop = " << R0_pop << ", S0/sex = " << S0/sex << endl;
+//    cout << "Spbio(t+1) = " << Spbio(t+1) << endl;
     //CareyFix: changed below from t+1 to t throughout if statement to match with get_recruitment_prior section
     if (t >= start_rec & t <=end_rec) //CRM: Recruits is defined by the population dynamics at the end of the first year and applies as year t+1; likewise, Recruits in the last year (t+1 = end_rec+1) does not correspond to any data, so it is not included in the likelihood component for recruitment later on.
      {
@@ -714,7 +719,7 @@ FUNCTION get_selectivity
    
  if (age_specific_sel == 1)
   {
-   cout <<" starting age_specific_sel = 1 "<< endl;
+//   cout <<" starting age_specific_sel = 1 "<< endl;
    for (g=1;g<=sex;g++)
     {
      for (f=1;f<=NselexVec;f++)
@@ -764,7 +769,7 @@ FUNCTION get_selectivity
       Sel_wt_age(f,g) = elem_prod(Sel_age(f,g), wt_age_middle(f,g));    
     }  
   }  
- 
+ LogSelexPar = log(SelexPar);
 //=====================================================================
 
 FUNCTION get_initial_conditions
@@ -775,7 +780,7 @@ FUNCTION get_initial_conditions
   
   //Virgin_Recruitment (by population)
   S0 = mfexp(ln_S0);
-  S0_lprof = S0; //for likelihood profile
+  //S0_lprof = S0; //for likelihood profile //Carey commented this out - not doing likelihood profiles and don't want this in the .cor file because it's 100% correlated with S0 and messes up the techinteractions.for model.
    
   //Calculate R0 from S0 and fecundity at age
   sum_fec = Fec(nages)*mfexp(-M*double(nages))/(1-mfexp(-M));
@@ -783,7 +788,7 @@ FUNCTION get_initial_conditions
    sum_fec  += Fec(a)*mfexp(-M*double(age_vector(a)));
   R0_pop = S0/sum_fec; 
   Spbio(styr) = S0/sex;
-  cout << "S0 = " << S0 << ", sum_fec = " << sum_fec <<", R0_pop = "<< R0_pop;
+//  cout << "S0 = " << S0 << ", sum_fec = " << sum_fec <<", R0_pop = "<< R0_pop;
   //Allocate half of the recruitment for each sex
   for (g=1;g<=sex;g++)
    if (R0_pop > 0) 

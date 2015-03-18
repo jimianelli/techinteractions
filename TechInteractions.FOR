@@ -525,6 +525,9 @@ C     Debugging variables:
      +  0:MaxConfigs) :: Natage
       REAL(8),DIMENSION(1:MaxSpec,1:MaxMVN,0:MaxConfigs) :: 
      +SSB_MVNvec
+!      REAL(8),DIMENSION(1:MaxMVN) :: ln_S0_mvnvec
+      REAL(8),DIMENSION(1:MaxMVN) :: LogSelex1_mvnvec,LogSelex2_mvnvec,
+     +                               LogSelex3_mvnvec,LogSelex4_mvnvec
       REAL(8) :: pCatBio
       REAL, DIMENSION(1:MaxSpec,1:Nsex,0:Maxage) :: MyNs
       REAL(8), DIMENSION(1:MaxSpec) :: TrialCatch
@@ -568,6 +571,11 @@ C     Debugging variables:
      +TrueSPR40,SSTrueSPR40
       LOGICAL :: cor_exists
       CHARACTER(11) :: TestMVN
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs,1:MaxMVN,1:Nsex,
+     +0:Maxage)::Selex_Curve_mvn
+      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs,1:MaxMVN) :: mvnF35,
+     +mvnB35,mvnSPR35,SSmvnSPR35
+      
       
       !Pstar                      - (1 = use the pstar approach, 0 = use AFSC Tier 3 HCR)
       !Nmvn                       - Number of multivariate normal draws of log(N-at-age) used for pstar control rule 
@@ -606,6 +614,9 @@ C     Debugging variables:
       !SSTrueSPR35,SSTrueSPR40    - Should be close to 0; SS values from optimizing to get SPR = 0.35 and 0.40
       !cor_exists                 - True = cab.cor exists (used if skipping over a run that didn't converge).
       !TestMVN                    - Will equal "Correlation" if MVN ran incorrectly.
+      !Selex_Curve_mvn            - A different selectivity curve based on parameter values drawn from a multivariate normal distribution (along with the other parameters) - a late addition
+      !mvnF35,mvnB35,mvnSPR35,SSmvnSPR35   - F35,B35,SPR35,and minimization accuracy (SS) that is specific to each vector drawn from the multivariate normal (MVN) process and configuration and species
+      
       END MODULE ShareDataRatioSubs
 C======================================================================
 
@@ -3868,9 +3879,16 @@ C     Summation limits for aggregating results
       !put a stop to further processing if the .cor file doesn't actually exist.
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
       IF (cor_exists) THEN
-          Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', Year2, 
+          Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', 
+     +GlobalProjYr, 
      +' Config ', Iconfig
           CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
+      ELSE
+          TestMVN = 'cor_dne'
+          Write(*,*)  'cab.cor does not exist for Sim ',Isim,', Year ', 
+     +GlobalProjYr, 
+     +' Config ', Iconfig
+
       ENDIF
       !Make a flag
       IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation') THEN
@@ -5502,18 +5520,26 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       INTEGER :: Ispec,Iarea,Iconfig,Iyear
       
       !Local variables
-      INTEGER :: varnum,FirstVarNum
+      INTEGER :: varnum,FirstVarNum,varnum0
       REAL(8) :: value,std
       CHARACTER(12) :: varname
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec)) :: EstNatAge,EstStdNatage
       REAL(8),DIMENSION(1:Nsex,0:Amax(Ispec),0:200) :: EstNatAgeCor
+      REAL(8),DIMENSION(0:40,1:100) :: EstCor
+      REAL(8),DIMENSION(1:40,1:100) :: mvn_cor
+      REAL(8),DIMENSION(1:40) :: par_vec
+      REAL(8),DIMENSION(1:40) :: std_vec
       CHARACTER(12) :: stuff1
       CHARACTER(11) :: stuff2
+      REAL(8) :: Temp
+      
       
       INTEGER :: Isims,Isex
       INTEGER :: Iage,Ipar,Iagevec,Icolvec
       !These to be added to the rest of the code later (assessment config and assessment year+1):
-      INTEGER :: NumAges
+!      INTEGER :: NumAges
+      INTEGER :: NumVars
+      INTEGER :: Irow, Icol,j,i
       
       !This probably needs to be global?? Yep
  !     REAL(8),DIMENSION(1:Nspec,1:Nmvn,0:Amax(Ispec)) :: Nvec
@@ -5521,9 +5547,14 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       EstStdNatage = 0.0
       EstNatAgeCor= 0.0
       
-      NumAges = AINT((Amax(Ispec) + 1)/12.0)
-      IF (MOD((Amax(Ispec) + 1),12).GT.0) THEN
-        NumAges = NumAges + 1
+!      NumAges = AINT((Amax(Ispec) + 1)/12.0)
+!      IF (MOD((Amax(Ispec) + 1),12).GT.0) THEN
+!        NumAges = NumAges + 1
+!      ENDIF
+
+      NumVars = AINT((Amax(Ispec) + 1+5)/12.0) !number of variables in mvnoutput
+      IF (MOD((Amax(Ispec) + 1 + 5),12).GT.0) THEN
+        NumVars = NumVars + 1
       ENDIF
       !------------------------------------------------------
       !Get mean and std information from cab.std
@@ -5551,33 +5582,68 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
       !Get correlation information
       
       EstNatAgeCor = 0.0
+      EstCor = 0.0
+      Irow = 0
       OPEN(Unit = 552,FILE = 'cab.cor')
       READ(552,*) varname
       READ(552,*) varname
       DO 102 Ipar = 1,200
           READ(552,1003) varnum,varname !,value,std,
 !     +(EstNatAgeCor(0,Iagevec),Iagevec=0,varnum-1) !this should be 200, not 2, but 200 doesn't work.
- 
+          !ln_S0 matters, but doesn't have its own row in the.cor file
+!          IF (varname.EQ.'ln_S0'.OR.varname.EQ.'LogSelexPar') 
+          IF (varname.EQ.'SelexPar[4]') THEN
+            varnum0 = varnum    
+          ENDIF
+          IF (varname.EQ.'LogSelexPar') THEN
+              BACKSPACE(UNIT=552)
+              READ(552,*) varnum,varname,par_vec(Irow+1),
+     +           std_vec(Irow+1),
+     +          (EstCor(Irow,Icol),Icol=1,varnum-1)
+              Irow = Irow +1
+          ENDIF !varname.EQ.'ln_S0'
+          
+!          IF (varname.EQ.'LogSelexPar') THEN
+!             BACKSPACE(UNIT=552)
+!             READ(552,*) varnum,varname,stuff1,stuff2,
+!     +          (EstCor(Irow,Icol),Icol=1,varnum)
+!             Irow = Irow + 1
+!          ENDIF !varname.EQ.'LogSelexPar'
+
+          
           IF (varname.EQ.'LogTheNatAge') THEN
               BACKSPACE(UNIT = 552)
-              DO 103 Isex = 1,Nsex
+              !DO 103 Isex = 1,Nsex
+              Isex = 1
               DO 103 Iage = 0,Amax(Ispec)
-!                  READ(552,1002) varnum,varname,value,std,
-!     +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
-                  READ(552,*) varnum,varname,stuff1,stuff2,
-     +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
+ !                 READ(552,*) varnum,varname,stuff1,stuff2,
+ !    +(EstNatAgeCor(Isex,Iage,Iagevec),Iagevec=0,varnum-1)
+                   READ(552,*) varnum,varname,par_vec(Irow+1),
+     +std_vec(Irow+1),
+     +(EstCor(Irow,Icol),Icol=1,varnum-1)
+                   Irow = Irow + 1
 103          CONTINUE !end Iage loop
               EXIT
           ENDIF !varname.EQ.LogT
-102   CONTINUE !end loop reading through std file
-      
+102           CONTINUE !end loop reading through cor file
+
+      !Create mvncor matrix (then go back and expand this to mvn_means, mvn_stds:
+      !get rid of columns 2-37
+      !new_col(2) = old_col(38)
+      !new_col(3) = old_col(39)
+      !...
+
+!      mvn_cor(1:Irow,1) = EstCor(1:Irow,1)
+      DO 1021 j = 1,(Irow-1)
+        mvn_cor(1:Irow,j) = EstCor(1:Irow,j+varnum0)
+1021  CONTINUE
       CLOSE(552)
       
       !------------------------------------------------------
       !Generate vectors of N-at-age for this configuration
       !Write the text file for MVN.exe and then call MVN.exe:
-      OPEN(Unit = 53,File = 'mvninputFem.txt')
-        WRITE(53,1004) Amax(Ispec)+1 !Number of variables
+      OPEN(Unit = 53,File = 'mvninputAll.txt')
+        WRITE(53,1004) Irow !Number of variables
         WRITE(53,1005) Nmvn !Number of random vectors (need to add to input file)
         WRITE(53,1009) 500 !Random number seed - we want this to be the same for each scenario (the means, stds, cor will change)
         WRITE(53,1006) 1    !means are supplied
@@ -5585,14 +5651,22 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
         WRITE(53,1006) 1    !correlations are supplied
         
         !write out mean std of log-N-at-age
-        WRITE(53,1007) (EstNatAge(1,Iage),Iage=0,Amax(Ispec))
-        WRITE(53,1007) (EstStdNatAge(1,Iage),Iage=0,Amax(Ispec))
-      
-        !DO 104 Isex = 1,Nsex
-        DO 104 Iage = 1,Amax(Ispec)
-            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
-     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
-104     CONTINUE
+!        WRITE(53,1007) (EstNatAge(1,Iage),Iage=0,Amax(Ispec))
+!        WRITE(53,1007) (EstStdNatAge(1,Iage),Iage=0,Amax(Ispec))
+        WRITE(53,1007) (par_vec(i),i=1,Irow)
+        WRITE(53,1007) (std_vec(i),i=1,Irow)
+        
+!        !DO 104 Isex = 1,Nsex
+!        DO 104 I = 1,Amax(Ispec)
+!            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
+!     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
+!104     CONTINUE
+        
+        DO 104 i = 1,(Irow-1)
+            WRITE(53,1007) (mvn_cor(i,Icolvec),Icolvec = 
+     +1,i)
+104     CONTINUE       
+        
         
 !        !DO 1041 Isex = 1,Nsex
 !            DO 1041 Iage = 0,Amax(Ispec)
@@ -5600,44 +5674,14 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 !     +(FirstVarNum-1),((FirstVarNum-1)+Amax(Ispec)+1 +(Iage-1)))
 !1041    CONTINUE
       CLOSE(53) !Close input file cabmvn.txt (input for MVN program)
-      CALL SYSTEM("(echo mvninputFem.txt& echo mvnoutputFem.txt&
+      CALL SYSTEM("(echo mvninputAll.txt& echo mvnoutputAll.txt&
      + echo .& echo .) | mvn") !Draw random log(N-at-age) vectors from the multivariate normal distribution.
       !------------------------------------------------------
       
-      !Generate male vector of random numbers:
-      !------------------------------------------------------
-      !Generate vectors of N-at-age for MALES for this configuration
-      !Write the text file for MVN.exe and then call MVN.exe:
-      OPEN(Unit = 53,File = 'mvninputMale.txt')
-        WRITE(53,1004) Amax(Ispec)+1 !Number of variables
-        WRITE(53,1005) Nmvn !Number of random vectors (need to add to input file)
-        WRITE(53,1009) 500 !Random number seed - we want this to be the same for each scenario (the means, stds, cor will change)
-        WRITE(53,1006) 1    !means are supplied
-        WRITE(53,1006) 1    !stds are supplied
-        WRITE(53,1006) 1    !correlations are supplied
-        
-        !write out mean std of log-N-at-age
-        WRITE(53,1007) (EstNatAge(2,Iage),Iage=0,Amax(Ispec))
-        WRITE(53,1007) (EstStdNatAge(2,Iage),Iage=0,Amax(Ispec))
-      
-!        !DO 104 Isex = 1,Nsex
-!        DO 104 Iage = 1,Amax(Ispec)
-!            WRITE(53,1007) (EstNatAgeCor(1,Iage,Icolvec),Icolvec = 
-!     +(FirstVarNum-1),((FirstVarNum-1)+(Iage-1)))
-!104     CONTINUE
-        
-        !Test this line carefully
-            DO 1041 Iage = 1,Amax(Ispec)
-              WRITE(53,1007) (EstNatAgeCor(2,Iage,Icolvec),Icolvec = 
-     +(FirstVarNum+Amax(Ispec)),((FirstVarNum+Amax(Ispec))+(Iage-1)))
-1041    CONTINUE
-      CLOSE(53) !Close input file cabmvn.txt (input for MVN program)
-      CALL SYSTEM("(echo mvninputMale.txt& echo mvnoutputMale.txt&
-     + echo .& echo .) | mvn") !Draw random log(N-at-age) vectors from the multivariate normal distribution.
-      !------------------------------------------------------      
+   
 
       !Test that MVN created the needed files ok
-      OPEN(Unit = 54,File = "mvnoutputFem.txt")
+      OPEN(Unit = 54,File = "mvnoutputAll.txt")
       READ(54,*)
       READ(54,*) TestMVN
       CLOSE(54)
@@ -5645,31 +5689,43 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
         RETURN    
       ENDIF
   
-      !Test that MVN created the needed files ok
-      OPEN(Unit = 54,File = "mvnoutputMale.txt")
-      READ(54,*)
-      READ(54,*) TestMVN
-      CLOSE(54)
-      IF (TestMVN.EQ.'Correlation') THEN
-        RETURN    
-      ENDIF
-      
+!-------------------------need to start on reading in all params here----------------------
+!-------------------------------new variables/infrastructure needed------------------------------
       !Needs to be updated to read in female then male information into Nvec that accepts females and males separately.
       !Read in the vectors of N values
-      OPEN(Unit = 54,File = 'mvnoutputFem.txt')
-      DO 105 Isims = 1,Nmvn !program in this number - this has to stop now!
-        READ(54,1008) (Nvec(Ispec,1,Isims,Iage,Iconfig),
-     +Iage=0,Amax(Ispec)) !this is a prob bc only reads in to the end of a line, not all 31 obs for each Nvec.
+      OPEN(Unit = 54,File = 'mvnoutputAll.txt')
+      DO 105 Isims = 1,Nmvn 
+        READ(54,1008) LogSelex1_mvnvec(Isims),
+     +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
+     +  LogSelex4_mvnvec(Isims),
+     +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
+!        READ(54,1008) ln_S0_mvnvec(Isims),LogSelex1_mvnvec(Isims),
+!     +  LogSelex2_mvnvec(Isims),LogSelex3_mvnvec(Isims),
+!     +  LogSelex4_mvnvec(Isims),
+!     +  (Nvec(Ispec,1,Isims,Iage,Iconfig),Iage=0,Amax(Ispec))
+        
+        !Make a selectivity curve for each Isim and config.
+      Isex = 1
+      DO 1055 Iage = 0,Amax(Ispec)  
+       Temp = -log(19.0)*(Iage-exp(LogSelex1_mvnvec(Isims)))/
+     +(exp(LogSelex2_mvnvec(Isims))) !change to be in terms of LogSelex params
+       Selex_Curve_mvn(Ispec,Iconfig,Isims,1,Iage) = 
+     +1.0/(1.0 + exp(Temp))
+ 
+       Temp = -log(19.0)*(Iage-exp(LogSelex3_mvnvec(Isims)))/
+     +(exp(LogSelex4_mvnvec(Isims))) !change to be in terms of LogSelex params
+       Selex_Curve_mvn(Ispec,Iconfig,Isims,2,Iage) = 
+     +1.0/(1.0 + exp(Temp))
+1055  CONTINUE
+        
+ !               Temp=-log(19.0)*(Iage-SCL50(Ispec))/(SCL95(Ispec)-SCL50(ISpec))
+ !       Sel(Ispec,Iage) = 1.0/(1.0+exp(Temp))
 105   CONTINUE
       CLOSE(54)
-
-      OPEN(Unit = 54,File = 'mvnoutputMale.txt')
-      DO 1051 Isims = 1,Nmvn 
-        READ(54,1008) (Nvec(Ispec,2,Isims,Iage,Iconfig),
-     +Iage=0,Amax(Ispec)) !this is a prob bc only reads in to the end of a line, not all 31 obs for each Nvec.
-1051  CONTINUE
       
-      CLOSE(54) !close mvnoutput.txt file
+      !Set male vectors equal to female vectors (would need to change this if growth, nat mort were different by sex, but now they aren't, so this is ok - nothing makes males different from females in the current input file setup...)      
+      ! This is done because you can't have males and females in the correlation matrix when they are identical - the mvn random deviates cannot be generated if some variables are 100% correlated.
+      Nvec(Ispec,2,:,:,Iconfig) = Nvec(Ispec,2,:,:,Iconfig)
       
       !Calculate current SSB for each vector
       !Iconfig = 1 is the last dimension of SSB_MVNvec
@@ -5678,6 +5734,9 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
              SSB_MVNvec(Ispec,Isims,Iconfig) = SSB_MVNvec(Ispec,Isims,
      +Iconfig) +
      +exp(Nvec(Ispec,1,Isims,Iage,Iconfig))*Fec(Ispec,Iage)
+             
+
+             
 1061  CONTINUE
       !Run minopt for finding the effort required to meet a trial quota, but run it on the dynamics with each Nvec with the output being estF(Ivec)
       !make a subroutine that does this, taking in Est Selex, Nvec, M, and a trial ABC
@@ -5688,10 +5747,8 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
        DO 1062 Iage = 0,Amax(Ispec)
            Natage(Ispec,1,Iage,Iconfig) = EstNatAge(1,Iage) 
            Natage(Ispec,2,Iage,Iconfig) = EstNatAge(2,Iage) 
-1062  CONTINUE
+1062   CONTINUE
       
-      
-      !Shertzer 2008 numerical integration to find Pr(Ft > FOFL) = p* for estimated Ft and FOFL
       
 
       
@@ -5703,8 +5760,10 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 1004  FORMAT(I2,15x,"#Number of variables")
 1005  FORMAT(I5,12x,"#Number of random vectors")
 1006  FORMAT(I2,15x, "#means, stds, and correlations are supplied")
-1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
-1008  FORMAT(<NumAges>(1x,12(F8.4,1x),/))
+!1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
+1007  FORMAT(100(F8.5,1x)) !don't overstate confidence - this is all that's in the .cor file.
+1008  FORMAT(<NumVars-1>(1x,12(F8.4,1x),/),1x,12(F8.4,1x)) !if there's a line with fewer than 12 values, need the ,/ otherwise this messes things up
+!1008  FORMAT(<NumVars>(1x,12(F8.4,1x))) !not this exactly.
 1009  FORMAT(I5,12x,"#Random Number Seed")
         END SUBROUTINE IterateNvecsMVN 
 
@@ -5874,8 +5933,8 @@ C
                     ThoseNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,
      +                                     Iage,Iconfig)) !Vector specific
 2117             CONTINUE !End Isex and Iage loop
-                 TheSelex = EstS(Ispec,1,:,:,Iconfig) !Not Ivec specific right now, but would be under MCMC
-                   
+!                 TheSelex = EstS(Ispec,1,:,:,Iconfig) !Not Ivec specific right now, but would be under MCMC
+                  TheSelex = Selex_Curve_mvn(Ispec,Iconfig,Ivec,:,:) 
        !Here you should cal FIT.
        CALL Fit(X,SS,1,CareyGRD)
        SS = FUNK(X) !X is the initial guess for F that produces a pre-specified amount of catch for the p* approach; 
@@ -6049,17 +6108,23 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       EXTERNAL FUNK
       
 !      Ispec = 1  !eventually a loop
-        MinOpt = 12 !Find F35% and B35%
-      DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
-        !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
+        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
+        !Option for just using the AFSC tier 3 control rule (which will not be vector-specific)
+       DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
         X = 0.0
         X(1) = 0.05
         TheM = EstM(Ispec,Iconfig)
         TheFecVec = Fec(1,0:Maxage)
+        ThePlusAge = Amax(Ispec)
+        
+        IF (UsePstar.EQ.0) THEN
+        !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
+
+
+
         TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
      +1:IYear) !1 is area 1 (maybe get rid of this dimension later to clean things up)
         TheSelex = EstS(Ispec,1,:,:,Iconfig) 
-        ThePlusAge = Amax(Ispec)
         EstB_SPR = 0.0
         EstSPR = 0.0
 !Info on what goes into AFSC_SPR:      
@@ -6075,7 +6140,37 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         !Save info to check out whether optimization worked (written to file in PstarSummary) 
         EstSPR35(Ispec,Iconfig) = EstSPR
         SSEstSPR35(Ispec,Iconfig) = SS
+       !The ELSE statement here is in progress. CRM 3/5/15
+!1033   CONTINUE
+
+      ELSE !IF (UsePstar.EQ.1) (difference is that Pstar rule is vector specific.
+
+        TheRecVec(1:IYear) = EstRec(Ispec,1,Iconfig,
+     +1:IYear) !Later work on whether want this to be vector specific.
+             
+         DO 2033 Ivec = 1,Nmvn
+
+             TheSelex = Selex_Curve_mvn(Ispec,Iconfig,Ivec,:,:) 
+             EstB_SPR = 0.0
+             EstSPR = 0.0
+             
+            CALL Fit(X,SS,1,CareyGRD)
+            SS = FUNK(X)  
+            !the lines below need to have another dimension for ivec.
+            mvnF35(Ispec,Iconfig,Ivec) = X(1)
+            mvnB35(Ispec,Iconfig,Ivec) = EstB_SPR
         
+            !Save info to check out whether optimization worked (written to file in PstarSummary) 
+            mvnSPR35(Ispec,Iconfig,Ivec) = EstSPR
+            SSmvnSPR35(Ispec,Iconfig,Ivec) = SS            
+             
+2033       CONTINUE   !ivec loop       
+!10333    CONTINUE      !iconfig loop   
+          
+          
+      ENDIF
+      
+          
  
         MinOpt = 13 !Find F40% and B40%
         X = 0.0
@@ -6099,21 +6194,25 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         Depl = 0.0
       
         IF (UsePstar.EQ.1) THEN
-        DO 200 Ivec = 1,Nmvn
-          Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
-
-          IF ((Depl.GT.0.40)) THEN
-            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)
-
-          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
-            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)*
-     +      ((SSB_MVNvec(Ispec,Ivec,Iconfig)/EstB40(Ispec,Iconfig))
-     +      -AFSC_alpha)*(1-AFSC_alpha)
-
-          ELSE
-            EstFOFL(Ispec,Iconfig,Ivec) = 0.0
-          ENDIF
-        
+          DO 200 Ivec = 1,Nmvn
+             EstFOFL(Ispec,Iconfig,Ivec) = mvnF35(Ispec,Iconfig,Ivec)   
+                
+                
+!-----------OLD PSTAR Fofl: where Fofl is calculated based on Tier 3 regulations----------
+!          Depl = SSB_MVNvec(Ispec,Ivec,Iconfig)/S0CAEst(Ispec,1,Iconfig)
+!
+!          IF ((Depl.GT.0.40)) THEN
+!            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)
+!
+!          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+!            EstFOFL(Ispec,Iconfig,Ivec) = EstF35(Ispec,Iconfig)*
+!     +      ((SSB_MVNvec(Ispec,Ivec,Iconfig)/EstB40(Ispec,Iconfig))
+!     +      -AFSC_alpha)*(1-AFSC_alpha)
+!
+!          ELSE
+!            EstFOFL(Ispec,Iconfig,Ivec) = 0.0
+!          ENDIF
+!-------------------------------------------------------------------------------------------      
         !Calculate estimated OFL for each random vector based on FOFL
           !This info is not really needed, but keep code just in case??
           !Need to calculate FOFL and OFL based on the single base assessment for comparison to AFSC control rule.
@@ -6153,7 +6252,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       !No Iconfigs and no vecs for the true FOFL.
       MinOpt = 14 !Find F35% and B35%
       X = 0.0
-      X(1) = EstF35(Ispec,1) !Might as well use a good seed to speed things up
+      X(1) = EstFOFL(Ispec,1,1) !Might as well use a good seed to speed things up
       TheRecVec = 0.0 !Re-initialize after the steps above.
       TheM = M(Ispec)
       TheFecVec = Fec(1,0:Maxage)
@@ -6189,6 +6288,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       
       !----------------------------------------------------------------------------------------------      
       !TrueFOFL calculations:
+      IF (UsePstar.EQ.0) THEN
         Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
 
         IF ((Depl.GT.0.40)) THEN
@@ -6202,11 +6302,17 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         ELSE
           TrueFOFL(Ispec,IYear) = 0.0
         ENDIF      
+      ELSE !UsePstar.EQ.1
+          TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
+      ENDIF !IF UsePstar.EQ.0
       
       !Calculate true OFL
       !Don't need this right now, but might need it in the future
         !use CalcCatchFromF() for this calculation - straightforward (except for inability to enter in certain arguments for some reason).
       
+
+          
+      !--------------------------------------------------------------------------          
       MinOpt = 16 !Calculate the estimated FOFL and OFL based on the base assessment only using the correct M and h (?)
       !Fill this in later - not sure what exactly makes sense for comparison, as this rule would have more info on M and h inherently than the p* rule (which accounts for uncertainty in M and h).
       !Could be that estimating M and h and doing the AFSC OFL control rule would be the comparison?
@@ -6337,6 +6443,7 @@ C
 
       !----------------------------------------------------------------
       !Pstar2.OUT (UNIT 401): Write out optimization info for estimated F35% and F40% (all configuration-specific)
+      IF (UsePstar.EQ.0) THEN
       IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
       WRITE(401,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
      +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
@@ -6354,14 +6461,35 @@ C
      +TrueSPR40(Ispec),SSTrueSPR40(Ispec)
 
 101   CONTINUE
-
+      ENDIF
+!-----------------for pstar output--------------------
+      IF (UsePstar.EQ.1) THEN
+        IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
+      WRITE(401,*) 'Isim,IYr,Ispec,Icon,Ivec,mvnF35,mvnB35,mvnSPR35,
+     +SSmvnSPR35,TrueF35,TrueB35,TruSPR35,SSTruSPR35'
+      WRITE(401,*) Nsim,NProjYr,Nspec,Nconfigs
+      ENDIF
       
+      DO 1012 Ispec = 1,Nspec
+          DO 1012 Iconfig = 1,Nconfigs
+              DO 1012 Ivec = 1,Nmvn
+      WRITE(401,2) Isim,IYear-1,Ispec,Iconfig,Ivec,
+     +mvnF35(Ispec,Iconfig,Ivec),
+     +mvnB35(Ispec,Iconfig,Ivec),
+     +mvnSPR35(Ispec,Iconfig,Ivec),
+     +SSmvnSPR35(Ispec,Iconfig,Ivec),
+     +TrueF35(Ispec),TrueB35(Ispec,IYear-1),
+     +TrueSPR35(Ispec),SSTrueSPR35(Ispec)
+
+1012  CONTINUE
+      ENDIF
+!------------------------------------------------------------------    
       
       !----------------------------------------------------------------
       
 1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.5,1x,F17.10,1x,F17.10,1x,F20.5,
      +1x,F17.10,2(1x,F15.12),1x,F15.5)
-2     FORMAT(4(1x,I4),8(1x,F10.8,1x,F10.4))
+2     FORMAT(5(1x,I4),20(1x,F10.8,1x,F10.4))
 !3     FORMAT(20(25x,1x))
 
       END SUBROUTINE SummaryPstar
