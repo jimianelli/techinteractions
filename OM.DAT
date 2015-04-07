@@ -1,4 +1,4 @@
-Number of simulations                   2
+Number of simulations                   50
 Operating model only (no assessments)   0
 Use old values (1=Yes)                  0
 Number of projection years (MSE)        10
@@ -8,62 +8,62 @@ First yr fishing (NA if finding Qvals)  1
 Solve for final depl (1=Yes)            1                    !Correct SaveConstantEff.all for 1x1 tech interact model has effort = 0.008443367447227 to get 39.9% depletion.
 Set final depl (if not solving)         -2.30258509299405          !This seems outdated
 Year MPA is implemented                 300
-Number of species                       3
+Number of species                       1
 Number of time-steps during the year    1            !Have never changed this value - untested.
 Number of North-south Blocks            1            
 Number of East-west Blocks              1            
-Carrying Capacity (SSB total)           10000.0    10000.0    10000.0   
-Natural mortality                       0.20 0.20 0.20
-Maximum Age                             30   30   30  
+Carrying Capacity                       10000.0    10000.0
+Natural mortality                       0.20 0.20
+Maximum Age                             30   30  
 Plus groups? (1=Yes; 0=No)              1 
-Initial Dep (used to FindQVals)         40.0   40.0   40.0
-Final Dep (out of date; see below)      40.0   40.0   40.0   
+Initial Dep (used to FindQVals)         40.0   40.0
+Final Dep (out of date; see below)      40.0   40.0   
 Does Qval equal 1 (DR project)?         0
-Qval Seeds (if finding Qvals)           1.001 1.001 1.001    !0.001 for 18x5 model   
+Qval Seeds (if finding Qvals)           1.001 1.001    !0.001 for 18x5 model   
 Recruitment specifications
- Include process error? (1=yes;0=no)    0
- Sigma(Global)                          0.6      0.60      0.60  
- Sigma (Local)                          0.000001 0.000001 0.000001 
- Steepness                              0.75 0.75 0.75 
- Type of SR relationship 1,2,3,4        1    1    1
- RecDistn(0=even;1=params;2pat)         0    0    0
- Centre of gravity recruitment (X)      10.00   10.000   10.000
- Centre of gravity recruitment (Y)      0.500   0.500   0.500
- Left direction variance (X)            10000.0 10000.0 10000.0									! these values need to be the same
- Left direction variance (Y)            10000.0 10000.0 10000.0                 ! these values need to be the same
- Right direction variance (X)           10000.0 10000.0 10000.0                 ! these values need to be the same
- Right direction variance (Y)           10000.0 10000.0 10000.0                 ! these values need to be the same
+ Include process error? (1=yes;0=no)    1
+ Sigma(Global)                          0.6      0.60  
+ Sigma (Local)                          0.000001 0.000001 
+ Steepness                              0.75 0.75 
+ Type of relationship 1, 2, 3           1    1
+ RecDistn(0=even;1=params;2pat)         0    0
+ Centre of gravity recruitment (X)      10.00   10.000
+ Centre of gravity recruitment (Y)      0.500   0.500
+ Left direction variance (X)            10000.0 0.50
+ Left direction variance (Y)            10000.0 0.50
+ Right direction variance (X)           10000.0 1.00 
+ Right direction variance (Y)           10000.0 0.30
 Growth parameters
- Linf (F)                               50.00 50.00 50.00
- Linf (M)                               40.00 40.00 40.00
- K (F)                                  0.200 0.200 0.200
- K (M)                                  0.220 0.220 0.220
- To (F)                                 0.00 0.00 0.00 
- To (M)                                 0.00 0.00 0.00  
- a (F)                                  0.001 0.001 0.001
- a (M)                                  0.002 0.002 0.002
- b (F)                                  3.000 3.000 3.000
- b (M)                                  3.100 3.100 3.100
- Length Bin Intervals                   2    2    2          !Defined here b.c. of length calcs in the readspec function
- Number of length bins                  30   30   30          
+ Linf (F)                               50.00 50.00
+ Linf (M)                               50.00 50.00
+ K (F)                                  0.200 0.200
+ K (M)                                  0.200 0.200
+ To (F)                                  0.00 0.00 
+ To (M)                                  0.00 0.00  
+ a (F)                                  0.001 0.001
+ a (M)                                  0.001 0.001
+ b (F)                                  3.000 3.000
+ b (M)                                  3.000 3.000
+ Length Bin Intervals                   2    2          !Defined here b.c. of length calcs in the readspec function
+ Number of length bins                  30   30          
 Maturity parameters 
- L50                                    4.00  4.00  4.00
- L95                                    8.00  8.00  8.00
+ L50                                    4.00  4.00
+ L95                                    8.00  8.00
 Dispersal
- Mix (north-south)                      0.01    0.01    0.01   
- Mix (east-west)                        0.01    0.01    0.01   
- X1N (and V1N)                          10.00   1.000   10.00   1.000   10.00   1.000   
- X2N (and V2N)                          17.50   1.000   17.50   1.000   17.50   1.000   
- X1E (and V1E)                          2.50    1.000   2.50    1.000   2.50    1.000   
- X2E (and V2E)                          4.50    1.000   4.50    1.000   4.50    1.000   
+ Mix (north-south)                      0.01    0.01   
+ Mix (east-west)                        0.01    0.01   
+ X1N (and V1N)                          10.00   1.000   0.010   0.020
+ X2N (and V2N)                          17.50   1.000   0.020   0.010
+ X1E (and V1E)                          2.50    1.000   0.010   0.020
+ X2E (and V2E)                          4.50    1.000   0.020   0.010
 Selectivity commercial 
- Age-at-at-50%-recruitment              5.000   5.000   5.000  
- Age-at-at-95%-recruitment              8.000   8.000   8.000 
+ Age-at-at-50%-recruitment              5.000   3.000  
+ Age-at-at-95%-recruitment              8.000   6.000 
 Selectivity survey     
- Age-at-at-50%-recruitment              5.000   5.000   5.000  
- Age-at-at-95%-recruitment              8.000   8.000   8.000  
+ Age-at-at-50%-recruitment              5.000   3.000  
+ Age-at-at-95%-recruitment              8.000   6.000  
 Spatial catchability
- SigmaQ                                 0.001   0.001   0.001      
+ SigmaQ                                 0.001   0.001      
  Hyperstability                         1
  
 Total Effort (Year, effort)
@@ -147,17 +147,17 @@ No Surveys in closed areas (1=Yes)      0
 Number of pre-history assessments       0
 Years for historical assessments        300    Used to be 51 66 81 for MPA assessment work.
 
-ImplOpt - implementation error (0=no)   0
+ImplOpt - implementation error          0
 
 Larval Dispersal
- MixLarval (north-south)                1.00    1.00    1.00   
- MixLarval (east-west)                  0.50    0.50    0.50   
- X1NLarval (and V1NLarval)              10.00   1.00    10.00   1.00    10.00   1.00  
- X2NLarval (and V2NLarval)              17.50   1.00    17.50   1.00    17.50   1.00  
- X1ELarval (and V1ELarval)              2.50    3.00    2.50    3.00    2.50    3.00  
- X2ELarval (and V2ELarval)              4.50    0.001   4.50    0.001   4.50    0.001 
+ MixLarval (north-south)                1.00    0.01   
+ MixLarval (east-west)                  0.50    0.01   
+ X1NLarval (and V1NLarval)              10.00   1.00    0.010   0.020
+ X2NLarval (and V2NLarval)              17.50   1.00    0.020   0.010
+ X1ELarval (and V1ELarval)              2.50    3.00    0.010   0.020
+ X2ELarval (and V2ELarval)              4.50    0.001   0.020   0.010
  
 Number of target depletions             1
 Target Year, Target Depletion(by species)
-65   40.0  40.0  40.0
+65   40.0  40.0
 

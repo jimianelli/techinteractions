@@ -6108,9 +6108,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       EXTERNAL FUNK
       
 !      Ispec = 1  !eventually a loop
-        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
         !Option for just using the AFSC tier 3 control rule (which will not be vector-specific)
        DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
+        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
         X = 0.0
         X(1) = 0.05
         TheM = EstM(Ispec,Iconfig)
