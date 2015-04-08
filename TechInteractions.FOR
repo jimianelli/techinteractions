@@ -6108,9 +6108,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       EXTERNAL FUNK
       
 !      Ispec = 1  !eventually a loop
-        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
         !Option for just using the AFSC tier 3 control rule (which will not be vector-specific)
        DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
+        MinOpt = 12 !Find F35% and B35%, configuration-specific (not vector specific) or both vector and configuration-specific
         X = 0.0
         X(1) = 0.05
         TheM = EstM(Ispec,Iconfig)
@@ -6171,21 +6171,21 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       ENDIF
       
           
- 
-        MinOpt = 13 !Find F40% and B40%
-        X = 0.0
-        X(1) = EstF35(Ispec,Iconfig) !Might as well use a good seed to speed things up
-        !Continue to use same defn's of AFSC_SPR() arguments.
-        CALL Fit(X,SS,1,CareyGRD)
-        SS = FUNK(X)
+        IF (UsePstar.NE.1) THEN
+          MinOpt = 13 !Find F40% and B40%
+          X = 0.0
+          X(1) = EstF35(Ispec,Iconfig) !Might as well use a good seed to speed things up
+          !Continue to use same defn's of AFSC_SPR() arguments.
+          CALL Fit(X,SS,1,CareyGRD)
+          SS = FUNK(X)
       
-        EstF40(Ispec,Iconfig) = X(1)
-        EstB40(Ispec,Iconfig) = EstB_SPR
+          EstF40(Ispec,Iconfig) = X(1)
+          EstB40(Ispec,Iconfig) = EstB_SPR
  
-        !Save info to check out whether optimization worked (written to file in PstarSummary) 
-        EstSPR40(Ispec,Iconfig) = EstSPR
-        SSEstSPR40(Ispec,Iconfig) = SS
-     
+          !Save info to check out whether optimization worked (written to file in PstarSummary) 
+          EstSPR40(Ispec,Iconfig) = EstSPR
+          SSEstSPR40(Ispec,Iconfig) = SS
+        ENDIF
         !OFL control rule equation, based on above somersaults:
         !Need an estimate of current SSB for each of NMVN numbers-at-age vectors generated
         !Need an estimate SSB0 that is configuration-specific (with MCMC it would be vector-specific)

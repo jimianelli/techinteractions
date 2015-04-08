@@ -1,15 +1,15 @@
-Assessment Options                      1  !Only one method right now.
-Number of assessment areas (Narea)      1  #was 3 in previous studies.
-Lower limit (NS)                        1  1  1
-Upper limit (NS)                        1  1  1 
-Lower limit (EW)                        1  1  1 
-Upper limit (EW)                        1  1  1 
+Assessment Options                       1  !Only one method right now.
+Number of assessment areas (Narea)       1  #was 3 in previous studies.
+Lower limit (NS)                         1  1  1
+Upper limit (NS)                         1  1  1 
+Lower limit (EW)                         1  1  1 
+Upper limit (EW)                         1  1  1 
 Biological parameters
-Maximum Age                             30        30        30
-Natural mortality (M)                   0.20      0.20      0.20
-SigmaR                                  0.60      0.60      0.60
-Steepness                               0.75      0.75      0.75
-Log S0  (cab)                           09.903488 09.903488 09.903488
+Maximum Age                                    30        30
+Natural mortality (M)                        0.20      0.20
+SigmaR                                       0.60      0.60
+Steepness                                    0.75      0.75
+Log S0  (cab)                           09.903488 09.903488
 Phases and bounds
 Phase/Bound M                           -1 0.01                  !Block is implemented in base year for initial depl. (same as yr of MPA implementation - 51 in MPA & assessments)
 Phase / Bound S0 (cab)                  1  1.500
@@ -20,10 +20,10 @@ Phase / Bound Logistic Selex a50 slope  3  3.0   2.5
 
 ---------------------------------------------- 
 Assumed CVs and effective sample sizes
-Cpue CV (-1 means set to true)          -1.0000
-Effective sample size (catches)         33.0
-Survey CV (-1 means set to true         -1.0000
-Effective sample size (Surveys)         33.0
+Cpue CV (-1 means set to true)           -1.0000
+Effective sample size (catches)             33.0
+Survey CV (-1 means set to true          -1.0000
+Effective sample size (Surveys)             33.0
 Year to start estimating rec devs       34
 Debug Assessment?                       0        (1 for debug; 0 ow)
 NoCPUEMPA                               0
