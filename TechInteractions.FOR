@@ -1010,17 +1010,42 @@ C
 C       Conduct stock assessments
         ! DoEstAll is effectively happening in the previous year (data aren't generated for TheProjYr yet)
         CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet
+        ! Save into a file the ABC for each species 
+        if (TheProjYear.EQ.FinDepYr+1) THEN
+            OPEN(UNIT=1111,FILE = "ABC.out")
+            write(1111,*) "Cod    Pollock    Yellowfin_sole"
+            write(1111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)    
+            CLOSE(1111)
+        ENDIF
+        if (TheProjYear.GT.FinDepYr+1) THEN
+            OPEN(UNIT=1111,FILE = "ABC.out", access='APPEND')
+            write(1111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)    
+            CLOSE(1111)
+        ENDIF        
         ! Run the technical interaction model to determine the realized catch
         CALL SYSTEM("main_code.exe")
         Write(*,*) 'Finished technical interaction model'
         ! Read in the output from the tech int model
-        OPEN(UNIT=1111,FILE = "catches.out")
-        READ(1111,*) 
-        READ(1111,*) (QuotaAct(II),II=1,MaxSpec)          ! there is a change in scale between the fortran model and tech int so changed them
-        CLOSE(1111)
+        OPEN(UNIT=1112,FILE = "catches.out")
+        READ(1112,*) 
+        READ(1112,*) (QuotaAct(II),II=1,MaxSpec)          
+        CLOSE(1112)    
+        ! there is a change in scale between the fortran model and tech int so changed them
         Do 2015 II=1,MaxSpec
             QuotaAct(II) = QuotaAct(II)*1000
 2015    CONTINUE          
+        ! Save into a file the realized catch for each species
+        if (TheProjYear.EQ.FinDepYr+1) THEN
+            OPEN(UNIT=1113,FILE = "TAC.out")
+            write(1113,*) "Cod    Pollock    Yellowfin_sole"
+            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
+            CLOSE(1113)
+        ENDIF
+        if (TheProjYear.GT.FinDepYr+1) THEN
+            OPEN(UNIT=1113,FILE = "TAC.out", access='APPEND')
+            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
+            CLOSE(1113)
+        ENDIF   
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
         ! And gen data for the next year's assessment
@@ -1616,8 +1641,7 @@ C------------------------------------------------------------
       READ(13,'(40X,I4)') DebugAssessment
       READ(13,'(40X,I5)') NoCPUEMPA
       READ(13,'(40X,I5)') UseFisheryCPUE
-
-
+	  
       IF (EstCpueCV.LT.0) EstCpueCV = CpueCV
       IF (EstEffCatchSamp.LT.0) EstEffCatchSamp = EffectSampCatch1
       IF (EstSurveyCV.LT.0) EstSurveyCV = SurvCV
@@ -4518,8 +4542,8 @@ C       The control file
      +      IestSigmaR(Ispec)**2.0+0.000001
 ! End of Carey's change.
 !------------------------------------------------------------------------
-      WRITE(99,703) StartYrRecDevs,(Year2-Year1+1)-IestIgR(Ispec),
-     +  -10.0d0,10.0d0,2
+      WRITE(99,703) max(1, 32-AMax(Ispec)),
+     +  (Year2-Year1+1)-IestIgR(Ispec), -10.0d0,10.0d0,2
 C     The line below makes the program run for just one year to id problems (note by Carey)
 C     WRITE(99,703) 2,2,-10.0d0,10.0d0,2
       
@@ -7298,6 +7322,7 @@ C changed "FinDeplRecord" --> done
 C changed "ConstantEff" (need to determine for each species independently) --> done 
 C changed "ConstantEffvec" (need to determine for each species independently) --> done
 C added FUNK3, FIT7, ProjYrInd to accomodate the multispecies aspect of the code (run the code for each species) --> done
+C now CAB estimate recdevs from max(1, first_catch - one_generation_time)
 
 C line 927: commented out      SS = FUNK(ConstantEffVec)
 C changed AFSC_SPR --> it was using the continuous form of equation for survival and not the discrete version the catch in the model is based off

@@ -9,7 +9,7 @@ Maximum Age                             15        15        30
 Natural mortality (M)                   0.34      0.38      0.12
 SigmaR                                  0.57      0.90      0.60
 Steepness                               0.99      0.67      0.75
-Log S0  (cab)                           20.50012  22.37192  20.72327
+Log S0  (log(2*SSB0) in cab)            21.19327  23.06507  21.41641
 Phases and bounds
 Phase/Bound M                           -1 0.01                  !Block is implemented in base year for initial depl. (same as yr of MPA implementation - 51 in MPA & assessments)
 Phase / Bound S0 (cab)                  1  1.500
