@@ -1022,6 +1022,7 @@ C       Conduct stock assessments
             write(1111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)    
             CLOSE(1111)
         ENDIF        
+        
         ! Run the technical interaction model to determine the realized catch
         CALL SYSTEM("main_code.exe")
         Write(*,*) 'Finished technical interaction model'

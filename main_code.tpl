@@ -7,13 +7,10 @@ DATA_SECTION
 // coeff.dat contains info that changes between years and iterations i.e Weight_strategy, b1, and b2 (needs to combine output from the linear programming run + fortran code (for TAC))
 // These contain the following variables:
 //	- Nb_strategy			: the number of fishing strategies in the model
-//	- Nb_gear				: the number of gear
 //	- Nb_species			: the number of species (in order: cod, pollock, yellowfin sole, and halibut (bycatch species))
 //	- price					: the price of species (right now exogenous but could be changed later on)
 //	- Weight_strategy		: the initial weight "dk" given to each fishing strategy (this is the variable that will be optimized)
-//	- Catch_strategy		: the catch proportion by species (cod, pollock, yellowfin, halibut)
-//	- Catch_limit_up		: the upper limit of catch proportion by species (cod, pollock, yellowfin)
-//	- Catch_limit_low		: the lower limit of catch proportion by species (cod, pollock, yellowfin)
+//	- Catch_strategy		: the catch proportion by species (cod, halibut, pollock and yellowfin)
 //	- nb_b1					: total number of b1 constaints i.e Ax <= b
 //  - nb_b2					: total number of b2 constaints i.e Ax >= b
 //  - n_b1constr_types		: number of types of b1 constraints (e.g. TAC, OY, upper bound for "dk")
@@ -30,12 +27,9 @@ DATA_SECTION
 //  - Actual_Catch_sub		: temporary matrix that stores the actual catch for each species and strategy
 	
 	init_int Nb_strategy
-	init_int Nb_gear
 	init_int Nb_species
 	init_vector price(1,Nb_species)
 	init_matrix Catch_strategy(1,Nb_species,1,Nb_strategy)
-	init_matrix Catch_limit_up(1,Nb_gear,1,Nb_species-1)
-	init_matrix Catch_limit_low(1,Nb_gear,1,Nb_species-1)
 	init_int nb_b1
 	init_int nb_b2
 	init_int n_b1constr_types
@@ -46,42 +40,50 @@ DATA_SECTION
 	init_matrix a1(1,nb_b1,1,Nb_strategy)
 	init_matrix a2(1,nb_b2,1,Nb_strategy)
 	//!! cout << n_b1by_constr << endl;
-	//!! cout << a2 << endl; exit(1);
-	//!! cout << Catch_limit_low << endl; exit(1);
-		
+
     !! ad_comm::change_datafile_name("TAC.dat");
 	init_vector TAC(1,Nb_species)
  	
-    !! ad_comm::change_datafile_name("coeff.dat");
+    !! ad_comm::change_datafile_name("coeff.dat");				// extracting the dk,t-1
 	init_vector Weight_strategy(1,Nb_strategy)
 	init_vector b1(1,nb_b1)
 	init_vector b2(1,nb_b2)
-	//!! cout << Weight_strategy << endl;exit(1);
-	//!! cout << "TAC:" << TAC << endl; exit(1);
+	//!! cout << Weight_strategy << endl; exit(1);
+	//!! cout << TAC << endl; exit(1);
+
+    !! ad_comm::change_datafile_name("coeff_original.dat");		// extracting the dk,t=1
+	init_vector Weight_strategy_initial(1,Nb_strategy)
+	init_vector b1_initial(1,nb_b1)
+	init_vector b2_initial(1,nb_b2)
 
  LOCAL_CALCS
+  // to update the TAC value within the b1 constraint vector
   for (int it=1;it<=Nb_species;it++){
   b1(it) = TAC(it);
   }
+  // to update the b1 constraint for the dk values 
+  for (int it=(Nb_species+2);it<=nb_b1;it++){
+  b1(it) = min(b1_initial(it), b1(it));
+  }
+  // to update the b2 constraint for the dk values 
+  for (int it=1;it<=nb_b2;it++){
+  b2(it) = max(b2_initial(it), b2(it));
+  }
  END_CALCS
+	!!cout << "b1_counds: " << b1 << endl; exit(1);
 	
 	vector relative_catch(1,Nb_strategy);
  LOCAL_CALCS		// Need to calculate the average catch between the boundaries for the initial value
-//  for (int it=1;it<=Nb_gear;it++){
-//  for (int jj=1;jj<Nb_species;jj++){
-//  relative_catch(jj) = Catch_strategy(it,)*TAC(jj)*(Catch_limit_low(it,jj)+Catch_limit_up(it,jj))/2;
-//  }
-//  }
   for (int it=1;it<=Nb_strategy;it++){
   relative_catch(it) = Weight_strategy(it);
   }
  END_CALCS
-	!! cout << relative_catch << endl;exit(1);
-	
-	vector Actual_Catch(1,Nb_species);
+	//!! cout << relative_catch << endl;exit(1);
+
+    vector Actual_Catch(1,Nb_species);
     matrix Actual_Catch_sub(1,Nb_species,1,Nb_strategy)
 
-  !! ad_comm::change_datafile_name("simple.dat");
+    !! ad_comm::change_datafile_name("simple.dat");
 	init_int nobs
 	init_vector Y(1,nobs)
 	init_vector x(1,nobs)	
@@ -94,12 +96,23 @@ PARAMETER_SECTION
   init_number b   
   vector pred_Y(1,nobs)
   objective_function_value obj_fun   
- 
-PROCEDURE_SECTION
+
+PRELIMINARY_CALCULATIONS_SECTION
   opt_sim();
+  for (int it=1;it<=(nb_b1-Nb_species-1);it++){
+  b1(it+Nb_species+1) = 3*relative_catch(it);
+  }
+  for (int it=1;it<=(nb_b2);it++){
+  b2(it) = 0.3*relative_catch(it);
+  }
+//  cout << b1 << endl;
+//  cout << b2 << endl;exit(1);
+  
+PROCEDURE_SECTION
   pred_Y=a*x+b;
   obj_fun=(norm2(pred_Y-Y)); 
   obj_fun=nobs/2.*log(obj_fun);    // make it a likelihood function so that
+
   store_results();
   
 FUNCTION opt_sim
@@ -121,16 +134,14 @@ FUNCTION  Get_Actual_Catch
 	// Set the variables to run the linear programming code
     dmatrix a3;
     dvector b3;
-	a3.initialize();
-	b3.initialize();
+		a3.initialize();
+		b3.initialize();
     ivector ierr(1,1);
     ierr(1)=0;
 		
-		// cout << relative_catch << endl;
+	cout << ierr(1) << endl;
 		
     lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
-	
-// The code below might be needed for later so keep it	
 //   do 
 //   {
 //      lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
@@ -138,7 +149,7 @@ FUNCTION  Get_Actual_Catch
 //      {
 //       cout<< "reDoing simplex with a different constraint b2"<<ierr<<endl;
 //       b2 *= 1.01;
-//		 b1 *= 0.99;
+//		b1 *= 0.99;
 //       lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
 // 		cout << "the current value of b2 is:" << b2 << endl;
 // 		cout << "the current value of relative_catch is:" << relative_catch << endl;
@@ -162,6 +173,7 @@ FUNCTION  store_results
   // Now store the results on:
   // - Actual catch for each species (including the bycatch species)
   // - The value of the "dk" matrix for the specific year 
+
   ofstream results("coeff.dat");   // this is to create an output file names "result.sso" with the results obtained from the step above
   ofstream catches("catches.out");   // this is to create an output file names "result.sso" with the results obtained from the step above
   catches << "# Catch by species" << endl; 
