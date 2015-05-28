@@ -40,37 +40,22 @@ DATA_SECTION
 	init_matrix a1(1,nb_b1,1,Nb_strategy)
 	init_matrix a2(1,nb_b2,1,Nb_strategy)
 	//!! cout << n_b1by_constr << endl;
-
-    !! ad_comm::change_datafile_name("TAC.dat");
-	init_vector TAC(1,Nb_species)
- 	
-    !! ad_comm::change_datafile_name("coeff.dat");				// extracting the dk,t-1
 	init_vector Weight_strategy(1,Nb_strategy)
 	init_vector b1(1,nb_b1)
 	init_vector b2(1,nb_b2)
 	//!! cout << Weight_strategy << endl; exit(1);
 	//!! cout << TAC << endl; exit(1);
 
-    !! ad_comm::change_datafile_name("coeff_original.dat");		// extracting the dk,t=1
-	init_vector Weight_strategy_initial(1,Nb_strategy)
-	init_vector b1_initial(1,nb_b1)
-	init_vector b2_initial(1,nb_b2)
-
+    !! ad_comm::change_datafile_name("TAC.dat");
+	init_vector TAC(1,Nb_species)
+ 	
  LOCAL_CALCS
   // to update the TAC value within the b1 constraint vector
   for (int it=1;it<=Nb_species;it++){
   b1(it) = TAC(it);
   }
-  // to update the b1 constraint for the dk values 
-  for (int it=(Nb_species+2);it<=nb_b1;it++){
-  b1(it) = min(b1_initial(it), b1(it));
-  }
-  // to update the b2 constraint for the dk values 
-  for (int it=1;it<=nb_b2;it++){
-  b2(it) = max(b2_initial(it), b2(it));
-  }
  END_CALCS
-	!!cout << "b1_counds: " << b1 << endl; exit(1);
+	//!!cout << "b1_counds: " << b1 << endl; exit(1);
 	
 	vector relative_catch(1,Nb_strategy);
  LOCAL_CALCS		// Need to calculate the average catch between the boundaries for the initial value
@@ -134,27 +119,30 @@ FUNCTION  Get_Actual_Catch
 	// Set the variables to run the linear programming code
     dmatrix a3;
     dvector b3;
-		a3.initialize();
-		b3.initialize();
+	a3.initialize();
+	b3.initialize();
     ivector ierr(1,1);
     ierr(1)=0;
 		
 	cout << ierr(1) << endl;
 		
-    lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
-//   do 
-//   {
-//      lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
-//      if (ierr(1))
-//      {
-//       cout<< "reDoing simplex with a different constraint b2"<<ierr<<endl;
-//       b2 *= 1.01;
-//		b1 *= 0.99;
-//       lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
-// 		cout << "the current value of b2 is:" << b2 << endl;
-// 		cout << "the current value of relative_catch is:" << relative_catch << endl;
-//      }
-//   } while (ierr(1));
+    do 
+    {
+       lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
+       if (ierr(1))
+       {
+        cout<< "reDoing simplex with a different initial relative catch value dk,t=1"<<ierr<<endl;
+		relative_catch *= 0.9;
+		for (int it=1;it<=(nb_b1-Nb_species-1);it++){
+		b1(it+Nb_species+1) = 3*relative_catch(it);
+		}
+		for (int it=1;it<=(nb_b2);it++){
+		b2(it) = 0.3*relative_catch(it);
+		}
+		lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
+  		cout << "the current value of relative_catch is:" << relative_catch << endl;
+       }
+    } while (ierr(1));
  
   // Now get the actual catch 
   Actual_Catch.initialize();
@@ -174,16 +162,16 @@ FUNCTION  store_results
   // - Actual catch for each species (including the bycatch species)
   // - The value of the "dk" matrix for the specific year 
 
-  ofstream results("coeff.dat");   // this is to create an output file names "result.sso" with the results obtained from the step above
+  //ofstream results("coeff.dat");   // this is to create an output file names "result.sso" with the results obtained from the step above
   ofstream catches("catches.out");   // this is to create an output file names "result.sso" with the results obtained from the step above
   catches << "# Catch by species" << endl; 
   catches << Actual_Catch << endl;
-  results << "# dk,t" << endl;
-  results << relative_catch << endl;
-  results << "# b1" << endl;
-  results <<  b1 << endl;
-  results << "# b2" << endl;
-  results <<  b2 << endl;
+  //results << "# dk,t" << endl;
+  //results << relative_catch << endl;
+  //results << "# b1" << endl;
+  //results <<  b1 << endl;
+  //results << "# b2" << endl;
+  //results <<  b2 << endl;
   
 FUNCTION void xxerror(const char * s)
     cerr << s << endl;

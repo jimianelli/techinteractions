@@ -160,4 +160,5 @@ Larval Dispersal
 Number of target depletions             1
 Target Year, Target Depletion(by species)
 65   50.0  55.0  65.0
-
+Management strategy                     0       	! 0 = status quo   1 = Multi-species quota adjustment
+OM fishing strategy                     0       	! 0 = fixed over time 	1 = changing over time

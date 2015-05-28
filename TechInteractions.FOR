@@ -289,8 +289,8 @@ C      PassEstVar          - Material at the stock level
 C
 C     Misc quantities
       INTEGER TheProjYear,MinOpt,Nsim,NprojYr,ISEEDO,ISEEDP
-      INTEGER SolFinDepl,ImplOpt
-      REAL*8 Quota(MaxSpec),QuotaAct(MaxSpec)
+      INTEGER SolFinDepl,ImplOpt,MS_HCR,OM_strategy,Current_val
+      REAL*8 Quota(MaxSpec),QuotaAct(MaxSpec),TAC(MaxSpec)
 
 C      TheProjYear         - Year of projection
 C      MinOpt              - Option for minimization
@@ -302,7 +302,10 @@ C      ISEEDO              - Random number seed
 C      ISEEDP              - Process error
 C      SolFinDepl          - Solve for the effort that gets the final depletion
 C      ImplOpt             - Option for Implementation uncertainty
-
+C      MS_HCR              - The management strategy for allocating the quota (0 or 1) 0 = status quo, 1 = Multi-species quota adjustment
+C      OM_strategy         - Is fishing strategy fixed over time (0 or 1) 0 = fixed, 1 = changing over time
+C      TAC                 - The TAC values determine by the quota allocation rules
+C      Current_val         - The current value of the EM fishing strategy
 
 C==========================================================================================
 C	Carey's variables in module form only: Variables that Carey added to the program
@@ -671,11 +674,12 @@ C	Time counter variables
 C	INTEGER Isim
       CHARACTER*1 MYINDC
 !     CHARACTER*2 HistChar1,HistChar2,HistChar3
-      INTEGER Iass,U,VV,i,iu,TheSim
+      INTEGER Iass,U,VV,i,iu,TheSim,VALS(MaxPYr)
       REAL*8 X(100),SS
       REAL*8 FUNK 
       REAL*8 FUNK3 
       REAL*8 FUNKSCALAR
+      INTEGER, DIMENSION(1000,500) :: OM_fish, EM_fish
 C     Carey: EXTERNAL means to use the user-defined definition of this function (FUNK), rather than an intrinsically defined function, like what's written into the FORTRAN programming language
       EXTERNAL FUNK
       EXTERNAL FUNKSCALAR
@@ -721,7 +725,19 @@ C	Input Files
 !     OPEN(UNIT=2,FILE="RANDOM6.NUM")
       OPEN(UNIT=2,FILE="RANDOMTRY.NUM") !This is used - seeds for each sim come from this file
 	OPEN(UNIT=3,FILE="RANDOM4.NUM")
-
+      ! Now read in the fishing strategy for the OM
+      OPEN(UNIT=1234,FILE = "Random_strategy_OM.dat")
+      DO 9876 II=1,1000
+          READ(1234,*)  OM_fish(II,:) 
+9876  enddo
+      CLOSE(1234)
+      ! Now read in the fishing strategy for the EM
+      OPEN(UNIT=1235,FILE = "Random_strategy_EM.dat")
+      DO 9877 II=1,1000
+          READ(1235,*)  EM_fish(II,:) 
+9877  enddo  
+      CLOSE(1235)
+           
 C	Output Files
 	OPEN(UNIT=39,FILE="results/SUMM18.OUT")
 
@@ -1009,24 +1025,64 @@ C       Impose MPA
 C
 C       Conduct stock assessments
         ! DoEstAll is effectively happening in the previous year (data aren't generated for TheProjYr yet)
-        CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet
-        ! Save into a file the ABC for each species 
-        if (TheProjYear.EQ.FinDepYr+1) THEN
-            OPEN(UNIT=1111,FILE = "ABC.out")
-            write(1111,*) "Cod    Pollock    Yellowfin_sole"
-            write(1111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)    
-            CLOSE(1111)
-        ENDIF
-        if (TheProjYear.GT.FinDepYr+1) THEN
-            OPEN(UNIT=1111,FILE = "ABC.out", access='APPEND')
-            write(1111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)    
-            CLOSE(1111)
-        ENDIF        
+        Current_val = EM_fish(Isim, TheProjYear)
+        CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet      
         
-        ! Run the technical interaction model to determine the realized catch
-        CALL SYSTEM("main_code.exe")
-        Write(*,*) 'Finished technical interaction model'
-        ! Read in the output from the tech int model
+        ! Run the technical interaction model to determine the TRUE realized catch (OEM) based on the OM_fish value
+        IF(OM_strategy.EQ.0) THEN 
+            CALL SYSTEM("main_code.exe")
+        ENDIF    
+        
+        IF(OM_strategy.EQ.1) THEN 
+            IF(OM_fish(Isim, TheProjYear).EQ.1) THEN 
+                CALL SYSTEM("main_code2000.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.2) THEN 
+                CALL SYSTEM("main_code2001.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.3) THEN 
+                CALL SYSTEM("main_code2002.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.4) THEN 
+                CALL SYSTEM("main_code2003.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.5) THEN 
+                CALL SYSTEM("main_code2004.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.6) THEN 
+                CALL SYSTEM("main_code2005.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.7) THEN 
+                CALL SYSTEM("main_code2006.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.8) THEN 
+                CALL SYSTEM("main_code2007.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.9) THEN 
+                CALL SYSTEM("main_code2008.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.10) THEN 
+                CALL SYSTEM("main_code2009.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.11) THEN 
+                CALL SYSTEM("main_code2010.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.12) THEN 
+                CALL SYSTEM("main_code2011.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.13) THEN 
+                CALL SYSTEM("main_code2013.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.14) THEN 
+                CALL SYSTEM("main_code2013.exe")
+            ENDIF
+            IF(OM_fish(Isim, TheProjYear).EQ.15) THEN 
+                CALL SYSTEM("main_code2014.exe")
+            ENDIF
+            Write(*,*) 'Finished OM technical interaction model'
+        ENDIF
+        
+        ! Save into a file the realized catch for each species
         OPEN(UNIT=1112,FILE = "catches.out")
         READ(1112,*) 
         READ(1112,*) (QuotaAct(II),II=1,MaxSpec)          
@@ -1034,19 +1090,19 @@ C       Conduct stock assessments
         ! there is a change in scale between the fortran model and tech int so changed them
         Do 2015 II=1,MaxSpec
             QuotaAct(II) = QuotaAct(II)*1000
-2015    CONTINUE          
-        ! Save into a file the realized catch for each species
+2015    CONTINUE 
         if (TheProjYear.EQ.FinDepYr+1) THEN
-            OPEN(UNIT=1113,FILE = "TAC.out")
+            OPEN(UNIT=1113,FILE = "Realized_catch.out")
             write(1113,*) "Cod    Pollock    Yellowfin_sole"
             write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
             CLOSE(1113)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
-            OPEN(UNIT=1113,FILE = "TAC.out", access='APPEND')
+            OPEN(UNIT=1113,FILE = "Realized_catch.out", access='APPEND')
             write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
             CLOSE(1113)
-        ENDIF   
+        ENDIF          
+        
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
         ! And gen data for the next year's assessment
@@ -1063,7 +1119,6 @@ C==========================================================
 
 C==================================================================
 
-	CLOSE(777)
       CLOSE(14)
       CLOSE(15)
       CLOSE(16)
@@ -1159,10 +1214,112 @@ C     Conduct stock assessments
          CLOSE(957)
 10000  CONTINUE 
       
-      ! Now write the results into the TAC.dat file
-      WRITE(777,222) QuotaAct/1000, Bycatch(TheYr-FinDepYr)
-222   FORMAT(10(F15.5,1x))
+      ! Now write the results into the TAC.dat file based on the quota allocation rule 
+      if (MS_HCR.EQ.0) THEN 
+      DO 5555 II=1, Nspec
+          TAC(II) = QuotaAct(II)/sum(QuotaAct)*1700000
+5555  CONTINUE
+      WRITE(777,'(10(F15.5,1x))') TAC, Bycatch(TheYr-FinDepYr)
+      CLOSE(777)
+      
+        ! Save the TAC values into a file 
+        if (TheProjYear.EQ.FinDepYr+1) THEN
+            OPEN(UNIT=1111,FILE = "TAC_statusquo.out")
+            write(1111,*) "Cod    Pollock    Yellowfin_sole"
+            write(1111,'(5(F14.2,1x))') (TAC(II),II=1,MaxSpec)    
+            CLOSE(1111)
+        ENDIF
+        if (TheProjYear.GT.FinDepYr+1) THEN
+            OPEN(UNIT=1111,FILE = "TAC_statusquo.out", access='APPEND')
+            write(1111,'(5(F14.2,1x))') (TAC(II),II=1,MaxSpec)    
+            CLOSE(1111)
+        ENDIF        
+     
+      ENDIF
+      
+      if (MS_HCR.EQ.1) THEN 
+      WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
+      CLOSE(777)
+      
+        ! Run the technical interaction model to determine the QUOTA based on the EM_fish value
+        IF(OM_strategy.EQ.0) THEN 
+            CALL SYSTEM("main_code.exe")
+        ENDIF 
+        
+        IF(OM_strategy.EQ.0) THEN 
+            IF(Current_val.EQ.1) THEN 
+                CALL SYSTEM("main_code2000.exe")
+            ENDIF
+            IF(Current_val.EQ.2) THEN 
+                CALL SYSTEM("main_code2001.exe")
+            ENDIF
+            IF(Current_val.EQ.3) THEN 
+                CALL SYSTEM("main_code2002.exe")
+            ENDIF
+            IF(Current_val.EQ.4) THEN 
+                CALL SYSTEM("main_code2003.exe")
+            ENDIF
+            IF(Current_val.EQ.5) THEN 
+                CALL SYSTEM("main_code2004.exe")
+            ENDIF
+            IF(Current_val.EQ.6) THEN 
+                CALL SYSTEM("main_code2005.exe")
+            ENDIF
+            IF(Current_val.EQ.7) THEN 
+                CALL SYSTEM("main_code2006.exe")
+            ENDIF
+            IF(Current_val.EQ.8) THEN 
+                CALL SYSTEM("main_code2007.exe")
+            ENDIF
+            IF(Current_val.EQ.9) THEN 
+                CALL SYSTEM("main_code2008.exe")
+            ENDIF
+            IF(Current_val.EQ.10) THEN 
+                CALL SYSTEM("main_code2009.exe")
+            ENDIF
+            IF(Current_val.EQ.11) THEN 
+                CALL SYSTEM("main_code2010.exe")
+            ENDIF
+            IF(Current_val.EQ.12) THEN 
+                CALL SYSTEM("main_code2011.exe")
+            ENDIF
+            IF(Current_val.EQ.13) THEN 
+                CALL SYSTEM("main_code2013.exe")
+            ENDIF
+            IF(Current_val.EQ.14) THEN 
+                CALL SYSTEM("main_code2013.exe")
+            ENDIF
+            IF(Current_val.EQ.15) THEN 
+                CALL SYSTEM("main_code2014.exe")
+            ENDIF
+            Write(*,*) 'Finished EM technical interaction model'
+        ENDIF 
+        
+        ! Read in the output from the tech int model
+        OPEN(UNIT=1112,FILE = "catches.out")
+        READ(1112,*) 
+        READ(1112,*) (QuotaAct(II),II=1,MaxSpec)          
+        CLOSE(1112)    
+        ! there is a change in scale between the fortran model and tech int so changed them
+        Do 2015 II=1,MaxSpec
+            QuotaAct(II) = QuotaAct(II)*1000
+2015    CONTINUE 
+        ! Save into a file the TAC obtained from the technical interaction model for each species
+        if (TheProjYear.EQ.FinDepYr+1) THEN
+            OPEN(UNIT=3111,FILE = "TAC_techint.out")
+            write(3111,*) "Cod    Pollock    Yellowfin_sole"
+            write(3111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
+            CLOSE(3111)
+        ENDIF
+        if (TheProjYear.GT.FinDepYr+1) THEN
+            OPEN(UNIT=3111,FILE = "TAC_techint.out", access='APPEND')
+            write(3111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
+            CLOSE(3111)
+        ENDIF
 
+      WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
+      CLOSE(777)
+      ENDIF 
       
 801   FORMAT(1x,I3,1x,2(F9.1,1x),2(F7.4,1x),2(F9.1,1x),2(F9.1,1x),
      +      2(F7.4,1x))
@@ -1354,6 +1511,8 @@ C     Data-related inputs
         READ(13,'(I4,5(1x,F5.2))') DeplYr(itarg), 
      +    (TargetDeplVec(itarg,Ispec),Ispec = 1,Nspec)
 3459  CONTINUE
+      READ(13,'(40X,I5)') MS_HCR
+      READ(13,'(40X,I5)') OM_strategy
       CLOSE(13)
 C
 !     Calculate length bins
@@ -5395,33 +5554,6 @@ C
 
 C
 C=======================================================================
-C
-
-      SUBROUTINE RAND(U,N,RANDOMSEED)
-      INTEGER N,X,Y,Z
-      REAL U(N),V
-	INTEGER, INTENT(IN), DIMENSION(3) :: RANDOMSEED
-
-	X = RANDOMSEED(1)
-	Y = RANDOMSEED(2)
-	Z = RANDOMSEED(3)
-C      COMMON/RANDOM/X,Y,Z
-      IF(N.LE.0) RETURN
-      DO  I=1,N
-        X=171*MOD(X,177)-2*(X/177)
-        IF(X.LT.0) X=X+30269
-        Y=172*MOD(Y,176)-35*(Y/176)
-        IF(Y.LT.0) Y=Y+30307
-        Z=170*MOD(Z,178)-63*(Z/178)
-        IF(Z.LT.0) Z=Z+30323
-        V=X/30269.0 + Y/30307.0 + Z/30323.0
-        U(I)=V-INT(V)
-      END DO
-      RETURN
-      END
-
-C      
-C====================================================================
 C
 
       SUBROUTINE WriteSpecs(UNUM)
