@@ -7450,19 +7450,17 @@ C 10. KO: removed two lines from "deletecabstuff.bat"
 C 11. KO: added fleet for EstS --> but only using fleet 1 in the rest of the code (05-15-15)
 
 C ---------------------------
-C Modification May 2015, week2
+C Modification May 2015
 C changed "FinDeplRecord" --> done
 C changed "ConstantEff" (need to determine for each species independently) --> done 
 C changed "ConstantEffvec" (need to determine for each species independently) --> done
 C added FUNK3, FIT7, ProjYrInd to accomodate the multispecies aspect of the code (run the code for each species) --> done
 C now CAB estimate recdevs from max(1, first_catch - one_generation_time)
-
 C line 927: commented out      SS = FUNK(ConstantEffVec)
 C changed AFSC_SPR --> it was using the continuous form of equation for survival and not the discrete version the catch in the model is based off
-C                  --> this means that the F for F35% or F40% (determined using AFSC_SPR) was not in the same scale as the F=qE 
-C                  --> done!
-
-C FindquotaF is producing a quota that is weird
+C                  --> this means that the F for F35% or F40% (determined using AFSC_SPR) was not in the same scale as the F=qE                 
+C Added two more lines in OM.dat: one controls the quota allocation method and the other controls how the fishing strategy changes (these are options that are only used for the NON P* study case)
+C 
 
 
 
