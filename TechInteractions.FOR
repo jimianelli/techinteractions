@@ -864,7 +864,7 @@ C      Find the catchability coefficients
        IF (USePrevVals.NE.1.AND.QValOne.NE.1) THEN
           DO 1000 Ispec=1,Nspec
           CALL FindQvalsInd(Ispec)
-1000   EndDO
+1000   CONTINUE
 C          CALL FindQvals()
        WRITE(22,'(2(I10,1x),3F20.15,1x)') SEED1,SEED2,
      +      (QVAL(Ispec),ISpec=1,NSpec)
@@ -907,7 +907,7 @@ C	      X(Ispec) = QVal(Ispec)
           SS = FUNKSCALAR(BestInitEffort)
       ENDIF
 !=========================================================
-
+C                  
 C	Carey sets QVal to 1 for density ratio project
 
 C
@@ -951,8 +951,16 @@ C      Find the effort levels
 66695  CONTINUE
        ENDIF 
 
-       !Use previous values for the effort level that produces the depletion level that's desired.
-       IF (SolFinDepl.NE.1) THEN     
+       !Copy paste the last Effort values from OM.dat to SaveConstEff.all
+       IF (SolFinDepl.EQ.0) THEN     
+       !Write out ConstantEff levels to ConstantEff.All
+        WRITE(78,'(51F5.2,1x,3(I3,1x),10(F10.6,1x))') 
+     +  (TotEffort(Yr),Yr=1,BaseYr),Isim,mystyr,myendyr,
+     +  (TargetDeplVec(1,Ispec),Ispec=1,Nspec)
+       ENDIF
+       
+       !Use previous values (from SaveConstEff.all) for the effort level that produces the depletion level that's desired.
+       IF (SolFinDepl.EQ.2) THEN     
        DO 66696 itarg = 1,NTargetDepl
            READ(78,*) (ConstantEff(Ispec),Ispec=1,Nspec),TheSim,StartYr,
      +  EndYr,(DeplFound(Ispec),Ispec=1,Nspec),
@@ -3676,15 +3684,17 @@ C       Impose MPA
 21110     CONTINUE
 21100    CONTINUE          
         ENDIF
+        
 C        TheEffort(1) = EXP(X(1))  !CHANGETHIS
           TheEffort(1) = X(1)
         CALL projYrInd(Yr,TheEffort,Ispec)
 31000  CONTINUE
+
        FUNK3 = 0
        Depl2(Ispec) = SPBIoTot(Ispec,EndYr)/SpBioTot(Ispec,MinPYr)*100 ! Changed from EndYr+1 to EndYr
 
        IF (ABS(Depl2(Ispec)-FinalDep(Ispec)).GT.0.01) Funk3 = 
-     +      (Depl2(Ispec)-FinalDep(Ispec))**2.0*1000
+     +      (Depl2(Ispec)-FinalDep(Ispec))**2.0
 C       WRITE(*,*) FUNK,TheEffort(1),Depl
 	FinDepRecord(Ispec) = Depl2(Ispec)
       ENDIF      
@@ -5960,7 +5970,7 @@ C     Local variables
        StartYr = LastDepYear
        EndYr = DepYear
        MinOpt = 3
-	 CareyGRD = 1.2
+	 CareyGRD = 0.5
 C      X(1) = LOG(TotEffort(0)) !before SS3MPA stuff
 	ObjFun = 1000000
       

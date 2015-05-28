@@ -5,7 +5,7 @@ Upper limit (NS)                        1  1  1
 Lower limit (EW)                        1  1  1 
 Upper limit (EW)                        1  1  1 
 Biological parameters
-Maximum Age                             15        15        30
+Maximum Age                             20        20        40
 Natural mortality (M)                   0.34      0.38      0.12
 SigmaR                                  0.57      0.90      0.60
 Steepness                               0.99      0.67      0.75
