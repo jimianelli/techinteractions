@@ -675,6 +675,7 @@ C	Time counter variables
 C	INTEGER Isim
       CHARACTER*1 MYINDC
 !     CHARACTER*2 HistChar1,HistChar2,HistChar3
+      CHARACTER*2 cIsim 
       CHARACTER*21 cstring
       INTEGER Iass,U,VV,i,iu,TheSim,VALS(MaxPYr)
       REAL*8 X(100),SS
@@ -861,10 +862,10 @@ C	Carey used Qval = 1 for density ratio project
 C==============================================
 C      Find the catchability coefficients
        IF (USePrevVals.NE.1.AND.QValOne.NE.1) THEN
-C          DO 1000 Ispec=1,Nspec
-C          CALL FindQvalsInd(Ispec)
-C1000   EndDO
-          CALL FindQvals()
+          DO 1000 Ispec=1,Nspec
+          CALL FindQvalsInd(Ispec)
+1000   EndDO
+C          CALL FindQvals()
        WRITE(22,'(2(I10,1x),3F20.15,1x)') SEED1,SEED2,
      +      (QVAL(Ispec),ISpec=1,NSpec)
 	    WRITE(39,'(1x,A)') 'Qval(Ispec),ISpec=1,NSpec)'
@@ -927,7 +928,7 @@ C      Find the effort levels
           !Write out ConstantEff levels to ConstantEff.All
          WRITE(78,*) 'Eff1, Eff2, Eff3, Isim, BegYr, EndYr, Dep1, Dep2,
      + Dep3, Tgdep1, Tgdep2, Tgdep3'
-         WRITE(78,'(3F26.15,1x,3(I3,1x),10(F10.6,1x))') 
+         WRITE(78,'(3F26.10,1x,3(I3,1x),10(F10.6,1x))') 
      +    (ConstantEff(Ispec),Ispec=1,NSpec),Isim,
      +    BaseYr+1,DeplYr(itarg),(FinDepRecord(Ispec),Ispec=1,NSpec),
      +    (TargetDeplVec(itarg,Ispec),Ispec=1,NSpec)
@@ -937,7 +938,7 @@ C      Find the effort levels
            mytarg = TargetDeplVec(itarg,:)
            CALL GetEffLev(mystyr,myendyr,mytarg)
            !Write out ConstantEff levels to ConstantEff.All
-           WRITE(78,'(3F26.15,1x,3(I3,1x),10(F10.6,1x))') 
+           WRITE(78,'(3F26.10,1x,3(I3,1x),10(F10.6,1x))') 
      +  (ConstantEff(Ispec),Ispec=1,Nspec),Isim,mystyr,myendyr,
      +  (FinDepRecord(Ispec),Ispec=1,Nspec),
      +  (mytarg(Ispec),Ispec=1,Nspec)
@@ -1119,8 +1120,9 @@ C       Conduct stock assessments
 12000  CONTINUE 
    
       ! Between iteration, save the 
-      cstring = 'Saveresults '//cIsim//
-      CALL SYSTEM("Saveresults")
+      write(cIsim, '(I2)') Isim
+      cstring = 'Saveresults '//cIsim
+      CALL SYSTEM(cstring)
        
 10000 CONTINUE !Ends the Isim = 1,Nsim main loop
 
@@ -2215,6 +2217,169 @@ C
 
       RETURN
       END SUBROUTINE ProjForward
+
+C
+C ===========================================================================
+C    
+	  
+      SUBROUTINE ProjForwardInd(Kvals, Ispec)
+C
+C	This subroutine basically uses the results from InitProj and calculates the spawning stock number at age based on the number at age per recruit 
+C	Steps:
+C		1. first time it calculates the recruitment value			 
+C		2. multiplies the above with the spawning stock number at age (calculated in InitPorj)
+C		3. the stock recruit relationship
+C		4. then project forward the SSN and recruitment using the ProjYr subroutine
+C      
+	USE ShareDataRatioSubs
+      IMPLICIT NONE
+C
+C     Global variables
+      REAL*8 KVals(MaxSpec) 
+C
+C     Local variables 
+      INTEGER ISpec,IBlkNS,IBlkEW,Isex,Iage,Year,Iarea
+      REAL*8 TheEffort(10)
+      REAL*8 Recruits,SSBT,SSBT2,Rec2
+      REAL(8),DIMENSION(Nsex,0:MaxAge) :: Nsums
+C
+C	Reset larval abundance
+C	Larvae = 0
+      Nsums = 0           ! sum of N over all ages
+      NatAgeCompact(Ispec,:,MinPYr,:,:)=0
+      R0forSS3 = 0
+C     Set up initial conditions given the KVals
+C
+C      Calculate recruitment (SSBEq is SSB per recruit, Kvals is SSB total 
+C         => Recruits*SSBEq = Kvals => Recruits = Kvals/SSBEq)
+       Recruits = Kvals(Ispec) / SSBEq(ISpec)
+
+C      Copy from N to Temp1
+       DO 11000 Isex = 1,Nsex
+        DO 11000 IBlkNS = 1,NNSBlock
+         DO 11000 IBlkEW = 1,NEWBlock
+          DO 11100 Iage = 0,Amax(Ispec)
+           N(Ispec,Isex,IBlkNS,IBlkEW,MinPyr,Iage) = Recruits *
+     +        Neq(Ispec,Isex,IBlkNs,IBlkEW,Iage)
+      !Carey adds in a non-spatial calculation of numbers at age at the beg. of year
+           NatAgeCompact(Ispec,Isex,MinPYr,Iage,0) = NatAgeCompact
+     +(Ispec,Isex,MinPYr,Iage,0)+N(Ispec,Isex,IBlkNS,IBlkEW,MinPyr,Iage)
+           Nsums(Isex,Iage) = Nsums(Isex,Iage) + 
+     +       N(Ispec,Isex,IBlkNS,IBlkEW,MinPYr,Iage)
+11100     CONTINUE     
+          RecSum(Ispec,MinPyr,IblkNS,IblkEW) =
+     +      N(ISpec,1,IBlkNS,IBlkEW,MinPYr,0)  ! This just records the number of recruits when the model is in unfished equilibrium, but doesn't get used anywhere, except to write the info to a file.
+          R0forSS3(Ispec) = R0forSS3(Ispec) + 
+     +      N(Ispec,Isex,IBlkNS,IBlkEW,MinPyr,0)
+11000  CONTINUE        
+C
+!Right here add a loop for figuring out R0forSS3 by assessment area. Use MinNS,MinEW,...
+      R0forSS3B = 0
+        DO 11144 Isex = 1,Nsex
+         DO 11144 Iarea = 1,Narea
+          DO 11133 IBlkNS = MinNS(Iarea),MaxNS(Iarea)
+            DO 11133 IBlkEW = MinEW(Iarea),MaxEW(Iarea)
+           R0forSS3B(Ispec,Iarea) = R0forSS3B(Ispec,Iarea) +
+     +     N(Ispec,Isex,IBlkNS,IBlkEW,MinPYr,0)
+11133   CONTINUE
+11144   CONTINUE
+
+C      Calculate initial mature
+       SSBT = 0
+       DO 12000 Iarea = 1,Narea
+        SpBioArea(Ispec,Iarea,MinPYr) = 0
+        DO 12100 IBlkNS = MinNS(Iarea),MaxNS(Iarea)
+         DO 12100 IBlkEW = MinEW(Iarea),MaxEW(Iarea)
+          SSBT2 = 0
+          DO 12110 Iage = 1,Amax(Ispec)    
+           SSBT2=SSBT2+N(Ispec,1,IBlkNS,IBlkEW,MinPYr,Iage) * 
+     +       Fec(Ispec,Iage)
+12110     CONTINUE 
+          SSBT = SSBT + SSBT2
+          SpBio(Ispec,IBlkNS,IBlkEW,MinPYr) = SSBT2
+          SpBioArea(Ispec,Iarea,MinPyr) = SpBioArea(Ispec,Iarea,MinPyr) 
+     +      + SSBT2
+12100   CONTINUE
+12000  CONTINUE           
+       SPBioTot(Ispec,MinPYr) = SSBT
+C
+C      Stock-recruitment parameters - 1 GLOBAL density dependence
+       IF (SrType(Ispec).EQ.1) THEN
+        DO 13100 IBlkNS = 1,NNSBlock
+         DO 13100 IBlkEW = 1,NEWBlock
+          Rec2 = Recruits*Neq(Ispec,1,IBlkNs,IBlkEW,0)
+          SRR0(Ispec,IBlkNS,IblkEW) = Rec2
+          SRAlpha(Ispec,IBlkNS,IblkEW) = 
+     +        (1-Steep(Ispec))/(4*Steep(Ispec)*Rec2)
+          SRBeta(Ispec,IBlkNS,IblkEW) = 
+     +        (5*Steep(Ispec)-1)/(4*Steep(ISpec)*Rec2)     
+13100   CONTINUE         
+       ENDIF
+C
+C      Stock-recruitment parameters - 2 LOCAL density dependence
+       IF (SrType(Ispec).EQ.2) THEN
+        DO 13200 IBlkNS = 1,NNSBlock
+         DO 13200 IBlkEW = 1,NEWBlock
+          Rec2 = Recruits*Neq(Ispec,1,IBlkNs,IBlkEW,0)
+          SRR0(Ispec,IBlkNS,IblkEW) = Rec2
+          SRAlpha(Ispec,IBlkNS,IblkEW) = 
+     +        (1-Steep(Ispec))/(4*Steep(Ispec)*Rec2)
+          SRBeta(Ispec,IBlkNS,IblkEW) = 
+     +        (5*Steep(Ispec)-1)/(4*Steep(ISpec)*Rec2)     
+13200   CONTINUE         
+       ENDIF
+C
+C      Stock-recruitment parameters - 3 LOCAL density dependence
+       IF (SrType(Ispec).EQ.3) THEN
+        DO 13300 IBlkNS = 1,NNSBlock
+         DO 13300 IBlkEW = 1,NEWBlock
+          Rec2 = Recruits*Neq(Ispec,1,IBlkNs,IBlkEW,0)
+          SRR0(Ispec,IBlkNS,IblkEW) = Rec2
+          SRAlpha(Ispec,IBlkNS,IblkEW) = 
+     +        (1-Steep(Ispec))/(4*Steep(Ispec)*Rec2)
+          SRBeta(Ispec,IBlkNS,IblkEW) = 
+     +        (5*Steep(Ispec)-1)/(4*Steep(ISpec)*Rec2)     
+13300   CONTINUE         
+       ENDIF
+C
+C      Stock-recruitment parameters - 4 LOCAL and GLOBAL density dependence
+       IF (SrType(Ispec).EQ.4) THEN
+        DO 13400 IBlkNS = 1,NNSBlock
+         DO 13400 IBlkEW = 1,NEWBlock
+          Rec2 = Recruits*Neq(Ispec,1,IBlkNs,IBlkEW,0)
+          SRR0(Ispec,IBlkNS,IblkEW) = Rec2
+          SRAlpha(Ispec,IBlkNS,IblkEW) = 
+     +        (1-Steep(Ispec))/(4*Steep(Ispec)*Rec2)
+          SRBeta(Ispec,IBlkNS,IblkEW) = 
+     +        (5*Steep(Ispec)-1)/(4*Steep(ISpec)*Rec2)     
+13400   CONTINUE         
+       ENDIF
+C
+C     Project forward
+      Closed = 1
+      DO 20000 Year = MinPYr,BaseYr
+C      
+C      Impose MPA
+       IF (Year.EQ.MPAYear) THEN
+        DO 21100 Iarea = 1,NClosedAreas
+         DO 21110 IblkNS = MinCNS(Iarea),MaxCNS(Iarea)
+          DO 21110 IBlkEW = MinCEW(Iarea),MaxCEW(Iarea)
+           Closed(IBlkNS,IBlkEW) = 0
+21110    CONTINUE
+21100   CONTINUE          
+       ENDIF
+C       
+       TheEffort(1) = TotEffort(Year)
+       CALL ProjYrInd(Year,TheEffort,Ispec)
+      
+	IF (WriteOpt.EQ.1) THEN  !Write out information during an MSY run
+        CALL Summary2(Year)
+	ENDIF
+
+20000 CONTINUE       
+
+      RETURN
+      END SUBROUTINE ProjForwardInd
 
 C
 C ===========================================================================
@@ -3363,7 +3528,8 @@ C     Local variables
 C
       MinOpt = 1
 	CareyGRD = 1.2
-      X(Ispec) = Qvalseed(Ispec)*NNSBlock*NEWBlock
+      SS=1
+      X(1) = Qvalseed(Ispec)*NNSBlock*NEWBlock
       CALL FIT7(X,SS,1,CareyGRD,Ispec)  
 C     Carey: FIT finds the Qval that produces the specified value for depletion; 
 C     FIT calls FUNK(X) to do this; X = QVal, so in the end SS = FUNK(X) just finds the value of the objective function (SS) that produced the
@@ -3444,11 +3610,12 @@ C     MinOpt=1 means to find q value that leads to specific depletion level
       IF (MinOpt.EQ.1) THEN 
 C
 C      Copy values across
-       IF (X(Ispec).LT.0) RETURN
-       Qval(Ispec) = X(Ispec)
+       IF (X(1).LT.0) RETURN
+       Qval(Ispec) = X(1)
+       Kvals = Kvec
 C
 C      Project forward 
-       CALL ProjForward(Kvals)
+       CALL ProjForwardInd(Kvals,Ispec)
 C
 C      Calculate the objective function
        FUNK3 = 0
@@ -4944,7 +5111,7 @@ C-----------------------------------------------------
      +: 1+ CPUE; -1 SSB; -2 Recruitment"/100(I2,1x))
 6073  FORMAT("# Number of years for each index"/100(I3,1x))
 6074  FORMAT("# The abundance data (series, year)")
-6081  FORMAT(I2,1x,I4,1x,F15.4,1x,F5.3)     
+6081  FORMAT(I2,1x,I4,1x,F17.2,1x,F5.3)     
 609   FORMAT(/"# Length-frequency data"/
      +       "# Number of fleets"/I2/
      +       "# lenf_fleets: 1=fishery, 2 = survey "/I2/

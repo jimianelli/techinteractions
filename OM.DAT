@@ -16,7 +16,7 @@ Carrying Capacity (SSB total)           0800000000.0   5200000000.0   1000000000
 Natural mortality                       0.34 0.38 0.12
 Maximum Age                             20   20   40  
 Plus groups? (1=Yes; 0=No)              1 
-Initial Dep (used to FindQVals)         50.0   55.0   65.0
+Initial Dep (used to FindQVals)         50.0   50.0   50.0
 Final Dep (out of date; see below)      40.0   40.0   40.0   
 Does Qval equal 1 (DR project)?         0
 Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
@@ -114,10 +114,10 @@ Total Effort (Year, effort)
   45  1.000
   46  1.000
   47  1.000
-  48  0.900				! 0.9
-  49  0.800				! 0.8
-  50  0.700				! 0.7
-  51  0.600				! 0.6
+  48  1.000				! 0.9
+  49  1.000				! 0.8
+  50  1.000				! 0.7
+  51  1.000				! 0.6
      
 Specifications for the closed areas
 Number of closed areas                  0
