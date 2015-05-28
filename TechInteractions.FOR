@@ -615,6 +615,7 @@ C     Debugging variables:
       !TestMVN                    - Will equal "Correlation" if MVN ran incorrectly.
       
       REAL(8),DIMENSION(30) :: Bycatch
+      REAL(8) :: Bycatch_val
       
       ! Added the bycatch information to be read in from outside fortran (created within R for example. 
       ! We assume that the quota setting for the halibut bycatch is performed outside and that we do not have any control) 
@@ -674,6 +675,7 @@ C	Time counter variables
 C	INTEGER Isim
       CHARACTER*1 MYINDC
 !     CHARACTER*2 HistChar1,HistChar2,HistChar3
+      CHARACTER*21 cstring
       INTEGER Iass,U,VV,i,iu,TheSim,VALS(MaxPYr)
       REAL*8 X(100),SS
       REAL*8 FUNK 
@@ -745,7 +747,6 @@ C	Output Files
 !	DO 10001 SuperSim = 1,LastSuperSim
 
 C     Open output files 
-      OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
       OPEN(UNIT=14,FILE="results/SUMM2.OUT")
       OPEN(UNIT=15,FILE="results/SUMM3.OUT")
       OPEN(UNIT=16,FILE="results/SUMM4.OUT")
@@ -1085,23 +1086,27 @@ C       Conduct stock assessments
         ! Save into a file the realized catch for each species
         OPEN(UNIT=1112,FILE = "catches.out")
         READ(1112,*) 
-        READ(1112,*) (QuotaAct(II),II=1,MaxSpec)          
+        READ(1112,*) (QuotaAct(II),II=1,MaxSpec), Bycatch_val          
         CLOSE(1112)    
-        ! there is a change in scale between the fortran model and tech int so changed them
-        Do 2015 II=1,MaxSpec
-            QuotaAct(II) = QuotaAct(II)*1000
-2015    CONTINUE 
+
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out")
-            write(1113,*) "Cod    Pollock    Yellowfin_sole"
-            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
+            write(1113,*) "Cod    Pollock    Yellowfin_sole    Bycatch"
+            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+     +   Bycatch_val 
             CLOSE(1113)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out", access='APPEND')
-            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
+            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+     +   Bycatch_val 
             CLOSE(1113)
-        ENDIF          
+        ENDIF
+        ! there is a change in scale between the fortran model and tech int so changed them
+        Do 2015 II=1,MaxSpec
+            QuotaAct(II) = QuotaAct(II)*1000
+2015    CONTINUE 
+        
         
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
@@ -1113,6 +1118,10 @@ C       Conduct stock assessments
 
 12000  CONTINUE 
    
+      ! Between iteration, save the 
+      cstring = 'Saveresults '//cIsim//
+      CALL SYSTEM("Saveresults")
+       
 10000 CONTINUE !Ends the Isim = 1,Nsim main loop
 
 C==========================================================
@@ -1219,6 +1228,7 @@ C     Conduct stock assessments
       DO 5555 II=1, Nspec
           TAC(II) = QuotaAct(II)/sum(QuotaAct)*1700000
 5555  CONTINUE
+      OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
       WRITE(777,'(10(F15.5,1x))') TAC, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
@@ -1238,6 +1248,7 @@ C     Conduct stock assessments
       ENDIF
       
       if (MS_HCR.EQ.1) THEN 
+      OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
       WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
@@ -1317,6 +1328,7 @@ C     Conduct stock assessments
             CLOSE(3111)
         ENDIF
 
+      OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
       WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       ENDIF 
@@ -7450,17 +7462,19 @@ C 10. KO: removed two lines from "deletecabstuff.bat"
 C 11. KO: added fleet for EstS --> but only using fleet 1 in the rest of the code (05-15-15)
 
 C ---------------------------
-C Modification May 2015
+C Modification May 2015, week2
 C changed "FinDeplRecord" --> done
 C changed "ConstantEff" (need to determine for each species independently) --> done 
 C changed "ConstantEffvec" (need to determine for each species independently) --> done
 C added FUNK3, FIT7, ProjYrInd to accomodate the multispecies aspect of the code (run the code for each species) --> done
 C now CAB estimate recdevs from max(1, first_catch - one_generation_time)
+
 C line 927: commented out      SS = FUNK(ConstantEffVec)
 C changed AFSC_SPR --> it was using the continuous form of equation for survival and not the discrete version the catch in the model is based off
-C                  --> this means that the F for F35% or F40% (determined using AFSC_SPR) was not in the same scale as the F=qE                 
-C Added two more lines in OM.dat: one controls the quota allocation method and the other controls how the fishing strategy changes (these are options that are only used for the NON P* study case)
-C 
+C                  --> this means that the F for F35% or F40% (determined using AFSC_SPR) was not in the same scale as the F=qE 
+C                  --> done!
+
+C FindquotaF is producing a quota that is weird
 
 
 
