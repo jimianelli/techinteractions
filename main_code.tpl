@@ -48,12 +48,22 @@ DATA_SECTION
 
     !! ad_comm::change_datafile_name("TAC.dat");
 	init_vector TAC(1,Nb_species)
- 	
+ 
+	int dummy;
+	!! dummy=0;
+	
  LOCAL_CALCS
   // to update the TAC value within the b1 constraint vector
-  for (int it=1;it<=Nb_species;it++){
-  b1(it) = TAC(it);
-  }
+   for (int it=1;it<=Nb_species;it++){
+   b1(it) = TAC(it);
+	 if(TAC(it)>0) dummy+=1;
+   }
+  // If it happens that the TAC for one species becomes NULL i.e below MSST then lower the bounds for the constraints
+	 if(dummy<Nb_species){
+		for (int it=1;it<=(nb_b2);it++){
+		b2(it) = 0;
+		}	
+	 }
  END_CALCS
 	//!!cout << "b1_counds: " << b1 << endl; exit(1);
 	
