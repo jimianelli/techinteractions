@@ -749,7 +749,7 @@ C	Output Files
 
 C     Open output files 
       OPEN(UNIT=14,FILE="results/SUMM2.OUT")
-      OPEN(UNIT=15,FILE="results/SUMM3.OUT")
+      OPEN(UNIT=15,FILE="results/SUMM3.OUT",ACCESS='APPEND')
       OPEN(UNIT=16,FILE="results/SUMM4.OUT")
       OPEN(UNIT=17,FILE="results/SUMM5.OUT")
       OPEN(UNIT=18,FILE="results/SUMM6.OUT")
@@ -761,9 +761,9 @@ C     Carey: Add a file for analyzing movement characteristics
       OPEN(UNIT=29,FILE="results/SUMM10.OUT")
       OPEN(UNIT=32,FILE="results/SUMM11.OUT")
       OPEN(UNIT=33,FILE="results/SUMM12.OUT")
-      OPEN(UNIT=34,FILE="results/SUMM13.OUT")
-      OPEN(UNIT=35,FILE="results/SUMM14.OUT")
-	OPEN(UNIT=38,FILE="results/SUMM17.OUT")
+      OPEN(UNIT=34,FILE="results/SUMM13.OUT",ACCESS='APPEND')
+      OPEN(UNIT=35,FILE="results/SUMM14.OUT",ACCESS='APPEND')
+	OPEN(UNIT=38,FILE="results/SUMM17.OUT",ACCESS='APPEND')
       OPEN(UNIT=22,FILE="results/SAVE.ALL")
 	OPEN(UNIT=40,FILE="results/SUMM19.OUT")
 	OPEN(UNIT=41,FILE="results/SUMM20.OUT")
@@ -772,7 +772,7 @@ C     Carey: Add a file for analyzing movement characteristics
       OPEN(UNIT = 1600,FILE = "results/SurveyCPUE.OUT")
       OPEN(UNIT = 78,FILE = 'results/SaveConstantEff.All')
       OPEN(UNIT = 79,FILE = 'results/Move4SS.OUT')
-      OPEN(UNIT = 260,FILE="results/RECRUITS.OUT")
+      OPEN(UNIT = 260,FILE="results/RECRUITS.OUT",ACCESS='APPEND')
     
       !Pstar-related files
       OPEN(UNIT = 400,FILE = "results/Pstar1.OUT") !FDistn,FOFL information by vector, configuration, year,simulation
@@ -4214,9 +4214,9 @@ C     Open file
 
 C     Write out the total effort not divided by blocks (according to Carey)
 C     GlobalEffort def'n has to be changed if spatial effort blocks become activated.
-	if (Year.LE.BaseYr) WRITE(38,'(I2,1x,I2,1x,F15.5)') Ispec, Year, 
+	if (Year.LE.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
      +     GlobalEffort(Year)
-	if (Year.GT.BaseYr) WRITE(38,'(I2,1x,I2,1x,F15.5)') Ispec, Year, 
+	if (Year.GT.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
      +     ConstantEff(Ispec)
                
        DO 11000 Iarea = 1,Narea
@@ -4238,17 +4238,17 @@ C     GlobalEffort def'n has to be changed if spatial effort blocks become activ
          IF (SPBio(Ispec,IBlkNs,IBlkEW,MinPyr).GT.MaxSSB)
      +    MaxSSB = SPBio(Ispec,IBlkNs,IBlkEW,MinPyr) 
 12000  CONTINUE     
-       WRITE(15,601) ISpec,Year,
+       WRITE(15,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year)
      +       /SPBio(Ispec,IBlkNs,IBlkEW,MinPyr)*100,IBlkEW=1,NEWBlock),
      +        IBlkNS=1,NNSBlock)
-       WRITE(17,601) ISpec,Year,
+       WRITE(17,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year)/MaxSSB*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
-       WRITE(34,601) ISpec,Year,
+       WRITE(34,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year),
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
-       WRITE(35,601) Ispec,Year,
+       WRITE(35,601) Isim, Ispec,Year,
      +      ((CatArea(Ispec,IBlkNS,IBlkEW,Year),
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
        WRITE(16,601) Ispec,Year,
@@ -4279,7 +4279,7 @@ C     +	 OR.Year.EQ.60.OR.Year.EQ.-50) THEN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      +		(((N(Ispec,Isex,IBlkNS,IBlkEW,Year,Iage),
      +		 IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock),Isex = 1,Nsex)
 12001   CONTINUE
-         WRITE(260,624) ISpec,Year,
+         WRITE(260,624) Isim,ISpec,Year,
      +		(((N(Ispec,Isex,IBlkNS,IBlkEW,Year,0),
      +		 IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock),Isex = 1,Nsex)
 C       ENDIF  
@@ -4370,7 +4370,7 @@ C     Carey is adding 2 files, one for catch cpue and one for survey cpue
 
       RETURN
 600   FORMAT(1x,I4,10(3(1x,F8.2)))
-601   FORMAT(1x,I2,1x,I4,1x,200(F15.2,1x))
+601   FORMAT(1x,2I2,1x,I4,1x,200(F15.2,1x))
 602   FORMAT(1x,I2,1x,I4,1x,200(F8.4,1x))
 612   FORMAT(1x,I2,1x,I2,1x,I2,1x,200(F8.6,1x))
 613   FORMAT(1x,I2,1x,I4,1x,I4,1x,200(F20.12,1x))
@@ -4382,11 +4382,11 @@ C     Carey is adding 2 files, one for catch cpue and one for survey cpue
 618   FORMAT(1x,I2,1x,I4,1x,2(F12.2,1x))
 619	FORMAT(2(1x,I4),1x,F8.6,1x,F10.3,1x,F8.6,1x,2(F8.6,1x),F10.3)
 620   FORMAT(1x,I4,1x,2(F15.4))
-621	FORMAT(1x,I4,1x,3(I2,1x),2(F25.7,1x))
+621	FORMAT(1x,2I4,1x,3(I2,1x),2(F25.7,1x))
 622   FORMAT(1x,I2,1x,I4,1x,F10.3,1x,I4)
 !Carey added to output CPUE data (Catch and Survey CPUE)
 623   FORMAT(2(I4,1x),2(I2,1x),F18.8)
-624   FORMAT(1x,I2,1x,I4,1x,200(F20.5,1x))
+624   FORMAT(1x,2I2,1x,I4,1x,200(F20.5,1x))
 !Sim,Yr,Ispec,Iarea,CPUE
       END SUBROUTINE Summary2
 
@@ -4431,14 +4431,14 @@ C     Open file
          IF (SPBio(Ispec,IBlkNs,IBlkEW,MinPyr).GT.MaxSSB)
      +    MaxSSB = SPBio(Ispec,IBlkNs,IBlkEW,MinPyr) 
 12000  CONTINUE     
-       WRITE(15,601) ISpec,Year,
+       WRITE(15,601) Isim,ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year)
      +       /SPBio(Ispec,IBlkNs,IBlkEW,MinPyr)*100,IBlkEW=1,NEWBlock),
      +        IBlkNS=1,NNSBlock)
-       WRITE(17,601) ISpec,Year,
+       WRITE(17,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year)/MaxSSB*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
-       WRITE(34,601) ISpec,Year,
+       WRITE(34,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year),
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
        WRITE(16,601) ISpec,Year,
@@ -4449,7 +4449,7 @@ C     Open file
       WRITE(14,600) Year,(Val(II),II=1,Nspec*4),0.0d0
       RETURN
 600   FORMAT(1x,I4,10(3(1x,F8.2)))
-601   FORMAT(1x,I2,1x,I4,1x,200(F8.2,1x))
+601   FORMAT(1x,2I2,1x,I4,1x,200(F8.2,1x))
 602   FORMAT(1x,I2,1x,I4,1x,200(F8.4,1x))
 616   FORMAT(1x,I2,1x,I4,1x,3(F10.6),1x,2(F10.3),1x,2(I4))
 
@@ -4726,7 +4726,7 @@ C     Local variables
       CHARACTER*21 TstOut
       INTEGER Nrel1(10),Nrel2(10),Nage1(10),Nage2(10),EstFleet,Iarea
       INTEGER Iage,Isex,Itime,Yr,Ilen,II,Ioff,Iarea1a,Iarea2a,OutUnit
-	INTEGER Addone,CArea1
+	INTEGER Addone,CArea1,Firstcatch
       CHARACTER*2 cIsim,cIYr,cIconfig,cIspec
       CHARACTER*21 cstring
       
@@ -4757,12 +4757,12 @@ C
 C     Pre-set inputs (N fleets, 2 sexes, dummy lengths (44,2), age-specific
 C     selectivity (1), simple weight-at-age calculate (0) 
       WRITE(99,601) 1,Year2-Year1+1,1,EstFleet,EstFleet,1,1,
-     + 2,AmaxEst(Ispec),
-     + 44,6,2,1,0 !return to this line and fill in new entries that make logical sense
+     + 2,AmaxEst(Ispec),NLengthBins(ISpec),
+     + 1,LengthBinIntervals(Ispec),1,0 !return to this line and fill in new entries that make logical sense
 C     Dummy growth parameters - not used 
       WRITE(99,602) Lamin(Ispec,1),Lamin(Ispec,2),Linf(Ispec,1),
      +              Linf(Ispec,2),kpar(ISpec,1),kpar(Ispec,2),
-     +              0.02d0,0.02d0,0.09d0,0.09d0,
+     +              0.01d0,0.01d0,0.01d0,0.01d0,      ! The CV of growth is an input in CAB but not used in the oprating model so keep them small
      +              Apar(Ispec,1),Bpar(Ispec,1)
       WRITE(99,603)
       WRITE(99,6031) (WghtBeg(Ispec,1,Iage,0),Iage=0,AmaxEst(Ispec))
@@ -4829,7 +4829,7 @@ C     +  (Nrel2(Iarea),Iarea=1,EstFleet)
 C
 C     Dummy length data (not used): may want to change this for tech interact project at some point.
       WRITE(99,609) 1,1,1,1
-      WRITE(99,6091) 1,1,0,0.0d0,0.0d0,(1.0d0,ILen=1,44)
+      WRITE(99,6091) 1,1,0,0.0d0,0.0d0,(1.0d0,ILen=1,NLengthBins(ISpec))
 C
       Nage1 = 0
       Nage2 = 0
@@ -4891,7 +4891,14 @@ C       The control file
      +      IestSigmaR(Ispec)**2.0+0.000001
 ! End of Carey's change.
 !------------------------------------------------------------------------
-      WRITE(99,703) max(1, 32-AMax(Ispec)),
+      Firstcatch=1
+      DO 3333 II=Year1, Year2
+          IF(TotEffort(II).EQ.0) THEN 
+              Firstcatch=Firstcatch+1
+          ENDIF
+3333  CONTINUE
+      
+        WRITE(99,703) max(1, Firstcatch-AMax(Ispec)),
      +  (Year2-Year1+1)-IestIgR(Ispec), -10.0d0,10.0d0,2
 C     The line below makes the program run for just one year to id problems (note by Carey)
 C     WRITE(99,703) 2,2,-10.0d0,10.0d0,2

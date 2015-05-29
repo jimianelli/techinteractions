@@ -1,7 +1,7 @@
-Number of simulations                   10
+Number of simulations                   5
 Operating model only (no assessments)   0
 Use old values (1=Yes)                  0
-Number of projection years (MSE)        30
+Number of projection years (MSE)        1
 Base year for initial depletion         51
 Base year for final depletion           51
 First yr fishing (NA if finding Qvals)  1
@@ -38,14 +38,14 @@ Growth parameters
  Linf (M)                               92.3  70.6  33.7 
  K (F)                                  0.240 0.176 0.137
  K (M)                                  0.240 0.176 0.161
- To (F)                                 0.00 0.00 0.11 
- To (M)                                 0.00 0.00 -0.11  
+ To (F)                                 0.00 0.00 0.00 
+ To (M)                                 0.00 0.00 0.00  
  a (F)                                  0.000006 0.000007 0.000005
  a (M)                                  0.000006 0.000007 0.000009
  b (F)                                  3.160 3.018 3.227
  b (M)                                  3.160 3.018 3.081
- Length Bin Intervals                   2    2    2          !Defined here b.c. of length calcs in the readspec function
- Number of length bins                  47   36   20          
+ Length Bin Intervals                   1    1    1          !Defined here b.c. of length calcs in the readspec function
+ Number of length bins                  93   71   38          
 Maturity parameters 
  L50                                    4.88  3.69  10.27
  L95                                    7.93  5.75  13.11
@@ -71,42 +71,42 @@ Total Effort (Year, effort)
    2  0.000
    3  0.000
    4  0.000
-   5  0.000
-   6  0.000
-   7  0.000
-   8  0.000
-   9  0.000
-  10  0.000
-  11  0.000
-  12  0.000
-  13  0.000
-  14  0.000
-  15  0.000
-  16  0.000
-  17  0.000
-  18  0.000
-  19  0.000
-  20  0.000
-  21  0.000
-  22  0.000
-  23  0.000
-  24  0.000
-  25  0.000
-  26  0.000
-  27  0.000
-  28  0.000
-  29  0.000
-  30  0.000
-  31  0.000
-  32  0.100
-  33  0.200
-  34  0.300
-  35  0.400
-  36  0.500
-  37  0.600
-  38  0.700
-  39  0.800
-  40  0.900
+   5  0.030
+   6  0.060
+   7  0.090
+   8  0.120
+   9  0.150
+  10  0.180
+  11  0.210
+  12  0.240
+  13  0.270
+  14  0.300
+  15  0.330
+  16  0.360
+  17  0.390
+  18  0.420
+  19  0.450
+  20  0.480
+  21  0.510
+  22  0.540
+  23  0.570
+  24  0.600
+  25  0.630
+  26  0.660
+  27  0.690
+  28  0.720
+  29  0.750
+  30  0.780
+  31  0.810
+  32  0.840
+  33  0.870
+  34  0.900
+  35  0.930
+  36  0.960
+  37  0.990
+  38  1.000
+  39  1.000
+  40  1.000
   41  1.000
   42  1.000
   43  1.000
@@ -114,10 +114,10 @@ Total Effort (Year, effort)
   45  1.000
   46  1.000
   47  1.000
-  48  1.000				! 0.9
-  49  1.000				! 0.8
-  50  1.000				! 0.7
-  51  1.000				! 0.6
+  48  1.000
+  49  1.000
+  50  1.000
+  51  1.000
      
 Specifications for the closed areas
 Number of closed areas                  0
@@ -134,14 +134,14 @@ Upper limit (EW)                        1   1
 
 Specifications for data generation
 Data are deterministic (1=Yes)          0
-Coefficient of variation (CPUE)         0.4      
-Effective sample size (Catch)           100      (Pre-MPA)
-Effective sample size (Catch)           100      (With-MPA)
-First year with survey data             32
+Coefficient of variation (CPUE)         0.2      
+Effective sample size (Catch)           1000      (Pre-MPA)
+Effective sample size (Catch)           1000      (With-MPA)
+First year with survey data             5
 Frequency of surveys                    1
-Coefficient of variation (surveys)      0.2
-Effective sample size (surveys)         100      (Pre-MPA)
-Effective sample size (surveys)         100      (With MPA)
+Coefficient of variation (surveys)      0.1
+Effective sample size (surveys)         1000      (Pre-MPA)
+Effective sample size (surveys)         1000      (With MPA)
 No Surveys in closed areas (1=Yes)      0
 
 Number of pre-history assessments       0
