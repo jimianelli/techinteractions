@@ -4981,9 +4981,13 @@ C     Summation limits for aggregating results
       Write(cIsim,'(I2)') Isim
       Write(cIYr,'(I2)') GlobalProjYr
       Write(cIconfig,'(I2)') Iconfig+1
-      cstring = 'SaveCabStuff '//cIspec//' '//cIYr//' '//cIsim//' '
+      IF (UsePstar.EQ.1) THEN cstring = 'SaveCabStuffPstar '//cIspec//' '//cIYr//' '//cIsim//' '
      +//cIconfig
-      
+      ENDIF
+      IF (UsePstar.EQ.0) THEN cstring = 'SaveCabStuff '//cIspec//' '//cIYr//' '//cIsim//' '
+     +//cIconfig
+      ENDIF         
+          
       !put a stop to further processing if the .cor file doesn't actually exist.
       IF (UsePstar.EQ.1) THEN
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
@@ -7421,6 +7425,7 @@ C
       
       !----------------------------------------------------------------
       !Pstar1.OUT (UNIT = 400):
+      IF (UsePstar.EQ.1) THEN
       IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
       WRITE(400,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
      + FDistn SSFDistn
@@ -7438,7 +7443,8 @@ C
      +             TrueF(Ispec,IYear-1),SSTrueF(Ispec,IYear-1),
      +             TrueFOFL(Ispec,IYear-1),
      +             EstimatedP,Pstar,QuotaAct(Ispec)
-100   CONTINUE
+100   CONTINUE    
+      ENDIF
       !----------------------------------------------------------------
 !         TrueF(Ispec,IYear) = X(1)
 !         SSTrueF(Ispec,IYear) = SS !As a check.      
@@ -7489,6 +7495,7 @@ C
       
       !----------------------------------------------------------------
       !Pstar1.OUT (UNIT = 400):
+      IF (UsePstar.EQ.1) THEN
       IF (IYear.EQ.(FinDepYr+1)) THEN
       WRITE(4000,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
      + FDistn SSFDistn
@@ -7506,6 +7513,7 @@ C
      +             TrueF(Ispec,IYear-1),SSTrueF(Ispec,IYear-1),
      +             TrueFOFL(Ispec,IYear-1)
 100   CONTINUE
+      ENDIF
       !----------------------------------------------------------------
 !         TrueF(Ispec,IYear) = X(1)
 !         SSTrueF(Ispec,IYear) = SS !As a check.      
