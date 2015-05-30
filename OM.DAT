@@ -1,7 +1,7 @@
-Number of simulations                   5
+Number of simulations                   10
 Operating model only (no assessments)   0
 Use old values (1=Yes)                  0
-Number of projection years (MSE)        1
+Number of projection years (MSE)        30
 Base year for initial depletion         51
 Base year for final depletion           51
 First yr fishing (NA if finding Qvals)  1
