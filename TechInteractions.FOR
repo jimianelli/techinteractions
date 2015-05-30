@@ -4871,6 +4871,7 @@ C
 C******************************************************************************************
 C     Iterate over configurations (configs only influence ctl file): loop should run through cab.exe, then call a batch file to rename output within the loop.
       DO 1298 Iconfig = 0,Nconfigs
+C      Iconfig = 0
 C******************************************************************************************
 C       The control file
         OPEN(UNIT=99,FILE="CAB.CTL")
@@ -6478,13 +6479,9 @@ C         EstRec(Ispec,Carea1,yr) = Pred(5)
 50100   CONTINUE   !End loop over years
       
       !Need some lines to skip down to selectivity-at-age reporting in cab.rep
-         Do 541 Istuff = 1,10000
+         Do 541 Istuff = 1,20000
            READ(99,*) SecondStuff
-
-C           IF (FirstStuff.EQ.'Year, SpBio(Year), SpBio(Year)/SpBio(styr)
-C     +,BioOut, Recruit, Hrate ') THEN
-           
-           
+        
            !This needs to be split up into reading in fleet sex age selA as separate dummy variables'
            !just need SecondStuff to equal selA!
            
