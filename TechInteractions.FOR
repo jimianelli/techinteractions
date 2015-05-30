@@ -781,10 +781,11 @@ C     Carey: Add a file for analyzing movement characteristics
       OPEN(UNIT = 4000,FILE = "results/Pstar1_Old.OUT")
       OPEN(UNIT = 4001,FILE = "results/Pstar2_Old.OUT")
       OPEN(UNIT = 4002,FILE = "results/Pstar3_Old.OUT")
-
-      
+     
       WRITE(402,*) "The_following_assessments_didnt_produce_cor_or_MVNn"
       WRITE(402,*) "Isim, GlobalProjYr, Ispec, Iconfig, TestMVN"
+      
+      OPEN(UNIT = 5000,FILE = "results/F_output.OUT")
       !Make character variables of historical assessment years to then string together file names containing info on assessment year
 !      Write(HistChar1,'(I2)') HistAssYr(1)
 !      Write(HistChar2,'(I2)') HistAssYr(2)
@@ -1093,11 +1094,19 @@ C       Conduct stock assessments
         ENDIF
         
         ! Save into a file the realized catch for each species
-        OPEN(UNIT=1112,FILE = "catches.out")
-        READ(1112,*) 
-        READ(1112,*) (QuotaAct(II),II=1,MaxSpec), Bycatch_val          
-        CLOSE(1112)    
-
+        IF(OM_strategy.EQ.0 .OR. OM_strategy.EQ.1) THEN
+            OPEN(UNIT=1112,FILE = "catches.out")
+            READ(1112,*) 
+            READ(1112,*) (QuotaAct(II),II=1,MaxSpec), Bycatch_val          
+            CLOSE(1112)    
+        ENDIF 
+        
+        IF(OM_strategy.EQ.2) THEN 
+            OPEN(UNIT=777,FILE = "TAC.dat")
+            READ(777,*) (QuotaAct(II),II=1,MaxSpec), Bycatch_val          
+            CLOSE(777)    
+        ENDIF    
+                
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out")
             write(1113,*) "Cod    Pollock    Yellowfin_sole    Bycatch"
@@ -1111,11 +1120,13 @@ C       Conduct stock assessments
      +   Bycatch_val 
             CLOSE(1113)
         ENDIF
+
         ! there is a change in scale between the fortran model and tech int so changed them
+        IF(OM_strategy.EQ.0 .OR. OM_strategy.EQ.1) THEN
         Do 2015 II=1,MaxSpec
             QuotaAct(II) = QuotaAct(II)*1000
 2015    CONTINUE 
-        
+        ENDIF
         
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
@@ -1179,6 +1190,7 @@ C This CONTINUE refers to SuperSim = 1,2, which does not optimize, but performs 
       CLOSE(4000)
       CLOSE(4001)
       CLOSE(4002)
+      CLOSE(5000)
 
       total = etime(elapsed)
 	WRITE(*,*)
@@ -3004,7 +3016,7 @@ C     Copy from N to Temp1
      +  NatAgeCompact(Ispec,Isex,Year,Iage,0)*WghtBeg(Ispec,Isex,Iage,0)
 10000 CONTINUE  
         
-        TotalRecruits(:,Year) = 0
+        TotalRecruits(Ispec,Year) = 0
          DO 201 Isex = 1,Nsex
           TotalRecruits(Ispec,Year) = TotalRecruits(Ispec,Year) +
      +     NatAgeCompact(Ispec,Isex,Year,0,0)
@@ -4217,7 +4229,7 @@ C     GlobalEffort def'n has to be changed if spatial effort blocks become activ
 	if (Year.LE.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
      +     GlobalEffort(Year)
 	if (Year.GT.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
-     +     ConstantEff(Ispec)
+     +     EstFOFL(Ispec,1,1)/Qval(Ispec)
                
        DO 11000 Iarea = 1,Narea
          Totcat = Totcat + CatBio(Ispec,Iarea,Year)
@@ -4981,13 +4993,9 @@ C     Summation limits for aggregating results
       Write(cIsim,'(I2)') Isim
       Write(cIYr,'(I2)') GlobalProjYr
       Write(cIconfig,'(I2)') Iconfig+1
-      IF (UsePstar.EQ.1) THEN cstring = 'SaveCabStuffPstar '//cIspec//' '//cIYr//' '//cIsim//' '
+      cstring = 'SaveCabStuff '//cIspec//' '//cIYr//' '//cIsim//' '
      +//cIconfig
-      ENDIF
-      IF (UsePstar.EQ.0) THEN cstring = 'SaveCabStuff '//cIspec//' '//cIYr//' '//cIsim//' '
-     +//cIconfig
-      ENDIF         
-          
+      
       !put a stop to further processing if the .cor file doesn't actually exist.
       IF (UsePstar.EQ.1) THEN
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
@@ -7443,7 +7451,7 @@ C
      +             TrueF(Ispec,IYear-1),SSTrueF(Ispec,IYear-1),
      +             TrueFOFL(Ispec,IYear-1),
      +             EstimatedP,Pstar,QuotaAct(Ispec)
-100   CONTINUE    
+100   CONTINUE
       ENDIF
       !----------------------------------------------------------------
 !         TrueF(Ispec,IYear) = X(1)
@@ -7469,15 +7477,41 @@ C
 
 101   CONTINUE
 
+      !----------------------------------------------------------------
+      !F_output (UNIT 5000): Write out optimization info for estimated F35% and F40% (all configuration-specific)
+      IF (IYear.EQ.(FinDepYr+1).AND.Isim.EQ.1) THEN
+      WRITE(5000,*) 'Isim,IYr,Ispec,Icon,EstFOFL,
+     +EstF35,EstB35,EstSPR35,
+     +EstF40,EstB40,EstSPR40,
+     +TrueF35,TrueB35,TrueSPR35,
+     +TrueF40,TrueB40,TruSPR40'
+      WRITE(5000,*) Nsim,NProjYr,Nspec,Nconfigs
+      ENDIF
       
+      DO 102 Ispec = 1,Nspec
+          DO 102 Iconfig = 1,Nconfigs
+      WRITE(5000,3) Isim,IYear-1,Ispec,Iconfig,EstFOFL(Ispec,Iconfig,1),
+     +EstF35(Ispec,Iconfig),EstB35(Ispec,Iconfig),
+     +EstSPR35(Ispec,Iconfig),
+     +EstF40(Ispec,Iconfig),EstB40(Ispec,Iconfig),
+     +EstSPR40(Ispec,Iconfig),
+     +TrueF35(Ispec),TrueB35(Ispec,IYear-1),TrueSPR35(Ispec),
+     +TrueF40(Ispec),TrueB40(Ispec,IYear-1),TrueSPR40(Ispec)
+
+102   CONTINUE
+
+       
       
       !----------------------------------------------------------------
       
-1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.5,1x,F17.10,1x,F17.10,1x,F20.5,
+1     FORMAT(5(1x,I6),1x,F17.10,1x,F20.2,1x,F17.10,1x,F17.10,1x,F20.2,
      +1x,F17.10,2(1x,F15.12),1x,F15.5)
-2     FORMAT(4(1x,I4),8(1x,F10.8,1x,F10.4))
-!3     FORMAT(20(25x,1x))
-
+2     FORMAT(4(1x,I6),1x,F15.10,1x,F20.2,1x,F15.10,1x,F15.10,1x,F15.10,
+     +1x,F20.2,6(1x,F15.10))
+3     FORMAT(4(1x,I6),1x,F15.10,1x,F15.10,1x,F20.2,1x,F15.10,1x,
+     +F15.10,1x,F20.2,1x,F15.10,1x,F15.10,1x,F20.2,1x,F15.10,1x,
+     +F15.10,1x,F20.2,1x,F15.10,1x)
+     
       END SUBROUTINE SummaryPstar
 
 C
