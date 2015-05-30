@@ -1122,11 +1122,11 @@ C       Conduct stock assessments
         ENDIF
 
         ! there is a change in scale between the fortran model and tech int so changed them
-        IF(OM_strategy.EQ.0 .OR. OM_strategy.EQ.1) THEN
+C        IF(OM_strategy.EQ.0 .OR. OM_strategy.EQ.1) THEN
         Do 2015 II=1,MaxSpec
             QuotaAct(II) = QuotaAct(II)*1000
 2015    CONTINUE 
-        ENDIF
+C        ENDIF
         
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
