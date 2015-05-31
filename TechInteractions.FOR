@@ -7138,7 +7138,7 @@ C
       ii = 0
       EstAvgRec = 0.0
       DO 1004 Iyr = 1,(GlobalProjYr-1)        !This will change when using actual years.
-        EstAvgRec = EstAvgRec + Recvec(Iyr)
+        EstAvgRec = EstAvgRec + Recvec(Iyr)/2 ! Need to consider only the female Recruits (50-50 male and female)
         ii = ii+1
 1004  CONTINUE 
       EstAvgRec = EstAvgRec/ii
@@ -7276,7 +7276,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       X(1) = EstF35(Ispec,1) !Might as well use a good seed to speed things up
       TheRecVec = 0.0 !Re-initialize after the steps above.
       TheM = M(Ispec)
-      TheFecVec = Fec(1,0:Maxage)
+      TheFecVec = Fec(Ispec,0:Maxage)
       TheRecVec(1:IYear) = TotalRecruits(Ispec,1:IYear)
       TheSelex(1,:) = Sel(Ispec,:)
       TheSelex(2,:) = Sel(Ispec,:)
