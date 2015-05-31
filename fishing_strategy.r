@@ -201,7 +201,7 @@
 
 		
 ##################### Case 1: without the gear constraints:
-Without_gear_constraints <- function(Yr)
+Without_gear_constraints <- function(Yr,max_dk=5, min_dk=0.2)
 {	
 	##### Begin writing the file into a .dat file (not slack variables)
 
@@ -246,8 +246,8 @@ Without_gear_constraints <- function(Yr)
 		TACs <- c(200000, 1400000, 100000, 4575)										# This part is overridden by the fortran code
 		TACs <- c(319123, 2925188, 72241, 4575)										# This part is overridden by the fortran code
 	# Without the double constraint on the bounds (dk,t=1, and dkt-1)
-		Bounds_b1 <- c(rep(0,Nb_species), 1700000, 3*Data_weigthing)		# Need to figure this out
-		Bounds_b2 <- c(1/3*Data_weigthing)
+		Bounds_b1 <- c(rep(0,Nb_species), 1700000, max_dk*Data_weigthing)		# Need to figure this out
+		Bounds_b2 <- c(min_dk*Data_weigthing)
 	# Obj func
 		obj_fun <- as.vector(Data_input%*%price)
 		
@@ -313,31 +313,31 @@ Without_gear_constraints <- function(Yr)
 	# Now run the admb code and copy it to a different name
 	system("admb main_code")
 	system("main_code")
-	file.copy(from="main_code.exe", to=paste0("main_code", Yr, ".exe"))
+	file.copy(from="main_code.exe", to=paste0("main_code", Yr, ".exe"), overwrite=T)
 	
 	# And copy the data file
-	file.copy(from="main_code.dat", to=paste0("main_code", Yr, ".dat"))	
+	file.copy(from="main_code.dat", to=paste0("main_code", Yr, ".dat"), overwrite=T)	
 	
 	# Then copy the "main_code.tpl" file 
 	setwd(wd)
 }	
 	
 
-Without_gear_constraints(2000)
-Without_gear_constraints(2001)
-Without_gear_constraints(2002)
-Without_gear_constraints(2003)
-Without_gear_constraints(2004)
-Without_gear_constraints(2005)
-Without_gear_constraints(2006)
-Without_gear_constraints(2007)
-Without_gear_constraints(2008)
-Without_gear_constraints(2009)
-Without_gear_constraints(2010)
-Without_gear_constraints(2011)
-Without_gear_constraints(2012)
-Without_gear_constraints(2013)
-Without_gear_constraints(2014)
+Without_gear_constraints(2000,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2001,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2002,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2003,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2004,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2005,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2006,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2007,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2008,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2009,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2010,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2011,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2012,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2013,max_dk=5, min_dk=0.2)
+Without_gear_constraints(2014,max_dk=5, min_dk=0.2)
 
 ################# Now create a .dat file that contains information on which fishing strategy is used when
 setwd("F:\\Dropbox\\Postdoc_projects\\techinteractions_test")
