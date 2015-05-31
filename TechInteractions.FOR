@@ -7252,7 +7252,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
           IF ((Depl.GT.0.40)) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
 
-          ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+          ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
      +      (EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
      +      -AFSC_alpha)/(1-AFSC_alpha)
@@ -7314,7 +7314,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         IF ((Depl.GT.0.40)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
 
-        ELSEIF (Depl.LE.0.40.AND.Depl.GT.AFSC_alpha) THEN
+        ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
      +    ((SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear))
      +    -AFSC_alpha)*(1-AFSC_alpha)
