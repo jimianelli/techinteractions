@@ -1279,7 +1279,7 @@ C     Conduct stock assessments
             CALL SYSTEM("main_code.exe")
         ENDIF 
         
-        IF(OM_strategy.EQ.0) THEN 
+        IF(OM_strategy.EQ.1) THEN 
             IF(Current_val.EQ.1) THEN 
                 CALL SYSTEM("main_code2000.exe")
             ENDIF
