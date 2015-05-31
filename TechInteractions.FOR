@@ -1840,7 +1840,7 @@ C------------------------------------------------------------
       IF (EstEffCatchSamp.LT.0) EstEffCatchSamp = EffectSampCatch1
       IF (EstSurveyCV.LT.0) EstSurveyCV = SurvCV
       IF (EstEffSurveySamp.LT.0) EstEffSurveySamp = EffectSampSurvey1
-      IbiasType = 0
+      IbiasType = 1       ! was 0 (05/31/15)
 
 	READ(13,'(40X,I5)') DoMSYOnly	    
 
@@ -7697,7 +7697,7 @@ C changed AFSC_SPR --> it was using the continuous form of equation for survival
 C                  --> this means that the F for F35% or F40% (determined using AFSC_SPR) was not in the same scale as the F=qE 
 C                  --> done!
 
-C FindquotaF is producing a quota that is weird
+C 1843: changed IBiasTYpe=1 (need to come back to this later to check if this is the best)
 
 
 
