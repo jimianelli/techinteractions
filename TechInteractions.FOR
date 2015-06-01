@@ -3556,6 +3556,14 @@ C     FIT calls FUNK(X) to do this; X = QVal, so in the end SS = FUNK(X) just fi
 C     correct depletion.
       SS = FUNK3(X,Ispec)
 
+      ! if it happens that the model doesn't converge
+      if (SS.GT.1) THEN
+      X(1) = 0.2
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      ENDIF
+      
       RETURN
       END SUBROUTINE FindQvalsInd
 
@@ -3584,15 +3592,31 @@ C	MinOpt = 2 to find the effort level that produces the quota.
 
 C	ELSE
       DO 1000 II = 1,NeffortAreas
-       X(II) = -10
+       X(II) = 1.1
 1000  CONTINUE    
-	CareyGRD = 1.2   
+	CareyGRD = 0.99 
 
 C     Problem with this is that Fit is not getting at all close to the quota sometimes. The seed has to be close to start with. CRM.
       DO 888 Ispec = 1,Nspec
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
 C	ENDIF
       SS = FUNK3(X,Ispec)
+      
+      ! Second round optimization if the first one didn't make it
+	if (SS.GT.1) THEN
+      X(1) = 4
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+       ! Third round optimization if the second one didn't make it (just to make sure...)
+	    if (SS.GT.1) THEN
+          X(1) = 2.0
+          CareyGRD = 1.001 
+          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+          SS = FUNK3(X,Ispec)
+          ENDIF
+      ENDIF
+            
 C      WRITE(*,*) 'Minimum',SS,EXP(X(1))*qval(1)
 888   CONTINUE
 C
@@ -3650,7 +3674,8 @@ C     MinOpt=2 means to find E value that minimizes catch to quota for individua
       IF (MinOpt.EQ.2) THEN 
       
        DO 22000 II = 1,NeffortAreas
-        TheEffort(II) = EXP(X(II))
+C        TheEffort(II) = EXP(X(II))    ! changed this
+        TheEffort(II) = X(II)
 22000  CONTINUE         
        CALL ProjYrInd(TheProjYear,TheEffort,Ispec)
 C
