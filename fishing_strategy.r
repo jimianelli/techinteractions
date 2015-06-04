@@ -146,7 +146,7 @@
 					) + scale_fill_manual(values=cbPalette[1:4], guide=FALSE) + ggtitle(YEARS[yr]) + coord_cartesian(ylim=c(0, 1.2))# + geom_text(data=data1, aes(x, y, label=labs, group=NULL), colour="black", inherit.aes=FALSE, parse=FALSE, size=3)
 					
 				g	
-				ggsave(filename=paste0(getwd(), "/Figures/", YEARS[yr], ".png"), width=14, height=9, dpi=450)	
+				ggsave(filename=paste0(getwd(), "/Figures/", YEARS[yr], ".png"), width=14, height=9, dpi=200)	
 			}
 		
 
@@ -344,6 +344,7 @@ setwd("F:\\Dropbox\\Postdoc_projects\\techinteractions_test")
 set.seed(1)
 vals <- matrix(sample(1:15, 500000, replace=T), nrow=1000,500)
 write(vals, file="Random_strategy_OM.dat", ncolumns = 500)			# constraint on the "dK' lower bound
-set.seed(2)
-vals <- matrix(sample(1:15, 500000, replace=T), nrow=1000,500)
-write(vals, file="Random_strategy_EM.dat", ncolumns = 500)			# constraint on the "dK' lower bound
+vals_new <- vals
+vals_new[,2:500] <- vals[,1:499]
+vals_new[,1] <- rep(15, 1000)
+write(vals_new, file="Random_strategy_EM.dat", ncolumns = 500)			# constraint on the "dK' lower bound

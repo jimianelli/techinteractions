@@ -3609,12 +3609,12 @@ C	ENDIF
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
        ! Third round optimization if the second one didn't make it (just to make sure...)
-	    if (SS.GT.1) THEN
-          X(1) = 2.0
-          CareyGRD = 1.001 
-          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
-          SS = FUNK3(X,Ispec)
-          ENDIF
+C	    if (SS.GT.1) THEN
+C          X(1) = 2.0
+C          CareyGRD = 1.001 
+C          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+C          SS = FUNK3(X,Ispec)
+C          ENDIF
       ENDIF
             
 C      WRITE(*,*) 'Minimum',SS,EXP(X(1))*qval(1)
