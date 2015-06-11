@@ -390,7 +390,7 @@ C	AvgDepletion			- Depletion at the end of NProjYrs, averaged over simulations i
 C	AvgSSB					- SSB "" "" ""
 C	AvgCatch				- Catch "" "" ""
 
-	REAL(8) :: EffortMSY
+	REAL(8) :: EffortMSY(MaxSpec),FMSY(Maxspec)
 	INTEGER :: DoMSYOnly
 	INTEGER :: WriteOpt
 
@@ -616,6 +616,8 @@ C     Debugging variables:
       
       REAL(8),DIMENSION(30) :: Bycatch
       REAL(8) :: Bycatch_val
+      INTEGER :: DOCAB,optMSY
+      REAL(8) :: SSB_MSY(MaxSpec)
       
       ! Added the bycatch information to be read in from outside fortran (created within R for example. 
       ! We assume that the quota setting for the halibut bycatch is performed outside and that we do not have any control) 
@@ -815,19 +817,19 @@ C     Carey: Add a file for analyzing movement characteristics
 !      OPEN(UNIT = 7000,File = 'SpatialResults.Yr'//HistChar3//'Method2')
 
 
-	  OPEN(UNIT=51,FILE = "results/SUMM29.OUT")
-	  OPEN(UNIT=52,FILE = "results/SUMM30.OUT")
+	 OPEN(UNIT=51,FILE = "results/SUMM29.OUT")
+	 OPEN(UNIT=52,FILE = "results/SUMM30.OUT")
 
 
 C	Call a function here that within FUNK does the simulation NSim times, adds up the results from (1) a wide ranging profile and (2) the profile dialed in and then calls the FIT function to obtain the exact average best constant effort rate
 C	The other option is to work within what's already built to do the same thing - use switches to turn off FindInitEffort and FindEffLev; set constant effort = 0 for these, make a new MinOpt in FUNK that is outside of isim and inside supersim = 1 and call the FIT function
 C	FindMSYOnly = 1
-	IF (DoMSYOnly.EQ.1) THEN
-        !get Qval = from save.all
-        READ(22,*) SEED1,SEED2,(QVAL(Ispec),ISpec=1,NSpec) !22 is save.all
-	  CALL FindAvgMSY()
-        STOP
-	ENDIF
+	!IF (DoMSYOnly.EQ.1) THEN
+      !  !get Qval = from save.all
+      !  READ(22,*) SEED1,SEED2,(QVAL(Ispec),ISpec=1,NSpec) !22 is save.all
+	!  CALL FindAvgMSY()
+        !STOP
+	!ENDIF
 
       !-----------------------------------------------------------------------------------------------------
 C     Start simulations
@@ -976,7 +978,9 @@ C      Find the effort levels
        ENDIF
 
 
-  
+C      Find the MSY, SSBMSY and FMSY levels
+C	  CALL FindAvgMSY() 
+       
 C----------------------------------------------------------------------------------------
 C----------------------------------------------------------------------------------------      
 C      Generate the historical data: Loop from MinPYr to FinDepYr
@@ -1110,13 +1114,13 @@ C       Conduct stock assessments
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out")
             write(1113,*) "Cod    Pollock    Yellowfin_sole    Bycatch"
-            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+            write(1113,'(5(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
      +   Bycatch_val 
             CLOSE(1113)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out", access='APPEND')
-            write(1113,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+            write(1113,'(5(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
      +   Bycatch_val 
             CLOSE(1113)
         ENDIF
@@ -1143,6 +1147,7 @@ C        ENDIF
       cstring = 'Saveresults '//cIsim
       CALL SYSTEM(cstring)
        
+
 10000 CONTINUE !Ends the Isim = 1,Nsim main loop
 
 C==========================================================
@@ -1226,7 +1231,7 @@ C     Global variables
       INTEGER TheYr 
 C
 C     Local variables 
-      INTEGER Ispec,Iarea,II,Yr
+      INTEGER Ispec,Iarea,II,Yr,Isex,Iage
 C
 C     Clear summary array
       PassEstVar = 0
@@ -1238,32 +1243,62 @@ C     Conduct stock assessments
 
 !Run assessments (either in cab or in ss3)
 !---------------------------------------------------------------------------
-
+      if(DOCAB.EQ.1) THEN
           CALL DOCAB2(Ispec,0,0,MinPYr,TheYr-1,0,"A")
+      ENDIF
+      
+      if(DOCAB.EQ.0) THEN 
+          MyWeight(:,:) = Wght(Ispec,:,:,1) 
+          TheM = M(Ispec)       
+          DO 2117 Isex = 1,Nsex
+            DO 2117 Iage = 0,Amax(Ispec)
+             ThoseNs(Isex,Iage) = N(Ispec,Isex,1,1,TheYr-1,Iage)
+2117      CONTINUE !End Isex and Iage loop
+         TheSelex(1,:) = Sel(Ispec, :)
+         TheSelex(2,:) = Sel(Ispec, :)
+         
+          !Here you should cal FIT.
+          CALL FindFofl(Ispec,TheYr-1) 
+       
+          TheX = TrueFOFL(Ispec, TheYr-1)
+          CALL CalcCatchFromF(TheX,TheM,
+     +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
 
+          ! to retun the result I want
+          QuotaAct(Ispec) = pCatBio
+       
+      ENDIF
+          
 !--------------------------------------------------------------------------
          CLOSE(957)
 10000  CONTINUE 
-      
+
+C      Save the ABC output
+       OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
+      WRITE(765,'(I2,10(F17.2,1x))') TheYr,QuotaAct,
+     + Bycatch(TheYr-FinDepYr)
+      CLOSE(765)       
+       
       ! Now write the results into the TAC.dat file based on the quota allocation rule 
       if (MS_HCR.EQ.0) THEN 
       DO 5555 II=1, Nspec
-          TAC(II) = QuotaAct(II)/sum(QuotaAct)*1700000
+          TAC(II) = QuotaAct(II)/sum(QuotaAct)*
+     +MIN(1700000.0, sum(QuotaAct)/1000)
 5555  CONTINUE
       OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
-      WRITE(777,'(10(F15.5,1x))') TAC, Bycatch(TheYr-FinDepYr)
+      WRITE(777,'(10(F17.2,1x))') TAC, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
         ! Save the TAC values into a file 
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1111,FILE = "TAC_statusquo.out")
             write(1111,*) "Cod    Pollock    Yellowfin_sole"
-            write(1111,'(5(F14.2,1x))') (TAC(II),II=1,MaxSpec)    
+            write(1111,'(5(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
             CLOSE(1111)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=1111,FILE = "TAC_statusquo.out", access='APPEND')
-            write(1111,'(5(F14.2,1x))') (TAC(II),II=1,MaxSpec)    
+            write(1111,'(5(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
             CLOSE(1111)
         ENDIF        
      
@@ -1271,7 +1306,7 @@ C     Conduct stock assessments
       
       if (MS_HCR.EQ.1) THEN 
       OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
-      WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
+      WRITE(777,'(10(F17.2,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
         ! Run the technical interaction model to determine the QUOTA based on the EM_fish value
@@ -1775,6 +1810,7 @@ C     Local variables
 C
 C     Read in the area specifications
       OPEN(UNIT=13,FILE='EM.DAT')
+      READ(13,'(40X,I2)') DOCAB
       READ(13,'(40X,I2)') AssOpt
       READ(13,'(40X,I2)') Narea
       READ(13,'(40X,100(I2,1x))') (MinNS(Iarea),Iarea=1,Narea)
@@ -2094,6 +2130,7 @@ C     Local variables
       REAL*8 TheEffort(10)
       REAL*8 Recruits,SSBT,SSBT2,Rec2
       REAL(8),DIMENSION(Nspec,Nsex,0:MaxAge) :: Nsums
+
 C
 C	Reset larval abundance
 C	Larvae = 0
@@ -3609,14 +3646,20 @@ C	ENDIF
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
        ! Third round optimization if the second one didn't make it (just to make sure...)
-C	    if (SS.GT.1) THEN
-C          X(1) = 2.0
-C          CareyGRD = 1.001 
-C          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
-C          SS = FUNK3(X,Ispec)
-C          ENDIF
+	    if (SS.GT.1) THEN
+          X(1) = 3.0
+          CareyGRD = 1.001 
+          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+          SS = FUNK3(X,Ispec)
+          ENDIF
       ENDIF
-            
+       
+C     Save those F values
+      OPEN(UNIT=5678,FILE = "True_catch.out")
+      write(5678,'(5(F17.2,1x))') X(1)
+      if (Ispec.EQ.3) write(5678,*) ""
+      CLOSE(5678)
+      
 C      WRITE(*,*) 'Minimum',SS,EXP(X(1))*qval(1)
 888   CONTINUE
 C
@@ -3735,7 +3778,67 @@ C        TheEffort(1) = EXP(X(1))  !CHANGETHIS
 C       WRITE(*,*) FUNK,TheEffort(1),Depl
 	FinDepRecord(Ispec) = Depl2(Ispec)
       ENDIF      
-      
+
+
+C=======================================================================
+C     MinOpt=9 finds the equilibrium condition for each Isim and calculates AvgDepletion, AvgSSB, AvgCatch accross Nsim
+
+	IF (MinOpt.EQ.9) THEN
+	
+	SumDepl = 0.0
+	SumSSB = 0.0
+	SumCatch = 0.0
+	FUNK3 = 0.0
+
+	AvgDepletion = 0.0
+	AvgSSB = 0.0
+	AvgCatch = 0.0
+
+C	DO 1000 Isim = 1,Nsim
+C         WRITE(*,*) "Isim = "
+C         WRITE(*,*) Isim
+
+
+	  DO 1001 Yr = MinPYr,(MinPYr+150)
+          TotEffort(Yr) = 0.00000000001 
+1001	  CONTINUE !End Yr loop for initializing the model with no fishing effort (wipe out OM.dat entries)
+
+C      Project forward to get the population dynamics started and moving
+C          Kvals = 10000.0
+           Kvals = Kvec
+          CALL ProjForward(Kvals) !MinPYr to BaseYr (make BaseYr = -48)
+
+!	  DO 1002 Year = (BaseYr + 1),(BaseYr + NProjYr)
+        DO 1002 Year = MinPYr,(MinPYr+150)
+          TheEffort(1) = EXP(X(1))
+          CALL projYrInd(Year,TheEffort,Ispec)     
+1002    CONTINUE
+
+C=======================================================
+        ! Choose what to optimize
+	    if (optMSY.EQ.1) THEN
+          FUNK3 = FUNK3 - CatBio(Ispec,1,150)/1e6
+          ENDIF
+          IF (optMSY.EQ.0) THEN
+          FUNK3 = FUNK3 - SpBioTot(Ispec,150)/1e6
+          ENDIF
+C=======================================================
+
+C	Some extras:
+       Depl = SPBIoTot(Ispec,(MinPYr+149))/SpBioTot(Ispec,MinPYr)*100  
+	 AvgDepletion = SumDepl + Depl
+       AvgSSB = SumSSB + SPBioTot(Ispec,(MinPYr+149))
+	 AvgCatch  = SumCatch + CatBio(Ispec,1,(MinPYr+149))
+C1000	CONTINUE !end Isim loop
+
+C	AvgDepletion = SumDepl/Nsim
+C	AvgSSB = SumSSB/Nsim
+C	AvgCatch = SumCatch/Nsim
+C
+
+	ENDIF !MinOpt.EQ.9
+
+
       RETURN
       END FUNCTION FUNK3
 
@@ -3979,9 +4082,9 @@ C          Kvals = 10000.0
 		IF (WriteOpt.EQ.1) THEN
 		  CALL Summary2(Year)
 		ENDIF       
-1002	  CONTINUE
+1002    CONTINUE
 C========================================================
-	  FUNK = FUNK - CatBio(1,1,(MinPYr+149))
+        FUNK = FUNK - CatBio(Ispec,1,(MinPYr+149))
 C=======================================================
 
 C	Some extras:
@@ -4253,8 +4356,16 @@ C     Write out the total effort not divided by blocks (according to Carey)
 C     GlobalEffort def'n has to be changed if spatial effort blocks become activated.
 	if (Year.LE.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
      +     GlobalEffort(Year)
-	if (Year.GT.BaseYr) WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim, Ispec, Year, 
-     +     EstFOFL(Ispec,1,1)/Qval(Ispec)
+	if (Year.GT.BaseYr) THEN
+          IF (DoCAB.EQ.1) THEN 
+              WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim,  
+     +        Ispec, Year, EstFOFL(Ispec,1,1)/Qval(Ispec)
+              ENDIF
+          IF (DoCAB.EQ.0) THEN 
+              WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim,  
+     +        Ispec, Year, TrueFOFL(Ispec,Year-1)/Qval(Ispec)
+              ENDIF
+      ENDIF  
                
        DO 11000 Iarea = 1,Narea
          Totcat = Totcat + CatBio(Ispec,Iarea,Year)
@@ -4286,8 +4397,7 @@ C     GlobalEffort def'n has to be changed if spatial effort blocks become activ
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year),
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
        WRITE(35,601) Isim, Ispec,Year,
-     +      ((CatArea(Ispec,IBlkNS,IBlkEW,Year),
-     +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
+     +      (CatBio(Ispec,1,Year))
        WRITE(16,601) Ispec,Year,
      +      ((RecSum(Ispec,Year,IBlkNS,IBlkEW)/MaxRec*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
@@ -5085,6 +5195,7 @@ C---------------------------------------------------
       !This function sets the quota:
       IF (UsePstar.EQ.0) THEN 
           CALL  FindquotaF(Ispec, Year2) !FindquotaF(Year2,Ispec) 
+          
       ENDIF
  !      FindFforCatchReg(Year2), FindFofl() both done within FindPstarQuota
 C-----------------------------------------------------
@@ -6048,15 +6159,16 @@ C
 
 	SUBROUTINE FindAvgMSY()
 C This subroutine finds the effort that leads to MSY, MSY  
-C
+C This subroutine finds the constant effort from year 1 to year FinDepYr+1 which maximizes either the catch (MSY) or SBB (BMSY) depending on the optMSY value (0=BMSY, 1=MSY)
       USE ShareDataRatioSubs
       IMPLICIT NONE
 
 	REAL(8), DIMENSION(100) :: X
 	REAL(8) :: i,ObjFun
 	REAL(8) :: IEffort,BMSY,SEED1,SEED2
-      REAL(8) :: FUNK,SS
-	EXTERNAL FUNK
+      REAL(8) :: FUNK3,SS
+      INTEGER :: Ispec
+	EXTERNAL FUNK3
 
 	MinOpt = 9
 	ObjFun = 1000000.0
@@ -6074,40 +6186,49 @@ C      Read the seeds for this simulation
 	  CALL GenProcErr()
 22222 CONTINUE
 
+      optMSY = 1
+	DO 7878 Ispec = 1, Nspec
+      X(1) = LOG(0.6) !change to log in a minute.
+	CareyGRD = 1.001
+      CALL FIT7(X,SS,1,CareyGRD,Ispec)
+C     FIT finds the constant effort from year 1 to year FinDepYr+1 which maximizes either the catch (MSY) or SBB (BMSY) depending on the optMSY value (0=BMSY, 1=MSY)
+      SS = FUNK3(X,Ispec)
       
-	X(1) = LOG(TotEffort(StartFishing)) !change to log in a minute.
-	CareyGRD = 1.2
-      CALL FIT(X,SS,1,CareyGRD)
-C     FIT finsds the constant effort from year 1 to year FinDepYr+1 which
-C     minics the (pre-specified) final depletion. Note that this only works for ONE
-C     species
+      ! Second round of optimization if not good
+      if (X(1).GT.2) THEN      
+      X(1) = 1.2 !change to log in a minute.
+	CareyGRD = 1.001
+      CALL FIT7(X,SS,1,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      ENDIF 
+      
+      EffortMSY(Ispec) = EXP(X(1))
+      FMSY(Ispec) = EXP(X(1))*Qval(Ispec)
+      SSB_MSY(Ispec) = AvgSSB
 
-!	WriteOpt = 1  !Write out the results of doing simulations with the average optimal effort
-
-
-      SS = FUNK(X)
-	EffortMSY = X(1)
+7878  CONTINUE
       
       !Can't remember what this is about anymore (leftover from DR project)
-	CALL WriteSpecs(14)
-	CALL WriteSpecs(26)
-	CALL WriteSpecs(38)
-	CALL WriteSpecs(41)
-	!CALL WriteSpecs(52)
+C	CALL WriteSpecs(14)
+C	CALL WriteSpecs(26)
+C	CALL WriteSpecs(38)
+C	CALL WriteSpecs(41)
+C	!CALL WriteSpecs(52)
+C      
+C      !Find the F that produces the MSY using new function:
+C      !AvgCatch = trial quota.
+C
+C	Write(*,'(1x,A)') 'M,MaxAge,EffortMSY,AvgSSB,AvgDepletion,
+C     +	AvgCatch'
+C	Write(*,*) M(1),Amax(1),EffortMSY,AvgSSB,AvgDepletion,AvgCatch
+C
+C	WRITE(52,'(1x,A)') 'M,MaxAge,EffortMSY,AvgSSB,AvgDepletion,
+C     +	AvgCatch'
+C	WRITE(52,700) M(1),Amax(1),EffortMSY,AvgSSB,AvgDepletion,AvgCatch
+C
+C700   FORMAT(1x,F5.3,1x,I4,1x,F15.13,1x,F15.5,1x,F15.10,1x,F15.5)
+C
       
-      !Find the F that produces the MSY using new function:
-      !AvgCatch = trial quota.
-
-	Write(*,'(1x,A)') 'M,MaxAge,EffortMSY,AvgSSB,AvgDepletion,
-     +	AvgCatch'
-	Write(*,*) M(1),Amax(1),EffortMSY,AvgSSB,AvgDepletion,AvgCatch
-
-	WRITE(52,'(1x,A)') 'M,MaxAge,EffortMSY,AvgSSB,AvgDepletion,
-     +	AvgCatch'
-	WRITE(52,700) M(1),Amax(1),EffortMSY,AvgSSB,AvgDepletion,AvgCatch
-
-700	FORMAT(1x,F5.3,1x,I4,1x,F15.13,1x,F15.5,1x,F15.10,1x,F15.5)
-
 	RETURN
       END SUBROUTINE FindAvgMSY
       
@@ -7124,7 +7245,7 @@ C
       !Local variables
       INTEGER :: Iage,ii,Iyr
       REAL(8), DIMENSION(0:Maxage) :: NperRec0,NperRecF
-      REAL(8) :: EstAvgRec,SBPR0,SBPR_F
+      REAL(8) :: EstAvgRec,EstMedRec,SBPR0,SBPR_F,Median
       
       SBPR0 = 0.0
       SBPR_F = 0.0
@@ -7163,7 +7284,7 @@ C
       ii = 0
       EstAvgRec = 0.0
       DO 1004 Iyr = 1,(GlobalProjYr-1)        !This will change when using actual years.
-        EstAvgRec = EstAvgRec + Recvec(Iyr)/2 ! Need to consider only the female Recruits (50-50 male and female)
+        EstAvgRec = EstAvgRec + Recvec(Iyr)/2   ! Need to consider only the female Recruits (50-50 male and female)?
         ii = ii+1
 1004  CONTINUE 
       EstAvgRec = EstAvgRec/ii
@@ -7215,6 +7336,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         SS = FUNK(X)
       
         EstF35(Ispec,Iconfig) = X(1)
+C        if(Ispec.EQ.2) THEN 
+C            EstF35(Ispec,Iconfig) = 0.5
+C        ENDIF
         EstB35(Ispec,Iconfig) = EstB_SPR
         
         !Save info to check out whether optimization worked (written to file in PstarSummary) 
@@ -7272,12 +7396,12 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         ENDIF
 		
         IF (UsePstar.EQ.0) THEN
-          Depl = EstSB(Ispec,1,Iyear)/EstSB(Ispec,1,1)
+          Depl = EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
 
-          IF ((Depl.GT.0.40)) THEN
+          IF (Depl.GT.1) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
 
-          ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
+          ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
      +      (EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
      +      -AFSC_alpha)/(1-AFSC_alpha)
@@ -7287,6 +7411,22 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
           ENDIF
 		  
         ENDIF	
+C        IF (UsePstar.EQ.0) THEN
+C          Depl = EstSB(Ispec,1,Iyear)/EstSB(Ispec,1,1)
+C
+C          IF ((Depl.GT.0.40)) THEN
+C            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
+C
+C          ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
+C            EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
+C     +      (EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
+C     +      -AFSC_alpha)/(1-AFSC_alpha)
+C
+C          ELSE
+C            EstFOFL(Ispec,Iconfig,1) = 0.0
+C          ENDIF
+C		  
+C        ENDIF	
 		
 1033  CONTINUE !End loop over Iconfig  
        ! TheNs(Isex,Iage) = exp(Nvec(Ispec,Isex,Ivec,Iage))
@@ -7313,6 +7453,9 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
         SS = FUNK(X)
       
       TrueF35(Ispec) = X(1)
+C      if (Ispec.EQ.2) THEN 
+C           TrueF35(Ispec) = 0.6
+C      ENDIF
       TrueB35(Ispec,IYear) = EstB_SPR  
       
       TrueSPR35(Ispec) = EstSPR
@@ -7334,19 +7477,32 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       
       !----------------------------------------------------------------------------------------------      
       !TrueFOFL calculations:
-        Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
+        Depl = SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear)
 
-        IF ((Depl.GT.0.40)) THEN
+        IF ((Depl.GT.1)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
 
-        ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
+        ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
      +    ((SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear))
-     +    -AFSC_alpha)*(1-AFSC_alpha)
+     +    -AFSC_alpha)/(1-AFSC_alpha)
 
         ELSE
           TrueFOFL(Ispec,IYear) = 0.0
-        ENDIF      
+        ENDIF    
+C        Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
+C
+C        IF ((Depl.GT.0.40)) THEN
+C          TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
+C
+C        ELSEIF (Depl.LE.0.40.AND.Depl.GT.(0.4*AFSC_alpha)) THEN
+C          TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
+C     +    ((SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear))
+C     +    -AFSC_alpha)*(1-AFSC_alpha)
+C
+C        ELSE
+C          TrueFOFL(Ispec,IYear) = 0.0
+C        ENDIF      
       
       !Calculate true OFL
       !Don't need this right now, but might need it in the future
@@ -7724,6 +7880,10 @@ C                  --> done!
 
 C 1843: changed IBiasTYpe=1 (need to come back to this later to check if this is the best)
 
+C ---------------------------
+C Modifications June 2015
+C Added the possibility to run the model without estimation. Option "DOCAB" in EM.dat
+C Added a code to extract the FMSY, MSY and BMSY
 
 
 

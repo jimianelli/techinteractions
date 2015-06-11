@@ -1,3 +1,4 @@
+DOCab?                                  1    ! 0 = do not run cab (deterministic model) 1 = run CAB
 Assessment Options                      1  !Only one method right now.
 Number of assessment areas (Narea)      1  #was 3 in previous studies.
 Lower limit (NS)                        1  1  1

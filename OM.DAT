@@ -21,10 +21,10 @@ Final Dep (out of date; see below)      40.0   40.0   40.0
 Does Qval equal 1 (DR project)?         0
 Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
 Recruitment specifications
- Include process error? (1=yes;0=no)    1
+ Include process error? (1=yes;0=no)    0
  Sigma(Global)                          0.57      0.90      0.41  
  Sigma (Local)                          0.000001 0.000001 0.000001 
- Steepness                              0.99 0.67 0.99 
+ Steepness                              0.99 0.99 0.99 
  Type of SR relationship 1,2,3,4        1    1    1
  RecDistn(0=even;1=params;2pat)         0    0    0
  Centre of gravity recruitment (X)      10.00   10.000   10.000
@@ -160,5 +160,5 @@ Larval Dispersal
 Number of target depletions             1
 Target Year, Target Depletion(by species)
 51   50.0  55.0  65.0
-Management strategy                     1       	! 0 = status quo   1 = Multi-species quota adjustment
-OM fishing strategy                     1       	! 0 = fixed over time 	1 = changing over time	2 = none (no LP)
+Management strategy                     0       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
+OM fishing strategy (fleet dynamics)    0       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)
