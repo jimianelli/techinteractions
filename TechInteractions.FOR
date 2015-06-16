@@ -1045,54 +1045,12 @@ C       Conduct stock assessments
         
         ! Run the technical interaction model to determine the TRUE realized catch (OEM) based on the OM_fish value
         IF(OM_strategy.EQ.0) THEN 
-            CALL SYSTEM("main_code.exe")
+            CALL SYSTEM("main_code_average.exe")
         ENDIF    
         
         IF(OM_strategy.EQ.1) THEN 
             IF(OM_fish(Isim, TheProjYear).EQ.1) THEN 
                 CALL SYSTEM("main_code2000.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.2) THEN 
-                CALL SYSTEM("main_code2001.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.3) THEN 
-                CALL SYSTEM("main_code2002.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.4) THEN 
-                CALL SYSTEM("main_code2003.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.5) THEN 
-                CALL SYSTEM("main_code2004.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.6) THEN 
-                CALL SYSTEM("main_code2005.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.7) THEN 
-                CALL SYSTEM("main_code2006.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.8) THEN 
-                CALL SYSTEM("main_code2007.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.9) THEN 
-                CALL SYSTEM("main_code2008.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.10) THEN 
-                CALL SYSTEM("main_code2009.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.11) THEN 
-                CALL SYSTEM("main_code2010.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.12) THEN 
-                CALL SYSTEM("main_code2011.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.13) THEN 
-                CALL SYSTEM("main_code2013.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.14) THEN 
-                CALL SYSTEM("main_code2013.exe")
-            ENDIF
-            IF(OM_fish(Isim, TheProjYear).EQ.15) THEN 
-                CALL SYSTEM("main_code2014.exe")
             ENDIF
             Write(*,*) 'Finished OM technical interaction model'
         ENDIF
@@ -1311,54 +1269,12 @@ C      Save the ABC output
       
         ! Run the technical interaction model to determine the QUOTA based on the EM_fish value
         IF(OM_strategy.EQ.0) THEN 
-            CALL SYSTEM("main_code.exe")
+            CALL SYSTEM("main_code_average.exe")
         ENDIF 
         
         IF(OM_strategy.EQ.1) THEN 
             IF(Current_val.EQ.1) THEN 
                 CALL SYSTEM("main_code2000.exe")
-            ENDIF
-            IF(Current_val.EQ.2) THEN 
-                CALL SYSTEM("main_code2001.exe")
-            ENDIF
-            IF(Current_val.EQ.3) THEN 
-                CALL SYSTEM("main_code2002.exe")
-            ENDIF
-            IF(Current_val.EQ.4) THEN 
-                CALL SYSTEM("main_code2003.exe")
-            ENDIF
-            IF(Current_val.EQ.5) THEN 
-                CALL SYSTEM("main_code2004.exe")
-            ENDIF
-            IF(Current_val.EQ.6) THEN 
-                CALL SYSTEM("main_code2005.exe")
-            ENDIF
-            IF(Current_val.EQ.7) THEN 
-                CALL SYSTEM("main_code2006.exe")
-            ENDIF
-            IF(Current_val.EQ.8) THEN 
-                CALL SYSTEM("main_code2007.exe")
-            ENDIF
-            IF(Current_val.EQ.9) THEN 
-                CALL SYSTEM("main_code2008.exe")
-            ENDIF
-            IF(Current_val.EQ.10) THEN 
-                CALL SYSTEM("main_code2009.exe")
-            ENDIF
-            IF(Current_val.EQ.11) THEN 
-                CALL SYSTEM("main_code2010.exe")
-            ENDIF
-            IF(Current_val.EQ.12) THEN 
-                CALL SYSTEM("main_code2011.exe")
-            ENDIF
-            IF(Current_val.EQ.13) THEN 
-                CALL SYSTEM("main_code2013.exe")
-            ENDIF
-            IF(Current_val.EQ.14) THEN 
-                CALL SYSTEM("main_code2013.exe")
-            ENDIF
-            IF(Current_val.EQ.15) THEN 
-                CALL SYSTEM("main_code2014.exe")
             ENDIF
             Write(*,*) 'Finished EM technical interaction model'
         ENDIF 
@@ -1876,7 +1792,7 @@ C------------------------------------------------------------
       IF (EstEffCatchSamp.LT.0) EstEffCatchSamp = EffectSampCatch1
       IF (EstSurveyCV.LT.0) EstSurveyCV = SurvCV
       IF (EstEffSurveySamp.LT.0) EstEffSurveySamp = EffectSampSurvey1
-      IbiasType = 1       ! was 0 (05/31/15)
+      IbiasType = 0       ! was 0 (05/31/15)
 
 	READ(13,'(40X,I5)') DoMSYOnly	    
 
