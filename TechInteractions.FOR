@@ -1233,7 +1233,7 @@ C     Conduct stock assessments
 
 C      Save the ABC output
        OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
-      WRITE(765,'(I2,10(F17.2,1x))') TheYr,QuotaAct,
+      WRITE(765,'(I2,I2,10(F17.2,1x))') Isim,TheYr,QuotaAct,
      + Bycatch(TheYr-FinDepYr)
       CLOSE(765)       
        

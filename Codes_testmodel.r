@@ -3,9 +3,9 @@ gc()
 
 Scenario = 1
 
-# setwd(paste0("C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\techinteractions - Copy2\\results"))
-# setwd(paste0("C:\\Users\\Kotaro Ono\\Dropbox\\Postdoc_projects\\techinteractions - Copy2\\results"))
-# setwd(paste0("F:\\Dropbox\\Postdoc_projects\\techinteractions - Copy2\\results"))
+setwd(paste0("C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\techinteractions - Copy\\results"))
+setwd(paste0("C:\\Users\\Kotaro Ono\\Dropbox\\Postdoc_projects\\techinteractions - Copy\\results"))
+setwd(paste0("F:\\Dropbox\\Postdoc_projects\\techinteractions - Copy\\results"))
 
 Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 
@@ -41,9 +41,9 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 	BMSY <- ddply(MSST, .(Isim,Ispec), summarize, m=mean(TrueB40)) 
 	BMSY <- ddply(MSST, .(Ispec), summarize, m=mean(TrueB40),std=sd(TrueB40))
 	
-	g1 <- ggplot(SSB, aes(x=Year, y = SSB/1e6, group = Species, colour=Species)) + theme_bw() + labs(y="SSB (t)") + geom_line() + geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black") + geom_hline(yintercept = 1/2*MSSTs[,2]/1e6, linetype = 2, size=1, colour = c("red","green","blue"))
+	g1 <- ggplot(SSB, aes(x=Year, y = SSB/1e6, group = Species, colour=Species)) + theme_bw() + labs(y="SSB (t)") + geom_line() + geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black") + geom_hline(yintercept = 1/2*MSSTs[,2]/1e6, linetype = 2, size=1, colour = c("red","green","blue"))+coord_cartesian(xlim=c(0,80))
 	# ggplot(SSB, aes(x=Year, y = SSB, group = Species, colour=Species)) + theme_bw() + geom_line() + geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black") +coord_cartesian(ylim=c(0,1.9e09))+geom_hline(yintercept = BMSY[,2], linetype = 2, size=1, colour = c("red","green","blue"))
-	g1 <- g1+coord_cartesian(ylim=c(0,1500))
+	# g1 <- g1+coord_cartesian(ylim=c(0,1500))
 	
 ### Recruits
 	Rec <- read.table("RECRUITS.out")
@@ -53,7 +53,7 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 	Recs <- ddply(Rec, .(Sim,Species), summarize, m=mean(Rec_F))
 	Rec$Rec_std <- (Rec$Rec_F-rep(Recs[,3], nrow(Rec)/3))/rep(Recs[,3], nrow(Rec)/3)
 
-	g2 <- ggplot(Rec, aes(x=Year, y = Rec_F, group = Species, colour=Species)) + theme_bw() + geom_line()+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
+	g2 <- ggplot(Rec, aes(x=Year, y = Rec_F, group = Species, colour=Species)) + theme_bw() + geom_line()+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")+coord_cartesian(xlim=c(0,80))
 	# ggplot(Rec, aes(x=Year, y = Rec_std, group = Species, colour=Species)) + theme_bw() + geom_line()+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
 	# g2
 
@@ -64,7 +64,7 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 	Effort <- subset(Effort, subset=c(Sim == Simul))
 	Effort$F <- Effort$Effort*rep(Q,nrow(Effort)/3)
 	
-	g3 <- ggplot(Effort, aes(x=Year, y = F, group = Species, colour=Species))+ geom_line() +coord_cartesian(ylim=c(0,1)) + theme_bw()+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
+	g3 <- ggplot(Effort, aes(x=Year, y = F, group = Species, colour=Species))+ geom_line() +coord_cartesian(ylim=c(0,1),xlim=c(0,80)) + theme_bw()+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
 	# g3
 	
 ### Catches
@@ -83,7 +83,7 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
   Catch$Catch <- Catch$Catch/1e3
   Catch$Total_catch <- Catch$Total_catch/1e3
 	
-	g4 <- ggplot(Catch, aes(x=Year, y = Catch/1e3, group = Species, colour=Species)) + labs(y="Catch (1000t)") + geom_line(aes(x=Year, y=Catch/1e3)) + theme_bw() + geom_line(aes(x=Year, y=Total_catch/1e3), linetype = 2, size=1, colour = "black") + coord_cartesian(ylim=c(0,1.9e03)) #+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black") 
+	g4 <- ggplot(Catch, aes(x=Year, y = Catch/1e3, group = Species, colour=Species)) + labs(y="Catch (1000t)") + geom_line(aes(x=Year, y=Catch/1e3)) + theme_bw() + geom_line(aes(x=Year, y=Total_catch/1e3), linetype = 3, size=1, colour = "black") + coord_cartesian(ylim=c(0,1.9e03), xlim=c(0,80)) + geom_hline(yintercept = 1700, linetype = 2, size=1, colour = "black") #+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black") 
 
 ### Depletion
 	SSBDepletion_OM <- read.table("Summ3.out")
@@ -91,7 +91,7 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 	SSBDepletion_OM$Species <- factor(SSBDepletion_OM$Species, labels=c("Cod","Pollock","Yellowfin"))
 	SSBDepletion_OM <- subset(SSBDepletion_OM, subset=c(Sim == Simul))
 
-	g5 <- ggplot(SSBDepletion_OM, aes(x=Year, y = SSBDepletion, group = Species, colour=Species)) + theme_bw() + geom_line()+coord_cartesian(ylim=c(0,130))+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
+	g5 <- ggplot(SSBDepletion_OM, aes(x=Year, y = SSBDepletion, group = Species, colour=Species)) + theme_bw() + geom_line()+coord_cartesian(ylim=c(0,130),xlim=c(0,80))+ geom_vline(xintercept = 52, linetype = 2, size=1, colour = "black")
 	# g5
 
 ### The estimated ABC 
@@ -101,13 +101,13 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 	ABC <- reshape2::melt(ABC, id.vars=c("Year"), variable.name = "Species")
 	Total_ABC <- ddply(ABC, .(Year), summarize, Total_ABC=sum(value))
 	ABC$Total_ABC <- rep(Total_ABC[,2], 3)
-	ABC_plot <- ggplot(ABC, aes(x=Year, y = value/1e6, group = Species, colour=Species)) + theme_bw() + labs(y="ABC (t)") + geom_line()+coord_cartesian(ylim=c(0,4000))+ geom_line(aes(x=Year, y=Total_ABC/1e6), linetype = 3, size=1, colour = "black")+geom_hline(yintercept = 1700, linetype = 2, size=1, colour = "black")+geom_hline(yintercept = 1500, linetype = 2, size=1, colour = "black")
+	ABC_plot <- ggplot(ABC, aes(x=Year, y = value/1e6, group = Species, colour=Species)) + theme_bw() + labs(y="ABC (t)") + geom_line()+coord_cartesian(ylim=c(0,4000),xlim=c(0,80))+ geom_line(aes(x=Year, y=Total_ABC/1e6), linetype = 3, size=1, colour = "black")+geom_hline(yintercept = 1700, linetype = 2, size=1, colour = "black")#+geom_hline(yintercept = 1500, linetype = 2, size=1, colour = "black")
 
 ### Bycatch	
 	Bycatch <- read.table(paste0("Realized_catch.outSim", Simul),header=T)
 	Bycatch$Year <- 51:80
 	Bycatch$Species = "Bycatch"
-	g6 <- ggplot(Bycatch, aes(x=Year, y = Bycatch, group=Species, colour=Species)) + geom_line() + theme_bw() +labs(y="Catch(t)")
+	g6 <- ggplot(Bycatch, aes(x=Year, y = Bycatch, group=Species, colour=Species)) + geom_line() + theme_bw() +labs(y="Catch(t)")+coord_cartesian(xlim=c(0,80))
 
 ### Do all plots	
 	windows()
@@ -225,8 +225,8 @@ Figures_save <- "C:\\Users\\kotkot\\Dropbox\\Postdoc_projects\\Figures"
 		
 	}
 		
-		Plot_cab_fit(Which.species=1,Yr=53,Sim=1,fitComp=TRUE)
-		Plot_cab_fit(Which.species=2,Yr=53,Sim=1,fitComp=TRUE)
-		Plot_cab_fit(Which.species=3,Yr=53,Sim=1,fitComp=FALSE)
+		Plot_cab_fit(Which.species=1,Yr=65,Sim=1,fitComp=FALSE,fitIA=FALSE)
+		Plot_cab_fit(Which.species=2,Yr=65,Sim=1,fitComp=FALSE,fitIA=FALSE)
+		Plot_cab_fit(Which.species=3,Yr=65,Sim=1,fitComp=FALSE,fitIA=FALSE)
 		graphics.off()
 
