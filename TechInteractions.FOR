@@ -2891,7 +2891,7 @@ C      Add noise
         DO 33500 IBlkEW = 1,NEWBlock
 !-------------------------------------------------------------------------------
 !     Adding a switch to do or exclude process error for the purpose of debugging. 7/19/11
-         IF (DoProcessError.EQ.1) THEN
+         IF (DoProcessError.GE.1) THEN
            DO 33510 Isex = 1,Nsex
           N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) = 
      +      N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) *
@@ -3430,7 +3430,7 @@ C      Add noise
         DO 33500 IBlkEW = 1,NEWBlock
 !-------------------------------------------------------------------------------
 !     Adding a switch to do or exclude process error for the purpose of debugging. 7/19/11
-         IF (DoProcessError.EQ.1) THEN
+         IF (DoProcessError.GE.1) THEN
            DO 33510 Isex = 1,Nsex
           N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) = 
      +      N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) *
@@ -4170,8 +4170,9 @@ C     Generate the recruitment error terms
       DO 10000 Ispec = 1,NSpec
        DO 10000 Year = MinPYr,MaxPYr
         !global process error on recruitment (Error1)
-        Error0 = XNORM(1,0.0d0,1.0d0,ISEEDP)   
-        Error1 = SigmaR1(Ispec)*Error0-SigmaR1(ISpec)**2.0/2.0
+        Error0 = XNORM(1,0.0d0,1.0d0,ISEEDP)
+        Error1 = Error0*SigmaR1(Ispec)-SigmaR1(ISpec)**2.0/2.0
+        				
         DO 11000 IBlKNS = 1,NNSBlock
          DO 11000 IBlkEW = 1,NEWBlock
          !Local process error on recruitment (Error2)
@@ -4182,10 +4183,32 @@ C     Generate the recruitment error terms
 
 11000   CONTINUE         
 10000 CONTINUE       
-         ELSE
-           RecRes = 1
-         ENDIF
+      ENDIF
+
+C     No recruitment error
+  	IF (DoProcessError.EQ.0) THEN
+          RecRes = 1
+      ENDIF
 C
+C     Correlated recruitment error
+      IF (DoProcessError.EQ.2) THEN
+      DO 10088 Year = MinPYr,MaxPYr
+      Error0 = XNORM(1,0.0d0,1.0d0,ISEEDP)
+       DO 10088 Ispec = 1,NSpec
+        !global process error on recruitment (Error1)
+        Error1 = Error0*SigmaR1(Ispec)-SigmaR1(ISpec)**2.0/2.0
+        				
+        DO 11088 IBlKNS = 1,NNSBlock
+         DO 11088 IBlkEW = 1,NEWBlock
+         !Local process error on recruitment (Error2)
+          Error2 = XNORM(1,0.0d0,SigmaR2(Ispec),ISEEDP)
+     +                             -SigmaR2(ISpec)**2.0/2.0
+
+           RecRes(ISim,ISpec,Year,IBlkNS,IBlkEW) = EXP(Error1+Error2)
+11088   CONTINUE         
+10088 CONTINUE    
+      ENDIF
+		   
 C     Generate the catchability error terms
       !Carey did this 7/19/11
       !Carey 1/14/14: does this need to be fixed such that there is an ISEED for spatial catchability process error
