@@ -3509,12 +3509,19 @@ C     FIT calls FUNK(X) to do this; X = QVal, so in the end SS = FUNK(X) just fi
 C     correct depletion.
       SS = FUNK3(X,Ispec)
 
-      ! if it happens that the model doesn't converge
+      ! Second round to check convergence
       if (SS.GT.1) THEN
-      X(1) = 0.2
+      X(1) = 0.1
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
+      ! Third round to check convergence
+      if (SS.GT.1) THEN
+      X(1) = 0.5
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      ENDIF
       ENDIF
       
       RETURN
@@ -3535,7 +3542,7 @@ C
       IMPLICIT NONE
 C     
 C     Local variables
-      REAL*8 X(100),SS
+      REAL*8 X(100),SS,dummy
 	INTEGER :: II,III,Ispec
       REAL*8 FUNK3
       EXTERNAL FUNK3
@@ -3543,9 +3550,10 @@ C
 C	MinOpt = 2 to find the effort level that produces the quota.
       MinOpt = 2
 
+      dummy = 0.5
 C	ELSE
       DO 1000 II = 1,NeffortAreas
-       X(II) = 0.5
+       X(II) = dummy
 1000  CONTINUE    
 	CareyGRD = 0.99 
 
@@ -3557,24 +3565,31 @@ C	ENDIF
       
       ! Second round optimization if the first one didn't make it
 	if (SS.GT.1) THEN
-      X(1) = 1.1
+      X(1) = 1.0
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
-          ! Third round optimization if the first one didn't make it
-	    if (SS.GT.1) THEN
-          X(1) = 4
-          CareyGRD = 1.001 
-          CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
-          SS = FUNK3(X,Ispec)
-           ! Fourth round optimization if the second one didn't make it (just to make sure...)
-	        if (SS.GT.1) THEN
-              X(1) = 3.0
-              CareyGRD = 1.001 
-              CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
-              SS = FUNK3(X,Ispec)
-              ENDIF
-          ENDIF
+      ! Second round optimization if the first one didn't make it
+	if (SS.GT.1) THEN
+      X(1) = 2.0
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)      
+      ! Third round optimization if the first one didn't make it
+	if (SS.GT.1) THEN
+      X(1) = 3.0
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      ! Fourth round optimization if the second one didn't make it (just to make sure...)
+	if (SS.GT.1) THEN
+      X(1) = 4.0
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      ENDIF
+      ENDIF
+      ENDIF
       ENDIF
 C     Save those F values
       OPEN(UNIT=5678,FILE = "True_catch.out")
