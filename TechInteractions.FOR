@@ -833,7 +833,7 @@ C	FindMSYOnly = 1
 
       !-----------------------------------------------------------------------------------------------------
 C     Start simulations
-      DO 10000 Isim = 2,Nsim 
+      DO 10000 Isim = 1,Nsim 
 
       !Write out the simulation number and supersim each time
 	WRITE(*,*)
