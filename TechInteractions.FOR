@@ -7806,7 +7806,7 @@ C ---------------------------
 C Modifications June 2015
 C Added the possibility to run the model without estimation. Option "DOCAB" in EM.dat
 C Added a code to extract the FMSY, MSY and BMSY
-
+C Need to improve how to generate process error --> from a MVN distribution. 
 
 
 C ---------------------------
