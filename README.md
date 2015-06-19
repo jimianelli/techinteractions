@@ -6,7 +6,6 @@ Information about the branch:
 2. EM.dat file controls the setting the the assessment model (i.e CAB) 
 3. CR.dat mostly controls whether to use the P* approach or the AFSC tier 3 HCR rule
 
-Main changes: 
-1. Depending on the specification in the OM (last two lines in the OM.dat), the model implements either i) a "naive" quota allocation method TAC=ABC/sum(ABC)*1.7 or ii) a quota allocation based on LP 
-2. Depending on the specification in the OM (last two lines in the OM.dat), fishing strategies is either i) fixed over time or ii) changing over time
-3. the first line in EM.dat specifies whether to run CAB or not
+Main changes compared to the "Multsp_techint_KO_LP" branch
+1. the fishing strategy is based on the last 5 years.
+2. any deviation from it is controlled by the CV of fishing strategies
