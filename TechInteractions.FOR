@@ -833,7 +833,7 @@ C	FindMSYOnly = 1
 
       !-----------------------------------------------------------------------------------------------------
 C     Start simulations
-      DO 10000 Isim = 1,Nsim 
+      DO 10000 Isim = 2,Nsim 
 
       !Write out the simulation number and supersim each time
 	WRITE(*,*)
@@ -1233,7 +1233,7 @@ C     Conduct stock assessments
 
 C      Save the ABC output
        OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
-      WRITE(765,'(I2,I2,10(F17.2,1x))') Isim,TheYr,QuotaAct,
+      WRITE(765,'(I2,10(F17.2,1x))') TheYr,QuotaAct,
      + Bycatch(TheYr-FinDepYr)
       CLOSE(765)       
        
@@ -3545,7 +3545,7 @@ C	MinOpt = 2 to find the effort level that produces the quota.
 
 C	ELSE
       DO 1000 II = 1,NeffortAreas
-       X(II) = 1.1
+       X(II) = 0.5
 1000  CONTINUE    
 	CareyGRD = 0.99 
 
@@ -3557,19 +3557,25 @@ C	ENDIF
       
       ! Second round optimization if the first one didn't make it
 	if (SS.GT.1) THEN
-      X(1) = 4
+      X(1) = 1.1
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
-       ! Third round optimization if the second one didn't make it (just to make sure...)
+          ! Third round optimization if the first one didn't make it
 	    if (SS.GT.1) THEN
-          X(1) = 3.0
+          X(1) = 4
           CareyGRD = 1.001 
           CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
           SS = FUNK3(X,Ispec)
+           ! Fourth round optimization if the second one didn't make it (just to make sure...)
+	        if (SS.GT.1) THEN
+              X(1) = 3.0
+              CareyGRD = 1.001 
+              CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+              SS = FUNK3(X,Ispec)
+              ENDIF
           ENDIF
       ENDIF
-       
 C     Save those F values
       OPEN(UNIT=5678,FILE = "True_catch.out")
       write(5678,'(5(F17.2,1x))') X(1)
