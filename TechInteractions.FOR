@@ -4146,7 +4146,7 @@ C
 C
 C     Local variables
       INTEGER Year,Ispec,IBlkNS,IBlkEW
-      REAL*8 Error1,Error2
+      REAL*8 Error1,Error2,Error0
       REAL*8 XNORM
       EXTERNAL XNORM
 C
@@ -4155,8 +4155,8 @@ C     Generate the recruitment error terms
       DO 10000 Ispec = 1,NSpec
        DO 10000 Year = MinPYr,MaxPYr
         !global process error on recruitment (Error1)
-        Error1 = XNORM(1,0.0d0,SigmaR1(Ispec),ISEEDP)
-     +                             -SigmaR1(ISpec)**2.0/2.0
+        Error0 = XNORM(1,0.0d0,1.0d0,ISEEDP)   
+        Error1 = SigmaR1(Ispec)*Error0-SigmaR1(ISpec)**2.0/2.0
         DO 11000 IBlKNS = 1,NNSBlock
          DO 11000 IBlkEW = 1,NEWBlock
          !Local process error on recruitment (Error2)
