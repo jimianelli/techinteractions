@@ -684,7 +684,7 @@ C	INTEGER Isim
       REAL*8 FUNK 
       REAL*8 FUNK3 
       REAL*8 FUNKSCALAR
-      INTEGER, DIMENSION(1000,500) :: OM_fish, EM_fish
+      INTEGER, DIMENSION(100,100) :: OM_fish, EM_fish
 C     Carey: EXTERNAL means to use the user-defined definition of this function (FUNK), rather than an intrinsically defined function, like what's written into the FORTRAN programming language
       EXTERNAL FUNK
       EXTERNAL FUNKSCALAR
@@ -731,14 +731,14 @@ C	Input Files
       OPEN(UNIT=2,FILE="RANDOMTRY.NUM") !This is used - seeds for each sim come from this file
 	OPEN(UNIT=3,FILE="RANDOM4.NUM")
       ! Now read in the fishing strategy for the OM
-      OPEN(UNIT=1234,FILE = "Random_strategy_OM.dat")
-      DO 9876 II=1,1000
+      OPEN(UNIT=1234,FILE = "Random_seed_OM.dat")
+      DO 9876 II=1,100
           READ(1234,*)  OM_fish(II,:) 
 9876  enddo
       CLOSE(1234)
       ! Now read in the fishing strategy for the EM
-      OPEN(UNIT=1235,FILE = "Random_strategy_EM.dat")
-      DO 9877 II=1,1000
+      OPEN(UNIT=1235,FILE = "Random_seed_EM.dat")
+      DO 9877 II=1,100
           READ(1235,*)  EM_fish(II,:) 
 9877  enddo  
       CLOSE(1235)
@@ -1049,9 +1049,10 @@ C       Conduct stock assessments
         ENDIF    
         
         IF(OM_strategy.EQ.1) THEN 
-            IF(OM_fish(Isim, TheProjYear).EQ.1) THEN 
-                CALL SYSTEM("main_code2000.exe")
-            ENDIF
+            OPEN(unit=5353, FILE="seed.dat")
+            write(5353, *) OM_fish(Isim, (TheProjYear-FinDepYr)) 
+            CLOSE(5353)
+            CALL SYSTEM("fishing_strategy.Rexec")
             Write(*,*) 'Finished OM technical interaction model'
         ENDIF
         
@@ -1273,10 +1274,15 @@ C      Save the ABC output
         ENDIF 
         
         IF(OM_strategy.EQ.1) THEN 
-            IF(Current_val.EQ.1) THEN 
-                CALL SYSTEM("main_code2000.exe")
-            ENDIF
-            Write(*,*) 'Finished EM technical interaction model'
+            IF(TheProjYear.EQ.FinDepYr+1) THEN
+              CALL SYSTEM("main_code_average.exe")
+            ENDIF 
+            if (TheProjYear.GT.FinDepYr+1) THEN
+                OPEN(unit=5354, FILE="seed.dat")
+                write(5354, *) Current_val 
+                CLOSE(5354)
+                CALL SYSTEM("fishing_strategy.Rexec")
+            ENDIF    
         ENDIF 
         
         ! Read in the output from the tech int model

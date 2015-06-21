@@ -307,11 +307,11 @@
 	
 		
 ##################### Case 1: without the gear constraints:
-	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL)
+	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
-		set.seed(777)
+		set.seed(seed)
 		if (Choose_fish_strategies == "Year") 
 		{
 			Yr_select <- Yr
@@ -470,7 +470,7 @@
 	}	
 		
 
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=NULL)
+	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=NULL, seed=777)
 	
 	Without_gear_constraints(2000,max_dk=5, min_dk=0.2)
 	Without_gear_constraints(2001,max_dk=5, min_dk=0.2)
