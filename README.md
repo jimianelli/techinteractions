@@ -15,6 +15,6 @@ Some of the scenarios require running the "fishing_strategy.Rexec" code. But to 
 1. Open the command line "cmd.exe"
 2. type in 
 `ASSOC .Rexec=RScriptExecutable`
-3. then
+3.a. then
 `FTYPE RScriptExecutable=C:\Program Files\R\R-3.1.2\bin\x64\Rscript.exe  %1 %*`
-4. make sure that the path to Rscript.exe is right
+3.b. make sure that the above path to Rscript.exe is right
