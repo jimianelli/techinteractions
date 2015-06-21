@@ -471,6 +471,7 @@
 		
 
 	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=NULL, seed=777)
+	Without_gear_constraints(Yr=NULL,max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777)
 	
 	Without_gear_constraints(2000,max_dk=5, min_dk=0.2)
 	Without_gear_constraints(2001,max_dk=5, min_dk=0.2)

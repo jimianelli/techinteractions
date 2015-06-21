@@ -25,11 +25,6 @@
 	rm(list=ls())
 	gc()
 
-	if (Sys.info()[7]=="kotkot") folder1 <- "C:\\Users\\kotkot\\Dropbox\\MSE Data"
-	if (Sys.info()[7]=="Kotaro Ono") folder1 <- "C:\\Users\\Kotaro Ono\\Dropbox\\MSE Data"
-
-	main_folder = "../Postdoc_projects/techinteractions - Copy/"
-	
 #	source("C:\\R functions\\All_functions.r")
 #	source("C:\\R functions\\WestCoastMap.R")
 
@@ -47,17 +42,15 @@
 #
 ##############################################################################	
 
-	load(paste0(folder1, "\\Cluster_2000_2014_pca_FALSE_.Rdata"))
-
 	if (Choose_fish_strategies == "Year") 
 	{
 		YEARS <- 2000:2014 #1991:2014
-		load(paste0(folder1, "\\Cluster_2000_2014_pca_FALSE_.Rdata"))
+		load("Cluster_2000_2014_pca_FALSE_.Rdata")
 	}
 	if (Choose_fish_strategies == "Average") 
 	{
 		YEARS <- 2010:2014 #1991:2014
-		load(paste0(folder1, "\\Cluster_simple_2010_2014_pca_FALSE_.Rdata"))
+		load("Cluster_simple_2010_2014_pca_FALSE_.Rdata")
 	}
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
@@ -131,16 +124,6 @@
 			Data_subset <- subset(Catch_data, Yr == YEARS[yr])
 			Data_input1 <- subset(BSAI_data_partial, Yr == YEARS[yr])
 			Sp = c("Cod","Halibut","Pollock","Yellowfin")
-			png(file=paste0(folder1, "/Figures/Catch_proportion/", YEARS[yr], ".png"), width=15,height=15,units="cm",res=450)
-			par(mfrow=c(2,2), oma=c(4,4,0,2), mar=c(1,1,2,1))
-			for (i in 5:8) 
-			{
-				hist(Data_input1[,i], breaks=seq(0,1,by=0.05), xlab="", main="", ylim=c(0,85))
-				mtext(3, line=-0.5, text=Sp[i-4], xpd=NA, font=2)
-				if (i == 7) mtext(1, line=3, text="Proportion", adj=1.5, xpd=NA, font=1)
-				if (i == 5) { mtext(3, line=0.5, adj=1.2, text=YEARS[yr], xpd=NA, cex=1.2, font=2); mtext(2, line=2.5, text="Frequency", adj=-0.8, xpd=NA, font=1)}
-			}	
-			dev.off()
 			new <- tapply(Data_subset$value, list(Data_subset$Cluster), sum, na.rm=T)
 			Catch_strategy <- rbind(Catch_strategy, new)
 			weight_new <- as.numeric(new[which(!is.na(new) & new!=0)])
