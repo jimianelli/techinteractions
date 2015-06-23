@@ -3626,7 +3626,7 @@ C     Local variables
       CHARACTER*21 TstOut
       INTEGER Nrel1(10),Nrel2(10),Nage1(10),Nage2(10),EstFleet,Iarea
       INTEGER Iage,Isex,Itime,Yr,Ilen,II,Ioff,Iarea1a,Iarea2a,OutUnit
-	INTEGER Addone,CArea1
+	INTEGER Addone,CArea1,IOstatus
       CHARACTER*2 cIsim,cIYr,cIconfig
       CHARACTER*21 cstring
 
@@ -3879,6 +3879,12 @@ C     Summation limits for aggregating results
       !put a stop to further processing if the .cor file doesn't actually exist.
       INQUIRE(FILE = "cab.cor",EXIST=cor_exists)
       IF (cor_exists) THEN
+        OPEN(5000,FILE = "cab.cor")
+        READ(5000,*,IOSTAT = IOstatus)
+        CLOSE(5000)
+      ENDIF
+      IF (cor_exists.AND.IOstatus.GE.0) THEN
+
           Write(*,*) 'cab.cor exists for Sim ',Isim,', Year ', 
      +GlobalProjYr, 
      +' Config ', Iconfig
@@ -3891,7 +3897,8 @@ C     Summation limits for aggregating results
 
       ENDIF
       !Make a flag
-      IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation') THEN
+      IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation'.OR.
+     +    IOstatus.LT.0) THEN
         WRITE(402,*) Isim,GlobalProjYr,Ispec,Iconfig,TestMVN
         !return without re-calculating the quota (auto-sets quota to last year's)
         QuotaAct(Ispec) = CatBio(Ispec,1,GlobalProjYr-1)
