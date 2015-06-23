@@ -295,7 +295,7 @@
 		write(Bounds_b2, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
 				
 		# Now run the admb code and copy it to a different name
-#			system("admb main_code")
+			system("admb main_code")
 			system("main_code")
 			
 		# And copy the data file
