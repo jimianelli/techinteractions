@@ -209,6 +209,8 @@
 		{
 			## adding some random error 
 			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy*x); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
+			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = x+runif(4,-CV_strategy,CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
+			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
 			Data_input <- Data_input_fake
 		}
 		
@@ -295,15 +297,12 @@
 		write(Bounds_b2, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
 				
 		# Now run the admb code and copy it to a different name
-#			system("admb main_code")
-			system("main_code")
-			
-		# And copy the data file
-		if (!is.null(Yr)) file.copy(from=file_exe, to=paste0("main_code", Yr, ".dat"), overwrite=T)	
-		
+			#shell("admb main_code")
+			shell("main_code")
+				
 	}	
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.2, seed=seed_val)
+	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val)
 	
