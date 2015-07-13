@@ -671,7 +671,7 @@ C     Local variables
 
 C	Time counter variables
       real(8) :: etime          ! Declare the type of etime()
-      real(8),DIMENSION(2) :: elapsed     ! For receiving user and system time
+      real(4),DIMENSION(2) :: elapsed     ! For receiving user and system time
       real(8) :: total          ! For receiving total time
 
 C	INTEGER Isim
@@ -702,10 +702,10 @@ C     create the "results" directory in the techninteraction directory if it doe
 C     Clear some files
 	  !CALL SYSTEM("Del SUMM1.OUT")   ! this file is not used anymore so commenting out
       CALL SYSTEM("cd results")		  ! to specify where this file is located
-	CALL SYSTEM("Del SUMM1.EST") 
-      CALL SYSTEM("Del SUMM2.EST") 
-      CALL SYSTEM("Del REC.EST")
-	CALL SYSTEM("Del SUMM29.OUT")
+C	CALL SYSTEM("Del SUMM1.EST") 
+C      CALL SYSTEM("Del SUMM2.EST") 
+C      CALL SYSTEM("Del REC.EST")
+C	CALL SYSTEM("Del SUMM29.OUT")
 	CALL SYSTEM("cd ..")			  ! to go back at the working directory
 
 C      
@@ -1518,7 +1518,7 @@ C
       DO 4357 Ispec = 1,Nspec
        DO 4357 Isex = 1,Nsex
         Lamin(Ispec,Isex) = MAX(Linf(Ispec,Isex)*(1-exp(-kpar(Ispec,
-     +   Isex)* + (0.0-t0(Ispec,Isex)))),0.001)
+     +   Isex) + (0.0-t0(Ispec,Isex)))),0.001)
 4357  CONTINUE 
 
 C     Calculate weight-at-age
@@ -4262,7 +4262,7 @@ C     Open file
 10000 CONTINUE        
       CLOSE(14)   
       RETURN
-601   FORMAT(1x\,1x,I2,1x,I2)
+601   FORMAT(1x,1x,I2,1x,I2)
 602   FORMAT(1x,"Age Fecundity   Weight")
 603   FORMAT(1x,I3,1x,F9.4,1x,100(F8.3,1x))
 
@@ -4303,7 +4303,8 @@ C
 C
 C     Local variables
       INTEGER Ispec,Year,IBlkNS,IBlkEW,JBlkNS,JBlkEW,Iarea,II,Isex,Iage
-      REAL*8 TotCat,Val(100),MaxRec,MaxSSB,MaxEff,TotEff,IMPA
+			INTEGER IMPA
+      REAL*8 TotCat,Val(100),MaxRec,MaxSSB,MaxEff,TotEff
 
 C
 C     Total effort
@@ -5106,7 +5107,7 @@ C     Summation limits for aggregating results
           CALL IterateNvecsMVN(Ispec,Iarea1+Addone,Iconfig,Year2+1) !Might need to move this to avoid iterating for iconfig = 0 (which will be the true value and not the assessment author's specified trial values)
       ENDIF
       !Make a flag
-      IF (cor_exists.EQ..FALSE..OR.TestMVN.EQ.'Correlation') THEN
+      IF (cor_exists.EQV..FALSE..OR.TestMVN.EQ.'Correlation') THEN
         WRITE(402,*) Isim,GlobalProjYr,Ispec,Iconfig,TestMVN
         !return without re-calculating the quota (auto-sets quota to last year's)
         QuotaAct(Ispec) = CatBio(Ispec,1,GlobalProjYr-1)
@@ -5597,8 +5598,8 @@ C This subroutine calls amoeba2 to find the proposed ABC level that leads to a p
 C Set up the parameters for a fit
 
 C     IMPLICIT NONE
-      REAL*8 P(101,100),Y(101),X(100),SSS,FUNK,TOL
-	REAL(8), INTENT(IN) :: GRD
+      REAL*8 P(101,100),Y(101),X(100),SSS,FUNK2,TOL
+			REAL(8), INTENT(IN) :: GRD
       INTEGER*4 NDIM,I,J,ITER
       EXTERNAL FUNK2
 
@@ -5980,9 +5981,9 @@ C
       IMPLICIT NONE
 C
 C     Local variables
-      REAL*8 X(100),SS,ii,jj,IEffort,BestRoughEffort
+      REAL*8 X(100),SS,IEffort,BestRoughEffort
 	REAL*8 i,ObjFun,ObjFunRough
-      INTEGER Ispec,kk,ll
+      INTEGER Ispec,kk,ll,jj,ii
       REAL*8 FUNK
       REAL*8 FUNKSCALAR
       EXTERNAL FUNK
@@ -6569,10 +6570,10 @@ C     Pred(1) = Year, Pred(2) =estimated SpBio(Year), Pred(3) = Est Depletion(Ye
 C     Pred(4) = Est TotBio(Year), Pred(5) = EstRecruitment(Year), Pred(6) = Harvest rate(Year)
         DO 50100 Yr=Year1,Year2+1
          READ(99,*) (Pred(II),II=1,6) 
-         IF (Pred(1).GT.90000000000) Pred(1) = 90000000000
-         IF (Pred(2).GT.90000000000) Pred(2) = 90000000000
-         IF (Pred(4).GT.90000000000) Pred(4) = 90000000000
-         IF (Pred(6).GT.90000000000) Pred(6) = 90000000000
+         IF (Pred(1).GT.90000000000.0) Pred(1) = 90000000000.0
+         IF (Pred(2).GT.90000000000.0) Pred(2) = 90000000000.0
+         IF (Pred(4).GT.90000000000.0) Pred(4) = 90000000000.0
+         IF (Pred(6).GT.90000000000.0) Pred(6) = 90000000000.0
 C       
 C     This next "if" statement will need to be modified when testing "B" to match teh current meaning of Pred
          IF (INDC.EQ."B") THEN !Carey changed "C" to "B" to be consistent with WSG report and numbers
@@ -6944,7 +6945,7 @@ C     MVN is a program written by John Uebersax to generate multivariate normal 
 1005  FORMAT(I5,12x,"#Number of random vectors")
 1006  FORMAT(I2,15x, "#means, stds, and correlations are supplied")
 1007  FORMAT(100(F30.27,1x)) !might need to back down on decimals; we'll see.
-1008  FORMAT(<NumAges>(1x,12(F8.4,1x),/))
+1008  FORMAT(100(1x,12(F8.4,1x)))
 1009  FORMAT(I5,12x,"#Random Number Seed")
         END SUBROUTINE IterateNvecsMVN 
 
