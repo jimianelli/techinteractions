@@ -18,3 +18,5 @@ Some of the scenarios require running the "fishing_strategy.Rexec" code. But to 
 3. then
 `FTYPE RScriptExecutable=C:\Program Files\R\R-3.1.2\bin\x64\Rscript.exe  %1 %*`
 4. make sure that the above path to Rscript.exe is right
+
+bla
