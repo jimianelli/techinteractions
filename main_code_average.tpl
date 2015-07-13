@@ -95,10 +95,10 @@ PARAMETER_SECTION
 PRELIMINARY_CALCULATIONS_SECTION
   opt_sim();
   for (int it=1;it<=(nb_b1-Nb_species-1);it++){
-  b1(it+Nb_species+1) = 3*relative_catch(it);
+  b1(it+Nb_species+1) = 5*relative_catch(it);
   }
   for (int it=1;it<=(nb_b2);it++){
-  b2(it) = 0.3*relative_catch(it);
+  b2(it) = 0.2*relative_catch(it);
   }
 //  cout << b1 << endl;
 //  cout << b2 << endl;exit(1);
