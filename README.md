@@ -1,6 +1,6 @@
 ## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints with a simpler definition of fishing strategies. This is the updated version of the "Multsp_techint_KO_LP" branch
 
-## To compile 'techninteractions.for' using gfortran use the following code
+## To compile 'techinteractions.for' using gfortran use the following code
 gfortran -ffixed-line-length-none TechInteractions.for -o TechInteractions.exe
 
 ## Information about the branch:
