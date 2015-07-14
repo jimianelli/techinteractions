@@ -13,12 +13,3 @@ gfortran -ffixed-line-length-none TechInteractions.for -o TechInteractions.exe
 2. any deviation from it is controlled by the CV of fishing strategies
 3. for scenarios with changing fishing strategies, the fortran code needs to run "fishing_strategy.Rexec"
 
-## ! Important information to read to be able to run this branch !
-Some of the scenarios require running the "fishing_strategy.Rexec" code. But to be able to do so, user needs to do the following 
-1. Open the command line "cmd.exe"
-2. type in 
-`ASSOC .Rexec=RScriptExecutable`
-3. then
-`FTYPE RScriptExecutable=C:\Program Files\R\R-3.1.2\bin\x64\Rscript.exe  %1 %*`
-4. make sure that the above path to Rscript.exe is right
-
