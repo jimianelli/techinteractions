@@ -5835,35 +5835,6 @@ C        POINT. REPLACE THE OLD HIGH POINT AND CONTINUE
 
       END
 
-C      
-C=========================================================================
-C
-
-      SUBROUTINE RPERM(P,N,RANDOMSEED)
-!===Generate a random permutation, P, of the first N integers.
-!   (Shuffling, equivalent to sampling WITHOUT REPLACEMENT).
-!   Adaptation of Knuth Volume 2, Algorithm 3.4.2P.
-      INTEGER N,P(N), K,J,I,IPJ,ITEMP,M
-	INTEGER, INTENT(IN), DIMENSION(3) :: RANDOMSEED
-      REAL U(100)
-      DO I=1,N
-        P(I)=I
-      END DO
-!---Generate up to 100 U(0,1) numbers at a time.
-      DO I=1,N,100
-        M=MIN(N-I+1,100)
-        CALL RAND(U,M,RANDOMSEED)
-        DO J=1,M
-          IPJ=I+J-1
-          K=INT(U(J)*(N-IPJ+1))+IPJ
-          ITEMP=P(IPJ)
-          P(IPJ)=P(K)
-          P(K)=ITEMP
-        END DO
-      END DO
-      RETURN
-      END
-
 C
 C=======================================================================
 C
