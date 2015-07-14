@@ -1,5 +1,8 @@
 ## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints with a simpler definition of fishing strategies. This is the updated version of the "Multsp_techint_KO_LP" branch
 
+## To compile <techninteractions.for> using gfortran use the following code
+gfortran -ffixed-line-length-none TechInteractions.for -o TechInteractions.exe
+
 ## Information about the branch:
 1. OM.dat file controls the population dynamics of the Operating Model + the specifics of the data generation process (used in the Estimation Model) + how the fishing strategies changes over time in the OM
 2. EM.dat file controls the setting the the assessment model (i.e CAB) 
@@ -19,4 +22,3 @@ Some of the scenarios require running the "fishing_strategy.Rexec" code. But to 
 `FTYPE RScriptExecutable=C:\Program Files\R\R-3.1.2\bin\x64\Rscript.exe  %1 %*`
 4. make sure that the above path to Rscript.exe is right
 
-bla
