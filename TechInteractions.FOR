@@ -1052,7 +1052,7 @@ C       Conduct stock assessments
             OPEN(unit=5353, FILE="seed.dat")
             write(5353, *) OM_fish(Isim, (TheProjYear-FinDepYr)) 
             CLOSE(5353)
-            CALL SYSTEM("fishing_strategy.Rexec")
+            CALL SYSTEM("Rscript fishing_strategy.R")
             Write(*,*) 'Finished OM technical interaction model'
         ENDIF
         
@@ -1281,7 +1281,7 @@ C      Save the ABC output
                 OPEN(unit=5354, FILE="seed.dat")
                 write(5354, *) Current_val 
                 CLOSE(5354)
-                CALL SYSTEM("fishing_strategy.Rexec")
+                CALL SYSTEM("Rscript fishing_strategy.R")
             ENDIF    
         ENDIF 
         
@@ -4365,7 +4365,7 @@ C     GlobalEffort def'n has to be changed if spatial effort blocks become activ
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
        WRITE(35,601) Isim, Ispec,Year,
      +      (CatBio(Ispec,1,Year))
-       WRITE(16,601) Ispec,Year,
+       WRITE(16,602) Ispec,Year,
      +      ((RecSum(Ispec,Year,IBlkNS,IBlkEW)/MaxRec*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
 C Carey added this one
@@ -4436,7 +4436,7 @@ Cfs
      +   MaxEff = NetEffort(IBlkNS,IBlkEW,Year)
 21000 CONTINUE     
       IF (MaxEff.LE.0) MaxEff = 0.001
-      WRITE(18,601) -1,Year,
+      WRITE(18,602) -1,Year,
      +      ((NetEffort(IBlkNS,IBlkEW,Year)/MaxEff*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
       WRITE(32,602) -1,Year,
@@ -4476,7 +4476,7 @@ C	Carey is adding a file for larvae and recruits by cell
 C     Carey is adding 2 files, one for catch cpue and one for survey cpue
       DO 9878 Ispec = 1,Nspec
    !     DO 9878 Iarea = 0,Narea
-      WRITE(1500,623) Isim,Year,Ispec,(CPUE(Ispec,Iarea,Year),Iarea=
+      WRITE(1500,624) Isim,Year,Ispec,(CPUE(Ispec,Iarea,Year),Iarea=
      +   0,Narea)
       WRITE(1600,623) Isim,Year,Ispec,Iarea,(SurveyEst(Ispec,Iarea,
      +  Year),Iarea=0,Narea)
@@ -4494,13 +4494,13 @@ C     Carey is adding 2 files, one for catch cpue and one for survey cpue
 699   FORMAT(I2,1x,I2,1x,F8.4)
 617   FORMAT(1x,I4,1x,2(F10.4))
 618   FORMAT(1x,I2,1x,I4,1x,2(F12.2,1x))
-619	FORMAT(2(1x,I4),1x,F8.6,1x,F10.3,1x,F8.6,1x,2(F8.6,1x),F10.3)
+619	  FORMAT(2(1x,I4),1x,F8.6,1x,F10.3,1x,F8.6,1x,2(F8.6,1x),F10.3)
 620   FORMAT(1x,I4,1x,2(F15.4))
-621	FORMAT(1x,2I4,1x,3(I2,1x),2(F25.7,1x))
+621	  FORMAT(1x,2I4,1x,2(I2,1x),2(F25.7,1x))
 622   FORMAT(1x,I2,1x,I4,1x,F10.3,1x,I4)
 !Carey added to output CPUE data (Catch and Survey CPUE)
-623   FORMAT(2(I4,1x),2(I2,1x),F18.8)
-624   FORMAT(1x,2I2,1x,I4,1x,200(F20.5,1x))
+623   FORMAT(2(I4,1x),2(I2,1x),200(F18.8))
+624   FORMAT(1x,2I4,1x,I2,1x,200(F20.5,1x))
 !Sim,Yr,Ispec,Iarea,CPUE
       END SUBROUTINE Summary2
 
@@ -4555,7 +4555,7 @@ C     Open file
        WRITE(34,601) Isim, ISpec,Year,
      +      ((SpBio(Ispec,IBlkNS,IBlkEW,Year),
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
-       WRITE(16,601) ISpec,Year,
+       WRITE(16,602) ISpec,Year,
      +      ((RecSum(Ispec,Year,IBlkNS,IBlkEW)/MaxRec*100,
      +        IBlkEW=1,NEWBlock),IBlkNS=1,NNSBlock)
 
