@@ -25,13 +25,8 @@
 	rm(list=ls())
 	gc()
 
-	setwd("C:\\Users\\kotaro\\Dropbox\\MSE Data")
-	setwd("C:\\Users\\kotkot\\Dropbox\\MSE Data")
-	setwd("C:\\Users\\Kotaro Ono\\Dropbox\\MSE Data")
-	setwd("F:\\Dropbox\\MSE Data")
-
-	source("C:\\R functions\\All_functions.r")
-	source("C:\\R functions\\WestCoastMap.R")
+#	source("C:\\R functions\\All_functions.r")
+#	source("C:\\R functions\\WestCoastMap.R")
 
 ##############################################################################	
 #
@@ -47,17 +42,15 @@
 #
 ##############################################################################	
 
-	load(paste0(getwd(), "\\Cluster_2000_2014_pca_FALSE_.Rdata"))
-
 	if (Choose_fish_strategies == "Year") 
 	{
 		YEARS <- 2000:2014 #1991:2014
-		load(paste0(getwd(), "\\Cluster_2000_2014_pca_FALSE_.Rdata"))
+		load("Cluster_2000_2014_pca_FALSE_.Rdata")
 	}
 	if (Choose_fish_strategies == "Average") 
 	{
 		YEARS <- 2010:2014 #1991:2014
-		load(paste0(getwd(), "\\Cluster_simple_2010_2014_pca_FALSE_.Rdata"))
+		load("Cluster_simple_2010_2014_pca_FALSE_.Rdata")
 	}
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
@@ -81,7 +74,6 @@
 	if (Choose_fish_strategies == "Year") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,1:4], t(apply(BSAI_data[,-c(1:4)], 1, function(x) x/sum(x)))))
 	if (Choose_fish_strategies == "Average") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,1:3], t(apply(BSAI_data[,-c(1:3)], 1, function(x) x/sum(x)))))
 	BSAI_data_partial[is.na(BSAI_data_partial)] <- 0
-	head(BSAI_data_partial)
 
 	### remove from start strategies in which halibut is the main catch (proportion > 0.5)
 	if (Choose_fish_strategies == "Years") to_keep <- which(BSAI_data_partial$PACIFIC.HALIBUT<0.5)
@@ -116,124 +108,6 @@
 		Weight_gear_species[,,1] <- (apply(new, 2, function(x) x/sum(x)))
 	}
 	
-	Weight_gear_species_min <- round(apply(Weight_gear_species, c(1,2), min),2)[,-4]
-	Weight_gear_species_max <- round(apply(Weight_gear_species, c(1,2), max),2)[,-4]
-	## Some tweaking to alleviate some of the constraints
-	Weight_gear_species_max[which(Weight_gear_species_max==0)] <- 0.1
-	# Weight_gear_species_min[which(Weight_gear_species_max!=0)] <- 0
-	Weight_gear_species_max <- round(apply(Weight_gear_species, c(1,2), max),2)[,-4]
-
-	### Gear constraint based on the assessment data
-	Weight_gear_species_min <- matrix(c(0.20,0.00,0.89,
-										0.00,0.95,0.00,
-										0.00,0.00,0.00,
-										0.50,0.00,0.00),nrow=4,ncol=3,byrow=T) 
-	
-	Weight_gear_species_max <- matrix(c(0.40,0.05,0.99,
-										0.10,0.99,0.04,
-										0.10,0.10,0.06,
-										0.70,0.01,0.07),nrow=4,ncol=3,byrow=T) 
-	
-	Weight_gear_species_mid = (Weight_gear_species_min+Weight_gear_species_max)/2
-	Weight_gear_species_mid <- Weight_gear_species_mid/matrix(rep(apply(Weight_gear_species_mid,2,sum),4),,ncol=3,byrow=T)
-	
-
-		### The fishing strategies
-			library(ggplot2)
-			library(reshape2)
-			library(plyr)
-	if (Choose_fish_strategies == "Years")
-	{
-			for (yr in seq_along(YEARS))
-			{
-				data_plot <- subset(Catch_data, Yr==YEARS[yr])
-				data_plot$Area <- factor(data_plot$Area, levels=BSAI)
-				unfished_area <- which(table(data_plot$Area)==0)
-				# data_plot <- rbind(data_plot, data.frame(Yr=rep(YEARS[yr],4*length(unfished_area)), Area=rep(names(unfished_area),4), Gear=rep(data_plot$Gear[1],4*length(unfished_area)), Cluster=rep(data_plot$Cluster[1],4*length(unfished_area)), variable=rep(c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE", "PACIFIC.HALIBUT"),each=length(unfished_area)), value=rep(0,4*length(unfished_area))))
-				data_plot <- rbind(data_plot, data.frame(Yr=rep(YEARS[yr],length(unfished_area)), Area=rep(names(unfished_area),1), Gear=rep(data_plot$Gear[1],length(unfished_area)), Cluster=rep(data_plot$Cluster[1],length(unfished_area)), variable=rep("PACIFIC.COD", length(unfished_area)), value=rep(0,length(unfished_area))))
-				datdat <- melt(data_plot)
-				datdat <- ddply(datdat, .(Gear, Area, variable), summarise, value = mean(value))
-				cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-				datdat$colors <- cbPalette[as.numeric(datdat$variable)]
-				datdat$Area <- factor(datdat$Area, levels=BSAI)
-				datdat$species <- as.factor(datdat$variable)
-				datdat$Proportion <- datdat$value/rep(as.numeric(tapply(datdat$value, cut(1:nrow(datdat), nrow(datdat)/4), sum)), each=4)
-				datdat <- datdat[!is.na(datdat$value),]
-				# for the annotation
-					vars <- data.frame(expand.grid(unique(datdat[,'Gear']),unique(datdat[,'Area'])))
-					colnames(vars) <- c("Gear", "Area")
-					Catch_scale <- rep(0, nrow(vars))
-					vars_comb <- apply(vars, 1, function(x) paste(x, collapse="_"))
-					data_comb <- apply(datdat[,1:2], 1, function(x) paste(x, collapse="_"))
-					# Catch_scale[match(unique(data_comb),vars_comb)] <- as.character(cut(as.numeric(tapply(datdat$value, cut(1:nrow(datdat), nrow(datdat)/4), sum))/1000000, breaks=seq(0,300,by=100), include.lowest=FALSE))				
-					# Catch_scale <- as.factor(Catch_scale)
-					# Catch_scale <- factor(Catch_scale, labels=c(100,200,300,0))
-					# Catch_scale <- factor(Catch_scale, levels=c(0,100,200,300))
-					# Catch_scale <- paste(Catch_scale, "(1000t)")
-					# data1 <- data.frame(x = 3, y = 1.1, vars, labs=Catch_scale)
-				g <- ggplot(datdat, aes(x=species,y=Proportion, fill=factor(colors))) + geom_bar(stat="identity") + facet_grid(Gear ~ Area) + 
-				theme_bw() + theme(panel.grid.major = element_blank(),
-					panel.grid.minor = element_blank(),
-					strip.background = element_rect(fill = NA, linetype = 0),
-					axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5, colour=cbPalette[c(3,4,2,1)]),
-					axis.title = element_text(colour = "grey30", size=12),
-					axis.ticks = element_line(colour = "grey50"),
-					strip.text = element_text(colour = "grey30"),
-					plot.title = element_text(size = 16),
-					strip.text.x = element_text(size = 12),
-					strip.text.y = element_text(size = 12)
-					) + scale_fill_manual(values=cbPalette[1:4], guide=FALSE) + ggtitle(YEARS[yr]) + coord_cartesian(ylim=c(0, 1.2))# + geom_text(data=data1, aes(x, y, label=labs, group=NULL), colour="black", inherit.aes=FALSE, parse=FALSE, size=3)
-					
-				g	
-				ggsave(filename=paste0(getwd(), "/Figures/", YEARS[yr], ".png"), width=14, height=9, dpi=450)	
-			}
-		
-	}
-	if (Choose_fish_strategies == "Average")
-	{		
-		data_plot <- Catch_data
-		data_plot$Area <- factor(data_plot$Area, levels=BSAI)
-		unfished_area <- which(table(data_plot$Area)==0)
-		# data_plot <- rbind(data_plot, data.frame(Yr=rep(YEARS[yr],4*length(unfished_area)), Area=rep(names(unfished_area),4), Gear=rep(data_plot$Gear[1],4*length(unfished_area)), Cluster=rep(data_plot$Cluster[1],4*length(unfished_area)), variable=rep(c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE", "PACIFIC.HALIBUT"),each=length(unfished_area)), value=rep(0,4*length(unfished_area))))
-		data_plot <- rbind(data_plot, data.frame(Area=rep(names(unfished_area),1), Gear=rep(data_plot$Gear[1],length(unfished_area)), Cluster=rep(data_plot$Cluster[1],length(unfished_area)), variable=rep("PACIFIC.COD", length(unfished_area)), value=rep(0,length(unfished_area))))
-		datdat <- melt(data_plot)
-		datdat <- ddply(datdat, .(Gear, Area, variable), summarise, value = mean(value))
-		cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-		datdat$colors <- cbPalette[as.numeric(datdat$variable)]
-		datdat$Area <- factor(datdat$Area, levels=BSAI)
-		datdat$species <- as.factor(datdat$variable)
-		datdat$Proportion <- datdat$value/rep(as.numeric(tapply(datdat$value, cut(1:nrow(datdat), nrow(datdat)/4), sum)), each=4)
-		datdat <- datdat[!is.na(datdat$value),]
-		# for the annotation
-			vars <- data.frame(expand.grid(unique(datdat[,'Gear']),unique(datdat[,'Area'])))
-			colnames(vars) <- c("Gear", "Area")
-			Catch_scale <- rep(0, nrow(vars))
-			vars_comb <- apply(vars, 1, function(x) paste(x, collapse="_"))
-			data_comb <- apply(datdat[,1:2], 1, function(x) paste(x, collapse="_"))
-			# Catch_scale[match(unique(data_comb),vars_comb)] <- as.character(cut(as.numeric(tapply(datdat$value, cut(1:nrow(datdat), nrow(datdat)/4), sum))/1000000, breaks=seq(0,300,by=100), include.lowest=FALSE))				
-			# Catch_scale <- as.factor(Catch_scale)
-			# Catch_scale <- factor(Catch_scale, labels=c(100,200,300,0))
-			# Catch_scale <- factor(Catch_scale, levels=c(0,100,200,300))
-			# Catch_scale <- paste(Catch_scale, "(1000t)")
-			# data1 <- data.frame(x = 3, y = 1.1, vars, labs=Catch_scale)
-		g <- ggplot(datdat, aes(x=species,y=Proportion, fill=factor(colors))) + geom_bar(stat="identity") + facet_grid(Gear ~ Area) + 
-		theme_bw() + theme(panel.grid.major = element_blank(),
-			panel.grid.minor = element_blank(),
-			strip.background = element_rect(fill = NA, linetype = 0),
-			axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5, colour=cbPalette[c(3,4,2,1)]),
-			axis.title = element_text(colour = "grey30", size=12),
-			axis.ticks = element_line(colour = "grey50"),
-			strip.text = element_text(colour = "grey30"),
-			plot.title = element_text(size = 16),
-			strip.text.x = element_text(size = 12),
-			strip.text.y = element_text(size = 12)
-			) + scale_fill_manual(values=cbPalette[1:4], guide=FALSE) + ggtitle(YEARS[yr]) + coord_cartesian(ylim=c(0, 1.2))# + geom_text(data=data1, aes(x, y, label=labs, group=NULL), colour="black", inherit.aes=FALSE, parse=FALSE, size=3)
-			
-		g	
-			
-	}
-
-	
 ####### The initial weight for each strategy should be based on the original observer data
 ####### 1. aggregate each catch observation by fishing strategy
 ####### 2. expand the above so that the total catch is 1.700.000 t.
@@ -250,16 +124,6 @@
 			Data_subset <- subset(Catch_data, Yr == YEARS[yr])
 			Data_input1 <- subset(BSAI_data_partial, Yr == YEARS[yr])
 			Sp = c("Cod","Halibut","Pollock","Yellowfin")
-			png(file=paste0(getwd(), "/Figures/Catch_proportion/", YEARS[yr], ".png"), width=15,height=15,units="cm",res=450)
-			par(mfrow=c(2,2), oma=c(4,4,0,2), mar=c(1,1,2,1))
-			for (i in 5:8) 
-			{
-				hist(Data_input1[,i], breaks=seq(0,1,by=0.05), xlab="", main="", ylim=c(0,85))
-				mtext(3, line=-0.5, text=Sp[i-4], xpd=NA, font=2)
-				if (i == 7) mtext(1, line=3, text="Proportion", adj=1.5, xpd=NA, font=1)
-				if (i == 5) { mtext(3, line=0.5, adj=1.2, text=YEARS[yr], xpd=NA, cex=1.2, font=2); mtext(2, line=2.5, text="Frequency", adj=-0.8, xpd=NA, font=1)}
-			}	
-			dev.off()
 			new <- tapply(Data_subset$value, list(Data_subset$Cluster), sum, na.rm=T)
 			Catch_strategy <- rbind(Catch_strategy, new)
 			weight_new <- as.numeric(new[which(!is.na(new) & new!=0)])
@@ -304,8 +168,7 @@
 		
 	}
 	
-	
-		
+			
 ##################### Case 1: without the gear constraints:
 	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777)
 	{	
@@ -345,7 +208,9 @@
 		if(!is.null(CV_strategy)) 
 		{
 			## adding some random error 
-			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = (x+runif(4,0,CV_strategy)); bbb = aaa/sum(aaa); return(bbb)}))
+			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy*x); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
+			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = x+runif(4,-CV_strategy,CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
+			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
 			Data_input <- Data_input_fake
 		}
 		
@@ -369,9 +234,7 @@
 			Nb_constraints_b1 <- c(Nb_species,1,Nb_strategy)
 			Nb_constraints_b2 <- c(Nb_strategy)
 		# TACs
-			TACs <- c(500000, 1400000, 200000, 4575)													# Need to figure this out
-			TACs <- c(200000, 1400000, 100000, 4575)										# This part is overridden by the fortran code
-			TACs <- c(319123, 2925188, 72241, 4575)										# This part is overridden by the fortran code
+			TACs <- scan("TAC.dat",skip=1)
 		# Without the double constraint on the bounds (dk,t=1, and dkt-1)
 			Bounds_b1 <- c(rep(0,Nb_species), 1700000, max_dk*Data_weigthing)		# Need to figure this out
 			Bounds_b2 <- c(min_dk*Data_weigthing)
@@ -379,19 +242,8 @@
 			obj_fun <- as.vector(Data_input%*%price)
 			
 		##### Now write the file
-		wd <- getwd()	
-		if (Choose_fish_strategies == "Year") 
-		{
-			setwd("../Postdoc_projects/techint_LP_simple/")
 			file_save <- "main_code.dat"
 			file_exe <- "main_code.exe"
-		}
-		if (Choose_fish_strategies == "Average") 
-		{
-			setwd("../Postdoc_projects/techint_LP_simple_average/")
-			file_save <- "main_code_average.dat"
-			file_exe <- "main_code_average.exe"
-		}
 		
 		# Number fishing strategies 
 		write("# Number of fishing strategy", file=file_save)
@@ -443,82 +295,14 @@
 		# the b2 bounds (the upper bounds value of each b2 constraints)
 		write("# The b2 bounds ", file=file_save, append=T)
 		write(Bounds_b2, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
-		
-		# the TAC values (will be an output from fortran)
-		write("# TAC values", file="TAC.dat")
-		write(TACs, file="TAC.dat", ncolumns = Nb_strategy, append=T)			
-		
+				
 		# Now run the admb code and copy it to a different name
-		if (Choose_fish_strategies == "Year") 
-		{
-			system("admb main_code")
-			system("main_code")
-		}
-		if (Choose_fish_strategies == "Average") 
-		{
-			system("admb main_code_average")
-			system("main_code_average")
-		}
-		
-		if (!is.null(Yr)) file.copy(from=file_exe, to=paste0("main_code", Yr, ".exe"), overwrite=T)
-		
-		# And copy the data file
-		if (!is.null(Yr)) file.copy(from=file_exe, to=paste0("main_code", Yr, ".dat"), overwrite=T)	
-		
-		# Then copy the "main_code.tpl" file 
-		setwd(wd)
+			#shell("admb main_code")
+			shell("main_code")
+				
 	}	
 		
-
-	Without_gear_constraints(Yr=NULL,max_dk=10, min_dk=0.1, CV_strategy=NULL, seed=777)
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=NULL, seed=777)
-	Without_gear_constraints(Yr=NULL,max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777)
+	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(2000,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2001,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2002,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2003,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2004,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2005,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2006,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2007,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2008,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2009,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2010,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2011,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2012,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2013,max_dk=5, min_dk=0.2)
-	Without_gear_constraints(2014,max_dk=5, min_dk=0.2)
-
-################# Now create a .dat file that contains information on which fishing strategy is used when
-
-	if (Choose_fish_strategies == "Year") 
-	{
-		setwd("F:\\Dropbox\\Postdoc_projects\\techint_LP_simple")
-		set.seed(1)
-		vals <- matrix(sample(1:15, 500000, replace=T), nrow=1000,500)
-		write(vals, file="Random_strategy_OM.dat", ncolumns = 500)			# constraint on the "dK' lower bound
-		vals_new <- vals
-		vals_new[,2:500] <- vals[,1:499]
-		vals_new[,1] <- rep(15, 1000)
-		write(vals_new, file="Random_strategy_EM.dat", ncolumns = 500)			# constraint on the "dK' lower bound
-	}
+	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val)
 	
-	CV_strategy=0.1
-	if (Choose_fish_strategies == "Average") 
-	{
-		setwd("..\\Postdoc_projects\\techint_LP_simple_average")
-		set.seed(1)
-		VALS <- c()
-		for (it in 1:1000)
-		{
-			vals_new <- t(apply(Data_input_true, 1, function(x) { aaa = (x+runif(4,0,CV_strategy)); bbb = aaa/sum(aaa); return(bbb)}))
-			VALS <- rbind(VALS, t(vals_new))
-		}
-		write(t(VALS), file="Random_strategy_OM.dat", ncolumns = nrow(vals_new))			# constraint on the "dK' lower bound
-		
-		VALS_new <- VALS
-		VALS_new[5:nrow(VALS),] <- VALS[1:(nrow(VALS)-4),]
-		VALS_new[1:4,] <- t(Data_input_true)
-		write(t(VALS_new), file="Random_strategy_EM.dat", ncolumns = nrow(vals_new))			# constraint on the "dK' lower bound		
-	}
