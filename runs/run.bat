@@ -1,4 +1,5 @@
 @echo off
+if EXIST results (rmdir /S /Q results)
 set exec=..\src\build\debug\cab.exe 
 set exec2=..\src\build\debug\main_code_average.exe 
 set exec3=..\src\build\debug\TechInteractions.exe 
