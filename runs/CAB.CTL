@@ -13,7 +13,7 @@
 # SigmaR
 0.80999900   0.810001 -2
 # Start_rec_yr, End_rec_yr, Low_lmt, Upp_lmt, Phase
-   1   51 -10.0  10.0  2
+   1   52 -10.0  10.0  2
 # Sel patrns (3=Dome;2=DblLog;1=Log
  1  1
 #NselexCheck: Number of selex params
