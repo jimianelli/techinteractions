@@ -1,0 +1,1 @@
+IF NOT EXIST results mkdir results

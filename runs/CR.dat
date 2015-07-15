@@ -1,0 +1,25 @@
+Pstar approach? (1=yes,0=AFSC tier 3)   0
+
+Pstar HCR:
+Pstar                                   0.10
+Number MVN draws of ln(N-at-age)        1000
+Number of alt assess configs            1
+The configs species 1 to 3 (M + h make one config, paired vertically):
+config sp 1
+M configs      1                        0.34
+h configs      1                        0.99
+config weights 1                        1.00
+config sp 2
+M configs      2                        0.38
+h configs      2                        0.67
+config weights 2                        1.00
+config sp 3
+M configs      3                        0.12
+h configs      3                        0.99
+config weights 3                        1.00
+
+AFSC Tier 3 HCR:
+alpha (OFL)                             0.05
+Minus this many yrs for AvgRec calc     2                    !I don't think this is implemented yet. Nope not yet
+
+## added a comment for testing

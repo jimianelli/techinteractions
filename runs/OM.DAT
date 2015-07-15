@@ -1,0 +1,164 @@
+Number of simulations                   10
+Operating model only (no assessments)   0
+Use old values (1=Yes)                  0
+Number of projection years (MSE)        30
+Base year for initial depletion         51
+Base year for final depletion           51
+First yr fishing (NA if finding Qvals)  1
+Solve Effort for final depl (1=Yes)     0                    !0,1,2: 0=no (read from OM.dat), 1=yes, 2=read from SaveConstEff.all. Correct SaveConstantEff.all for 1x1 tech interact model has effort = 0.008443367447227 to get 39.9% depletion.
+Set final depl (if not solving)         -2.30258509299405          !This seems outdated
+Year MPA is implemented                 300
+Number of species                       3
+Number of time-steps during the year    1            !Have never changed this value - untested.
+Number of North-south Blocks            1            
+Number of East-west Blocks              1            
+Carrying Capacity (SSB total)           0800000000.0   5200000000.0   1000000000.00   
+Natural mortality                       0.34 0.38 0.12
+Maximum Age                             20   20   40  
+Plus groups? (1=Yes; 0=No)              1 
+Initial Dep (used to FindQVals)         50.0   55.0   65.0
+Final Dep (out of date; see below)      40.0   40.0   40.0   
+Does Qval equal 1 (DR project)?         0
+Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
+Recruitment specifications
+ Include process error? (1=yes;0=no)    0
+ Sigma(Global)                          0.57      0.90      0.41  
+ Sigma (Local)                          0.000001 0.000001 0.000001 
+ Steepness                              0.99 0.99 0.99 
+ Type of SR relationship 1,2,3,4        1    1    1
+ RecDistn(0=even;1=params;2pat)         0    0    0
+ Centre of gravity recruitment (X)      10.00   10.000   10.000
+ Centre of gravity recruitment (Y)      0.500   0.500   0.500
+ Left direction variance (X)            10000.0 10000.0 10000.0									! these values need to be the same
+ Left direction variance (Y)            10000.0 10000.0 10000.0                 ! these values need to be the same
+ Right direction variance (X)           10000.0 10000.0 10000.0                 ! these values need to be the same
+ Right direction variance (Y)           10000.0 10000.0 10000.0                 ! these values need to be the same
+Growth parameters
+ Linf (F)                               92.3  70.6  37.8 
+ Linf (M)                               92.3  70.6  33.7 
+ K (F)                                  0.240 0.176 0.137
+ K (M)                                  0.240 0.176 0.161
+ To (F)                                 0.00 0.00 0.00 
+ To (M)                                 0.00 0.00 0.00  
+ a (F)                                  0.000006 0.000007 0.000005
+ a (M)                                  0.000006 0.000007 0.000009
+ b (F)                                  3.160 3.018 3.227
+ b (M)                                  3.160 3.018 3.081
+ Length Bin Intervals                   1    1    1          !Defined here b.c. of length calcs in the readspec function
+ Number of length bins                  93   71   38          
+Maturity parameters 
+ L50                                    4.88  3.69  10.27
+ L95                                    7.93  5.75  13.11
+Dispersal
+ Mix (north-south)                      0.01    0.01    0.01   
+ Mix (east-west)                        0.01    0.01    0.01   
+ X1N (and V1N)                          10.00   1.000   10.00   1.000   10.00   1.000   
+ X2N (and V2N)                          17.50   1.000   17.50   1.000   17.50   1.000   
+ X1E (and V1E)                          2.50    1.000   2.50    1.000   2.50    1.000   
+ X2E (and V2E)                          4.50    1.000   4.50    1.000   4.50    1.000   
+Selectivity commercial 
+ Age-at-at-50%-recruitment              3.770   5.000   8.720  
+ Age-at-at-95%-recruitment              5.560   6.500   9.330 
+Selectivity survey     
+ Age-at-at-50%-recruitment              3.400   4.500   7.850  
+ Age-at-at-95%-recruitment              5.190   6.000   8.460  
+Spatial catchability
+ SigmaQ                                 0.001   0.001   0.001      
+ Hyperstability                         1
+ 
+Total Effort (Year, effort)
+   1  0.000
+   2  0.000
+   3  0.000
+   4  0.000
+   5  0.030
+   6  0.060
+   7  0.090
+   8  0.120
+   9  0.150
+  10  0.180
+  11  0.210
+  12  0.240
+  13  0.270
+  14  0.300
+  15  0.330
+  16  0.360
+  17  0.390
+  18  0.420
+  19  0.450
+  20  0.480
+  21  0.510
+  22  0.540
+  23  0.570
+  24  0.600
+  25  0.630
+  26  0.660
+  27  0.690
+  28  0.720
+  29  0.750
+  30  0.780
+  31  0.810
+  32  0.840
+  33  0.870
+  34  0.900
+  35  0.930
+  36  0.960
+  37  0.990
+  38  1.000
+  39  1.000
+  40  1.000
+  41  1.000
+  42  1.000
+  43  1.000
+  44  1.000
+  45  1.000
+  46  1.000
+  47  1.000
+  48  1.000
+  49  1.000
+  50  1.000
+  51  1.000
+     
+Specifications for the closed areas
+Number of closed areas                  0
+Lower limit (NS)                        1   1
+Upper limit (NS)                        1   1
+Lower limit (EW)                        1   1
+Upper limit (EW)                        1   1
+
+Specifications for open strata
+Lower limit (NS)                        1   1
+Upper limit (NS)                        1   1
+Lower limit (EW)                        1   1
+Upper limit (EW)                        1   1
+
+Specifications for data generation
+Data are deterministic (1=Yes)          0
+Coefficient of variation (CPUE)         0.2      
+Effective sample size (Catch)           100      (Pre-MPA)
+Effective sample size (Catch)           100      (With-MPA)
+First year with survey data             5
+Frequency of surveys                    1
+Coefficient of variation (surveys)      0.1
+Effective sample size (surveys)         100      (Pre-MPA)
+Effective sample size (surveys)         100      (With MPA)
+No Surveys in closed areas (1=Yes)      0
+
+Number of pre-history assessments       0
+Years for historical assessments        300    Used to be 51 66 81 for MPA assessment work.
+
+ImplOpt - implementation error (0=no)   0
+
+Larval Dispersal
+ MixLarval (north-south)                1.00    1.00    1.00   
+ MixLarval (east-west)                  0.50    0.50    0.50   
+ X1NLarval (and V1NLarval)              10.00   1.00    10.00   1.00    10.00   1.00  
+ X2NLarval (and V2NLarval)              17.50   1.00    17.50   1.00    17.50   1.00  
+ X1ELarval (and V1ELarval)              2.50    3.00    2.50    3.00    2.50    3.00  
+ X2ELarval (and V2ELarval)              4.50    0.001   4.50    0.001   4.50    0.001 
+ 
+Number of target depletions             1
+Target Year, Target Depletion(by species)
+51   50.0  55.0  65.0
+Management strategy                     0       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
+OM fishing strategy (fleet dynamics)    0       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)
