@@ -24,6 +24,7 @@
 
 	rm(list=ls())
 	gc()
+  library(reshape2)
 
 #	source("C:\\R functions\\All_functions.r")
 #	source("C:\\R functions\\WestCoastMap.R")
@@ -45,12 +46,12 @@
 	if (Choose_fish_strategies == "Year") 
 	{
 		YEARS <- 2000:2014 #1991:2014
-		load("Cluster_2000_2014_pca_FALSE_.Rdata")
+		load("../R/Cluster_2000_2014_pca_FALSE_.Rdata")
 	}
 	if (Choose_fish_strategies == "Average") 
 	{
 		YEARS <- 2010:2014 #1991:2014
-		load("Cluster_simple_2010_2014_pca_FALSE_.Rdata")
+		load("../R/Cluster_simple_2010_2014_pca_FALSE_.Rdata")
 	}
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)

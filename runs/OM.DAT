@@ -160,5 +160,5 @@ Larval Dispersal
 Number of target depletions             1
 Target Year, Target Depletion(by species)
 51   50.0  55.0  65.0
-Management strategy                     0       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
-OM fishing strategy (fleet dynamics)    0       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)
+Management strategy                     1       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
+OM fishing strategy (fleet dynamics)    1       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)

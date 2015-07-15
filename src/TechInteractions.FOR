@@ -1056,7 +1056,7 @@ C       Conduct stock assessments
             OPEN(unit=5353, FILE="seed.dat")
             write(5353, *) OM_fish(Isim, (TheProjYear-FinDepYr)) 
             CLOSE(5353)
-            CALL SYSTEM("Rscript fishing_strategy.R")
+            CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
             Write(*,*) 'Finished OM technical interaction model'
         ENDIF
         
@@ -1285,7 +1285,7 @@ C      Save the ABC output
                 OPEN(unit=5354, FILE="seed.dat")
                 write(5354, *) Current_val 
                 CLOSE(5354)
-                CALL SYSTEM("Rscript fishing_strategy.R")
+                CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
             ENDIF    
         ENDIF 
         

@@ -7,3 +7,4 @@ if EXIST %exec% (copy %exec% cab.exe ) ELSE echo "file missing, compile source c
 if EXIST %exec2% (copy %exec2% main_code_average.exe ) ELSE echo "file missing, compile source code in gmacs\src directory "
 if EXIST %exec3% (copy %exec3% TechInteractions.exe ) ELSE echo "file missing, compile source code in gmacs\src directory "
 TechInteractions 
+
