@@ -243,8 +243,8 @@
 			obj_fun <- as.vector(Data_input%*%price)
 			
 		##### Now write the file
-			file_save <- "main_code_average.dat"
-			file_exe <- "main_code_average.exe"
+			file_save <- "main_code.dat"
+			file_exe <- "main_code.exe"
 		
 		# Number fishing strategies 
 		write("# Number of fishing strategy", file=file_save)
@@ -299,7 +299,7 @@
 				
 		# Now run the admb code and copy it to a different name
 			#shell("admb main_code")
-			shell("main_code_average")
+			shell("main_code")
 				
 	}	
 		
