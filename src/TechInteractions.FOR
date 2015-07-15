@@ -16,6 +16,7 @@ C========================================================================
 	SAVE
 
 
+         CHARACTER(len=255) :: homedir
       INTEGER MaxSpec,MinPYr,MaxPYr,MaxAge,Nsex,MaxTime,MaxFleet
       INTEGER MaxNSBlk,MaxEWBlk,MaxSim,MaxLengthBins
       INTEGER MaxAssArea,MaxOpenArea,Max3StrataArea,MaxConfigs,MaxMVN
@@ -1045,9 +1046,12 @@ C       Conduct stock assessments
         
         ! Run the technical interaction model to determine the TRUE realized catch (OEM) based on the OM_fish value
         IF(OM_strategy.EQ.0) THEN 
+
+        CALL get_environment_variable("HOME", homedir)
+            WRITE (*,*) TRIM(homedir)
             CALL SYSTEM("main_code_average.exe")
-        ENDIF    
         
+        ENDIF
         IF(OM_strategy.EQ.1) THEN 
             OPEN(unit=5353, FILE="seed.dat")
             write(5353, *) OM_fish(Isim, (TheProjYear-FinDepYr)) 

@@ -100,6 +100,8 @@ PRELIMINARY_CALCULATIONS_SECTION
   for (int it=1;it<=(nb_b2);it++){
   b2(it) = 0.2*relative_catch(it);
   }
+  store_results();
+  exit(1);
 //  cout << b1 << endl;
 //  cout << b2 << endl;exit(1);
   
@@ -108,7 +110,6 @@ PROCEDURE_SECTION
   obj_fun=(norm2(pred_Y-Y)); 
   obj_fun=nobs/2.*log(obj_fun);    // make it a likelihood function so that
 
-  store_results();
   
 FUNCTION opt_sim
 // This code run the linear programming based on the constraints defined in:
