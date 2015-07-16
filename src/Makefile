@@ -5,11 +5,6 @@ AD = admb
 FCFLAGS = -O2
 FCFLAGS = -g -ffixed-line-length-none -L /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib 
 ADFLAGS = -f 
-# flags forall (e.g. look for system .mod files, required in gfortran)
-# FCFLAGS += -I/usr/include
-
-# libraries needed for linking, unused in the examples
-#LDFLAGS = -li_need_this_lib
 
 # List of executables to be built within the package
 PROGRAMS = TechInteractions Cab main_code main_code_average
