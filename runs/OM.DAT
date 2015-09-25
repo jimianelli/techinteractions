@@ -1,4 +1,5 @@
-Number of simulations                   10
+Start nb of simulations                 1
+End nb of simulations                   50
 Operating model only (no assessments)   0
 Use old values (1=Yes)                  0
 Number of projection years (MSE)        30
@@ -21,7 +22,7 @@ Final Dep (out of date; see below)      40.0   40.0   40.0
 Does Qval equal 1 (DR project)?         0
 Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
 Recruitment specifications
- Include process error? (1=yes;0=no)    0
+ Include process error? (1=yes;0=no)    1
  Sigma(Global)                          0.57      0.90      0.41  
  Sigma (Local)                          0.000001 0.000001 0.000001 
  Steepness                              0.99 0.99 0.99 
@@ -160,5 +161,5 @@ Larval Dispersal
 Number of target depletions             1
 Target Year, Target Depletion(by species)
 51   50.0  55.0  65.0
-Management strategy                     1       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
+Management strategy                     0       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
 OM fishing strategy (fleet dynamics)    1       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)

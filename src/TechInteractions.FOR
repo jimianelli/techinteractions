@@ -289,7 +289,8 @@ C      S0CAEst             - Estimated S0
 C      PassEstVar          - Material at the stock level
 C
 C     Misc quantities
-      INTEGER TheProjYear,MinOpt,Nsim,NprojYr,ISEEDO,ISEEDP
+      INTEGER Nsim_start,Nsim_end
+      INTEGER TheProjYear,MinOpt,NprojYr,ISEEDO,ISEEDP
       INTEGER SolFinDepl,ImplOpt,MS_HCR,OM_strategy,Current_val
       REAL*8 Quota(MaxSpec),QuotaAct(MaxSpec),TAC(MaxSpec)
 
@@ -297,7 +298,8 @@ C      TheProjYear         - Year of projection
 C      MinOpt              - Option for minimization
 C      Quota(s)            - Species quota      
 C      QuotaAct(s)         - Quota for model run (sum over areas)
-C      Nsim                - Number of simulations
+C      Nsim_start          - Start number of simulations
+C      Nsim_end            - End number of simulations
 C      NprojYr             - Number of projection years for MSE only (Carey thinks)
 C      ISEEDO              - Random number seed
 C      ISEEDP              - Process error
@@ -1347,7 +1349,8 @@ C took out Linf variables
 C
 C     Read in the specifications
       OPEN(UNIT=13,FILE='OM.DAT')
-      READ(13,'(40X,I4)') Nsim 
+      READ(13,'(40X,I4)') Nsim_start 
+      READ(13,'(40X,I4)') Nsim_end  
       READ(13,'(40X,I4)') OMonly
       READ(13,'(40X,I4)') UsePrevVals
       READ(13,'(40X,I4)') NprojYr
