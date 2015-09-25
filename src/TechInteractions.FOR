@@ -688,6 +688,7 @@ C	INTEGER Isim
       REAL*8 FUNK3 
       REAL*8 FUNKSCALAR
       INTEGER, DIMENSION(100,100) :: OM_fish, EM_fish
+      INTEGER, DIMENSION(2000,2) :: rand_file
 C     Carey: EXTERNAL means to use the user-defined definition of this function (FUNK), rather than an intrinsically defined function, like what's written into the FORTRAN programming language
       EXTERNAL FUNK
       EXTERNAL FUNKSCALAR
@@ -732,8 +733,13 @@ C	Input Files
 
 !     OPEN(UNIT=2,FILE="RANDOM6.NUM")
       OPEN(UNIT=2,FILE="RANDOMTRY.NUM") !This is used - seeds for each sim come from this file
-	OPEN(UNIT=3,FILE="RANDOM4.NUM")
-      ! Now read in the fishing strategy for the OM
+      DO 9875 II=1,2000
+          READ(2,*)  rand_file(II,:)
+9875  enddo
+	  CLOSE(2)
+	  OPEN(UNIT=3,FILE="RANDOM4.NUM")
+      
+	  ! Now read in the fishing strategy for the OM
       OPEN(UNIT=1234,FILE = "Random_seed_OM.dat")
       DO 9876 II=1,100
           READ(1234,*)  OM_fish(II,:) 
@@ -836,7 +842,7 @@ C	FindMSYOnly = 1
 
       !-----------------------------------------------------------------------------------------------------
 C     Start simulations
-      DO 10000 Isim = 1,Nsim 
+      DO 10000 Isim = Nsim_start,Nsim_end 
 
       !Write out the simulation number and supersim each time
 	WRITE(*,*)
@@ -854,7 +860,8 @@ C      Reset the quotas and all areas to open
 
 
 C      Read the seeds for this simulation 
-       READ(2,*) SEED1,SEED2
+       SEED1 = rand_file(Isim, 1)
+	   SEED2 = rand_file(Isim, 2)
        ISEEDP = SEED1 !ISEEDP = seed for Process error
        ISEEDO = SEED2 !ISEEDO = seed for Observation error
 C
@@ -1147,7 +1154,7 @@ C This CONTINUE refers to SuperSim = 1,2, which does not optimize, but performs 
 
 
 
-	CLOSE(2)
+	!CLOSE(2)
 	CLOSE(24)
 	CLOSE(25)
 	CLOSE(39)
@@ -2679,7 +2686,7 @@ C      Move animals around spatially
       CALL Movement2ForSS3(Temp1)
       IF (Isim.eQ.1.AND.Year.EQ.MinPYr) THEN
         WRITE(79,*) 'Nsim,Year, FromArea, ToArea, Age, ProportionMoved'
-        WRITE(79,'(4(I4,1x))') Nsim,FinDepYr,Narea,Amax(1)
+        WRITE(79,'(4(I4,1x))') Nsim_end,FinDepYr,Narea,Amax(1)
       ENDIF
 
       IF (Isim.EQ.1) THEN
@@ -3224,7 +3231,7 @@ C      Move animals around spatially
       CALL Movement2ForSS3(Temp1)
       IF (Isim.eQ.1.AND.Year.EQ.MinPYr) THEN
         WRITE(79,*) 'Nsim,Year, FromArea, ToArea, Age, ProportionMoved'
-        WRITE(79,'(4(I4,1x))') Nsim,FinDepYr,Narea,Amax(1)
+        WRITE(79,'(4(I4,1x))') Nsim_end,FinDepYr,Narea,Amax(1)
       ENDIF
 
       IF (Isim.EQ.1) THEN
@@ -4011,7 +4018,7 @@ C     MinOpt=9 finds the equilibrium condition for each Isim and calculates AvgD
 	AvgSSB = 0.0
 	AvgCatch = 0.0
 
-	DO 1000 Isim = 1,Nsim
+	DO 1000 Isim = Nsim_start,Nsim_end
          WRITE(*,*) "Isim = "
          WRITE(*,*) Isim
 
@@ -4044,9 +4051,9 @@ C	Some extras:
 	 SumCatch  = SumCatch + CatBio(1,1,(MinPYr+149))
 1000	CONTINUE !end Isim loop
 
-	AvgDepletion = SumDepl/Nsim
-	AvgSSB = SumSSB/Nsim
-	AvgCatch = SumCatch/Nsim
+	AvgDepletion = SumDepl/Nsim_end
+	AvgSSB = SumSSB/Nsim_end
+	AvgCatch = SumCatch/Nsim_end
 
 	ENDIF !MinOpt.EQ.9
 
@@ -5859,7 +5866,7 @@ C	Local Variables
 	INTEGER, INTENT(IN) :: UNUM
 
 	
-	WRITE(UNUM,'(I8)') Nsim			!Number of Simulations
+	WRITE(UNUM,'(I8)') Nsim_end			!Number of Simulations
 	WRITE(UNUM,'(I8)') NNSBlock		!Number of North-South Cells
 	WRITE(UNUM,'(I8)') NEWBlock		!Number of East-West Cells
       WRITE(UNUM,'(5(F6.3,1x))') (InitDep(Ispec),Ispec=1,Nspec)	!Initial depletion level (year 0)
@@ -6102,58 +6109,60 @@ C
 C ===========================================================================
 C
 
-	SUBROUTINE FindAvgMSY()
+C	SUBROUTINE FindAvgMSY()
 C This subroutine finds the effort that leads to MSY, MSY  
 C This subroutine finds the constant effort from year 1 to year FinDepYr+1 which maximizes either the catch (MSY) or SBB (BMSY) depending on the optMSY value (0=BMSY, 1=MSY)
-      USE ShareDataRatioSubs
-      IMPLICIT NONE
-
-	REAL(8), DIMENSION(100) :: X
-	REAL(8) :: i,ObjFun
-	REAL(8) :: IEffort,BMSY,SEED1,SEED2
-      REAL(8) :: FUNK3,SS
-      INTEGER :: Ispec
-	EXTERNAL FUNK3
-
-	MinOpt = 9
-	ObjFun = 1000000.0
-	WriteOpt = 0
-
-!	QVal = 1.0 !delete this and do the qval measurement. Qval is set from save.all to match what's being used elsewhere.
-	Quota = 0.0
-	Closed = 1
-
+C      USE ShareDataRatioSubs
+C      IMPLICIT NONE
+C
+C	REAL(8), DIMENSION(100) :: X
+C	REAL(8) :: i,ObjFun
+C	REAL(8) :: IEffort,BMSY,SEED1,SEED2
+C      REAL(8) :: FUNK3,SS
+C      INTEGER :: Ispec
+C    INTEGER, DIMENSION(2000,2) :: rand_file
+C	EXTERNAL FUNK3
+C
+C	MinOpt = 9
+C	ObjFun = 1000000.0
+C	WriteOpt = 0
+C
+C!	QVal = 1.0 !delete this and do the qval measurement. Qval is set from save.all to match what's being used elsewhere.
+C	Quota = 0.0
+C	Closed = 1
+C
 C      Read the seeds for this simulation 
-	DO 22222 Isim = 1,Nsim
-        READ(2,*) SEED1,SEED2
-        ISEEDP = SEED1
-        ISEEDO = SEED2
-	  CALL GenProcErr()
-22222 CONTINUE
-
-      optMSY = 1
-	DO 7878 Ispec = 1, Nspec
-      X(1) = LOG(0.6) !change to log in a minute.
-	CareyGRD = 1.001
-      CALL FIT7(X,SS,1,CareyGRD,Ispec)
+C	DO 22222 Isim = Nsim_start,Nsim_end
+C        SEED1 = rand_file(Isim, 1)
+C        SEED2 = rand_file(Isim, 2)
+C        ISEEDP = SEED1
+C        ISEEDO = SEED2
+C	  CALL GenProcErr()
+C22222 CONTINUE
+C
+C      optMSY = 1
+C	DO 7878 Ispec = 1, Nspec
+C      X(1) = LOG(0.6) !change to log in a minute.
+C	CareyGRD = 1.001
+C      CALL FIT7(X,SS,1,CareyGRD,Ispec)
 C     FIT finds the constant effort from year 1 to year FinDepYr+1 which maximizes either the catch (MSY) or SBB (BMSY) depending on the optMSY value (0=BMSY, 1=MSY)
-      SS = FUNK3(X,Ispec)
-      
-      ! Second round of optimization if not good
-      if (X(1).GT.2) THEN      
-      X(1) = 1.2 !change to log in a minute.
-	CareyGRD = 1.001
-      CALL FIT7(X,SS,1,CareyGRD,Ispec)
-      SS = FUNK3(X,Ispec)
-      ENDIF 
-      
-      EffortMSY(Ispec) = EXP(X(1))
-      FMSY(Ispec) = EXP(X(1))*Qval(Ispec)
-      SSB_MSY(Ispec) = AvgSSB
-
-7878  CONTINUE
-      
-      !Can't remember what this is about anymore (leftover from DR project)
+C      SS = FUNK3(X,Ispec)
+C      
+C      ! Second round of optimization if not good
+C      if (X(1).GT.2) THEN      
+C      X(1) = 1.2 !change to log in a minute.
+C	CareyGRD = 1.001
+C      CALL FIT7(X,SS,1,CareyGRD,Ispec)
+C      SS = FUNK3(X,Ispec)
+C      ENDIF 
+C      
+C      EffortMSY(Ispec) = EXP(X(1))
+C      FMSY(Ispec) = EXP(X(1))*Qval(Ispec)
+C      SSB_MSY(Ispec) = AvgSSB
+C
+C7878  CONTINUE
+C      
+C      !Can't remember what this is about anymore (leftover from DR project)
 C	CALL WriteSpecs(14)
 C	CALL WriteSpecs(26)
 C	CALL WriteSpecs(38)
@@ -6173,9 +6182,9 @@ C	WRITE(52,700) M(1),Amax(1),EffortMSY,AvgSSB,AvgDepletion,AvgCatch
 C
 C700   FORMAT(1x,F5.3,1x,I4,1x,F15.13,1x,F15.5,1x,F15.10,1x,F15.5)
 C
-      
-	RETURN
-      END SUBROUTINE FindAvgMSY
+C      
+C	RETURN
+C      END SUBROUTINE FindAvgMSY
       
 C      
 C================================================================
@@ -7564,7 +7573,7 @@ C
       WRITE(400,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
      + FDistn SSFDistn
      + EstFOFL TrueF SSTrueF TrueFOFL EstimatedP Pstar QuotaAct'
-      WRITE(400,*) Nsim,NProjYr,Nspec,Nconfigs,Nmvn
+      WRITE(400,*) Nsim_end,NProjYr,Nspec,Nconfigs,Nmvn
       ENDIF
       
       DO 100 Ispec = 1,Nspec
@@ -7589,7 +7598,7 @@ C
       WRITE(401,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
      +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
      +SSTruSPR35,TruSPR40,SSTruSPR40'
-      WRITE(401,*) Nsim,NProjYr,Nspec,Nconfigs
+      WRITE(401,*) Nsim_end,NProjYr,Nspec,Nconfigs
       ENDIF
       
       DO 101 Ispec = 1,Nspec
@@ -7611,7 +7620,7 @@ C
      +EstF40,EstB40,EstSPR40,
      +TrueF35,TrueB35,TrueSPR35,
      +TrueF40,TrueB40,TruSPR40'
-      WRITE(5000,*) Nsim,NProjYr,Nspec,Nconfigs
+      WRITE(5000,*) Nsim_end,NProjYr,Nspec,Nconfigs
       ENDIF
       
       DO 102 Ispec = 1,Nspec
@@ -7660,7 +7669,7 @@ C
       WRITE(4000,*) 'Isim IYearMinus1appliedinIYear Ispec Iconfig Ivec 
      + FDistn SSFDistn
      + EstFOFL TrueF SSTrueF TrueFOFL EstimatedP Pstar QuotaAct'
-      WRITE(4000,*) Nsim,NProjYr,Nspec,Nconfigs,Nmvn
+      WRITE(4000,*) Nsim_end,NProjYr,Nspec,Nconfigs,Nmvn
       ENDIF
       
       DO 100 Ispec = 1,Nspec
@@ -7684,7 +7693,7 @@ C
       WRITE(4001,*) 'Isim,IYr,Ispec,Icon,EstF35,EstB35,EstSPR35,
      +SSEstSPR35,EstF40,EstB40,EstSPR40,SSEstSPR40,TruSPR35,
      +SSTruSPR35,TruSPR40,SSTruSPR40'
-      WRITE(4001,*) Nsim,NProjYr,Nspec,Nconfigs
+      WRITE(4001,*) Nsim_end,NProjYr,Nspec,Nconfigs
       ENDIF
       
       DO 101 Ispec = 1,Nspec
