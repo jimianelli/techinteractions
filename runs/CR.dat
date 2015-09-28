@@ -11,7 +11,7 @@ h configs      1                        0.99
 config weights 1                        1.00
 config sp 2
 M configs      2                        0.38
-h configs      2                        0.67
+h configs      2                        0.99
 config weights 2                        1.00
 config sp 3
 M configs      3                        0.12
