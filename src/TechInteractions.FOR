@@ -4498,7 +4498,7 @@ C     Carey is adding 2 files, one for catch cpue and one for survey cpue
 
       RETURN
 600   FORMAT(1x,I4,10(3(1x,F8.2)))
-601   FORMAT(1x,2I2,1x,I4,1x,200(F15.2,1x))
+601   FORMAT(1x,2I3,1x,I4,1x,200(F15.2,1x))
 602   FORMAT(1x,I2,1x,I4,1x,200(F8.4,1x))
 612   FORMAT(1x,I2,1x,I2,1x,I2,1x,200(F8.6,1x))
 613   FORMAT(1x,I2,1x,I4,1x,I4,1x,200(F20.12,1x))
