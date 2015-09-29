@@ -203,7 +203,7 @@ C     Data for assessment purposes
       REAL*8 SNObs(MaxSpec,0:MaxAssArea,MinPyr:MaxPyr,MaxSpec,0:MaxAge)
       REAL*8 Ssel(MaxSpec,0:MaxAge)
       REAL*8 CpueCV,SurvCV
-      INTEGER IsDeterm,FirstSurvYr,FreqSurv
+      INTEGER IsDeterm,FirstCommYr,FirstSurvYr,FreqSurv
 
 
 C      ObsCatch(s,a,y)     - Observed catch by species, area and year
@@ -1483,6 +1483,7 @@ C     Data-related inputs
       READ(13,*)
       READ(13,*)
       READ(13,'(40X,I1)') IsDeterm
+      READ(13,'(40X,I5)') FirstCommYr
       READ(13,'(40X,F4.2)') CpueCV
       READ(13,'(40X,I5)') EffectSampCatch1
       READ(13,'(40X,I5)') EffectSampCatch2
@@ -4708,8 +4709,10 @@ C        Renormalize
          DO 41100 Iage = 0,AmaxEst(Ispec)
           Total = Total + CatNum(Ispec,Iarea,Yr,Isex,Iage)
 41100    CONTINUE          
-         IF (Total.EQ.0) THEN
+         IF (Yr.LT.FirstCommYr) THEN
           ComSS(Ispec,Iarea,Yr) = -1
+C         IF (Total.EQ.0) THEN
+C          ComSS(Ispec,Iarea,Yr) = -1
           Error = RAN2(ISEEDO)
           DO 41200 Iage = 0,AmaxEst(Ispec)
            CNObs(Ispec,Iarea,Yr,Isex,Iage) = 0

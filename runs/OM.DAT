@@ -135,6 +135,7 @@ Upper limit (EW)                        1   1
 
 Specifications for data generation
 Data are deterministic (1=Yes)          0
+First year with catch comp data         5
 Coefficient of variation (CPUE)         0.2      
 Effective sample size (Catch)           100      (Pre-MPA)
 Effective sample size (Catch)           100      (With-MPA)
