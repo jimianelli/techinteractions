@@ -13,3 +13,5 @@ gfortran -ffixed-line-length-none TechInteractions.for -o TechInteractions.exe
 2. any deviation from it is controlled by the CV of fishing strategies
 3. for scenarios with changing fishing strategies, the fortran code needs to run "fishing_strategy.Rexec"
 
+
+blabla
