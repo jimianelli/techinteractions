@@ -1,4 +1,4 @@
-## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS
+# This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS
 
 ## Structure of the `techinteractions` folder
 - `doc` contains documentations for the model and the MS
