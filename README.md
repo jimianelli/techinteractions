@@ -8,6 +8,8 @@
 
 ## Steps to run the models
 
+0. First, make sure that you have the path to the `R` folder in your environment variables. This should be something like: `C:\Program Files\R\R-3.2.2\bin`
+
 1. Create/specify scenarios
 See documentation in the `doc` folder
 
