@@ -56,7 +56,7 @@
 		1. Run technical interaction model (using seed from Random_seed_OM.dat)
 		2. Read in values from the technical interaction run and save in QuotaAct
 		3. This becomes the "realized catch" 
-		4. The TRUE REALIZED CATCH: this updates the population dynamics by finding effort level that match catch... some optimization error can happen
+		4. The TRUE REALIZED CATCH: this updates the population dynamics by finding effort level that match catch... some optimization error can happen if not careful
 			
 			
 		
