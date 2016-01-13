@@ -1,12 +1,12 @@
-# This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS
+# This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS #
 
-## Structure of the `techinteractions` folder
+## Structure of the `techinteractions` folder ##
 - `doc` contains documentations for the model and the MS
 - `R` contains all R codes used in this study
 - `runs` contains all files needed to run the model. Simulation results will be stored in a subfolder named `results`
 - `src` contains all source codes
 
-## Steps to run the models
+## Steps to run the models ##
 
 To begin with, make sure that you have the path to the `R` folder in your environment variables. This should be something like: `C:\Program Files\R\R-3.2.2\bin`
 
