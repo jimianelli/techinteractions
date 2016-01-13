@@ -1,0 +1,94 @@
+#if !defined(_MAIN_CODE_)
+#  define _MAIN_CODE_
+
+class model_data : public ad_comm{
+  data_int Nb_strategy;
+  data_int Nb_species;
+  data_vector price;
+  data_matrix Catch_strategy;
+  data_int nb_b1;
+  data_int nb_b2;
+  data_int n_b1constr_types;
+  data_ivector n_b1by_constr;
+  data_int n_b2constr_types;
+  data_ivector n_b2by_constr;
+  data_vector a0;
+  data_matrix a1;
+  data_matrix a2;
+  data_vector Weight_strategy;
+  data_vector b1;
+  data_vector b2;
+  data_vector TAC;
+  int dummy;
+  dvector relative_catch;
+  dvector Actual_Catch;
+  dmatrix Actual_Catch_sub;
+  data_int nobs;
+  data_vector Y;
+  data_vector x;
+  int rnseed;
+  ~model_data();
+  model_data(int argc,char * argv[]);
+  friend class model_parameters;
+};
+
+class model_parameters : public model_data ,
+  public function_minimizer
+{
+public:
+  ~model_parameters();
+  void preliminary_calculations(void);
+  void set_runtime(void);
+  virtual void * mycast(void) {return (void*)this;}
+  static int mc_phase(void)
+  {
+    return initial_params::mc_phase;
+  }
+  static int mceval_phase(void)
+  {
+    return initial_params::mceval_phase;
+  }
+  static int sd_phase(void)
+  {
+    return initial_params::sd_phase;
+  }
+  static int current_phase(void)
+  {
+    return initial_params::current_phase;
+  }
+  static int last_phase(void)
+  {
+    return (initial_params::current_phase
+      >=initial_params::max_number_phases);
+  }
+  static prevariable current_feval(void)
+  {
+    return *objective_function_value::pobjfun;
+  }
+private:
+  ivector integer_control_flags;
+  dvector double_control_flags;
+  param_init_number a;
+  param_init_number b;
+  param_vector pred_Y;
+  param_number prior_function_value;
+  param_number likelihood_function_value;
+  objective_function_value obj_fun;
+public:
+  virtual void userfunction(void);
+  virtual void report(const dvector& gradients);
+  virtual void final_calcs(void);
+  model_parameters(int sz,int argc, char * argv[]);
+  virtual void initializationfunction(void){}
+  void opt_sim(void);
+  void Get_Actual_Catch(void);
+  void store_results(void);
+ void xxerror(const char * s);
+ void lpsimplex(dvector& a0,dmatrix& a1, dmatrix& a2,dmatrix & a3, dvector& b1, dvector& b2, dvector& b3, dvector& x,ivector& ierr);
+ void simplx(dmatrix& a, int m, int n, int m1, int m2, int m3, ivector& icase, ivector& izrov, ivector& iposv);
+ void simp1(dmatrix& a,int mm, ivector& ll, int nll, int iabf, int *kp, double *bmax);
+ void simp2(dmatrix& a, int n, ivector& l2, int nl2, int *ip, int kp, double *q1);
+ void simp3(dmatrix& a,int i1,int k1,int ip,int kp);
+
+};
+#endif

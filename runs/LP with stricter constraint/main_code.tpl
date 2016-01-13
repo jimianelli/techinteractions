@@ -65,7 +65,7 @@ DATA_SECTION
 		}	
 	 }
  END_CALCS
-	//!!cout << "b1_bounds: " << b1 << endl; exit(1);
+	//!!cout << "b1_counds: " << b1 << endl; exit(1);
 	
 	vector relative_catch(1,Nb_strategy);
  LOCAL_CALCS		// Need to calculate the average catch between the boundaries for the initial value
@@ -100,6 +100,8 @@ PRELIMINARY_CALCULATIONS_SECTION
   for (int it=1;it<=(nb_b2);it++){
   b2(it) = 1/3*relative_catch(it);
   }
+  store_results();
+  exit(1);
 //  cout << b1 << endl;
 //  cout << b2 << endl;exit(1);
   
@@ -108,7 +110,6 @@ PROCEDURE_SECTION
   obj_fun=(norm2(pred_Y-Y)); 
   obj_fun=nobs/2.*log(obj_fun);    // make it a likelihood function so that
 
-  store_results();
   
 FUNCTION opt_sim
 // This code run the linear programming based on the constraints defined in:

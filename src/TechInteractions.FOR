@@ -164,6 +164,7 @@ C     Catch, Effort, etc.
       REAL*8 CatNum(MaxSpec,MaxAssArea,MinPYr:MaxPYr,Nsex,0:MaxAge)
       REAL*8 CatArea(MaxSpec,MaxNSBlk,MaxEWBlk,MinPYr:MaxPYr)
       REAL*8 TruExp(MaxSpec,MaxAssArea,MinPYr:MaxPYr)
+      REAL*8 TruExpSum(MaxSpec)
       REAL*8 TruSuv(MaxSpec,MaxAssArea,MinPYr:MaxPYr)
       REAL*8 SuvNum(MaxSpec,MaxAssArea,MinPYr:MaxPYr,Nsex,0:MaxAge)
       REAL*8 Effort(MaxAssArea,MinPYr:MaxPYr)
@@ -181,6 +182,7 @@ C      CatBio(s,a,y)       - Catch biomass
 C      CatNum(s,a,y,g,a)   - Catch numbers
 C      CatArea(s,i,j,y)    - Catch biomass (by cell)
 C      TruExp(s,a,y)       - Exploitable biomass
+C      TruExpSum(s)        - Exploitable biomass
 C      TruSuv(s,a,y)       - Survey biomass
 C      SuvNum(s,a,y,g,a)   - Survey numbers
 C      Effort(a,y)         - Effort by year
@@ -1053,6 +1055,27 @@ C       Conduct stock assessments
         Current_val = EM_fish(Isim, TheProjYear)
         CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet      
         
+C		VERY important step: If the estimated TAC is above TruExp, then replace the TAC value with the TruExp
+       OPEN(UNIT=715,FILE="TruExp.dat")       ! this is needed in the technical interaction model for the realized catch
+      READ(715,*) (TruExpSum(II),II=1,Nspec) 
+      CLOSE(715)       
+      OPEN(UNIT=123,FILE="TAC.dat")       ! this is needed in the technical interaction model
+      READ(123,*) QuotaAct, Bycatch_val 
+      CLOSE(123)
+        Do 2016 II=1,Nspec
+            QuotaAct(II) = QuotaAct(II)*1000
+2016    CONTINUE 
+       DO 7575 Ispec = 1,Nspec
+        IF (QuotaAct(Ispec).GT.TruExpSum(Ispec)) THEN
+			QuotaAct(Ispec) = 0.99*TruExpSum(Ispec)
+		ENDIF
+7575    CONTINUE 
+
+      OPEN(UNIT=124,FILE="TAC.dat")       ! RE-write the TAC value so that it corrects the things above
+      WRITE(124,'(10(F15.5,1x))') QuotaAct/1000, Bycatch_val 
+      CLOSE(124)
+
+
         ! Run the technical interaction model to determine the TRUE realized catch (OEM) based on the OM_fish value
         IF(OM_strategy.EQ.0) THEN 
 
@@ -1063,7 +1086,7 @@ C       Conduct stock assessments
         ENDIF
         IF(OM_strategy.EQ.1) THEN 
             OPEN(unit=5353, FILE="seed.dat")
-            write(5353, *) OM_fish(Isim, (TheProjYear-FinDepYr)) 
+            write(5353, *) OM_fish(Isim, TheProjYear) 
             CLOSE(5353)
             CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
             Write(*,*) 'Finished OM technical interaction model'
@@ -1204,6 +1227,7 @@ C     Global variables
 C
 C     Local variables 
       INTEGER Ispec,Iarea,II,Yr,Isex,Iage
+      REAL*8 TheEffort(10)
 C
 C     Clear summary array
       PassEstVar = 0
@@ -1242,9 +1266,19 @@ C     Conduct stock assessments
       ENDIF
           
 !--------------------------------------------------------------------------
+!     To determine the true exploitable biomass
+      TheEffort(1) = TotEffort(TheYr-1)
+      CALL ProjYrInd(TheYr,TheEffort,Ispec)
+!--------------------------------------------------------------------------
+      
          CLOSE(957)
 10000  CONTINUE 
-
+       
+C 		Save the true exploitable biomass
+      OPEN(UNIT=715,FILE="TruExp.dat")      ! this is needed in the technical interaction model for the realized catch
+      WRITE(715,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
+      CLOSE(715)       
+		
 C      Save the ABC output
        OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
       WRITE(765,'(I2,10(F17.2,1x))') TheYr,QuotaAct,
@@ -2617,9 +2651,9 @@ C	Spatially explicit survey numbers: SpatialSuvNum (added by Carey)
              IF (NoSurveyClosed.EQ.1) Tmp = Tmp * CLosed(IblkNS,IBlkEW)
              TruSuv(Ispec,Iarea,Year) = TruSuv(Ispec,Iarea,Year) + 
      +         SSel(Ispec,Iage)*Tmp*Wght(Ispec,Isex,Iage,Itime)        
-             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
-     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage) 
-     +                         *Tmp*Wght(Ispec,Isex,Iage,Itime)        
+C             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
+C     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage) 
+C     +                         *Tmp*Wght(Ispec,Isex,Iage,Itime)        
              SuvNum(Ispec,Iarea,Year,Isex,Iage) =
      +         SuvNum(Ispec,Iarea,Year,Isex,Iage) + SSel(Ispec,Iage)*Tmp
 25110    CONTINUE         
@@ -2655,6 +2689,10 @@ C
      +         CatNum(Ispec,Iarea,Year,Isex,Iage) + CatN
              CatBio(Ispec,Iarea,Year) = CatBio(Ispec,Iarea,Year) +
      +         CatN*Wght(Ispec,ISex,Iage,Itime)       
+             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
+     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage)* 
+     +         Temp1(Ispec,Isex,IBlkNS,IBlkEw,Iage)*
+     +         Wght(Ispec,Isex,Iage,Itime)      
               CatArea(Ispec,IBlkNS,IBlkEW,Year) = 
      +         CatArea(Ispec,IBlkNS,IBlkEW,Year) +
      +         CatN*Wght(Ispec,ISex,Iage,Itime)
@@ -3165,9 +3203,9 @@ C	Spatially explicit survey numbers: SpatialSuvNum (added by Carey)
              IF (NoSurveyClosed.EQ.1) Tmp = Tmp * CLosed(IblkNS,IBlkEW)
              TruSuv(Ispec,Iarea,Year) = TruSuv(Ispec,Iarea,Year) + 
      +         SSel(Ispec,Iage)*Tmp*Wght(Ispec,Isex,Iage,Itime)        
-             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
-     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage) 
-     +                         *Tmp*Wght(Ispec,Isex,Iage,Itime)        
+C             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
+C     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage) 
+C     +                         *Tmp*Wght(Ispec,Isex,Iage,Itime)        
              SuvNum(Ispec,Iarea,Year,Isex,Iage) =
      +         SuvNum(Ispec,Iarea,Year,Isex,Iage) + SSel(Ispec,Iage)*Tmp
 25110    CONTINUE         
@@ -3201,7 +3239,11 @@ C
      +         CatNum(Ispec,Iarea,Year,Isex,Iage) + CatN
              CatBio(Ispec,Iarea,Year) = CatBio(Ispec,Iarea,Year) +
      +         CatN*Wght(Ispec,ISex,Iage,Itime)       
-              CatArea(Ispec,IBlkNS,IBlkEW,Year) = 
+             TruExp(Ispec,Iarea,Year) = TruExp(Ispec,Iarea,Year) +
+     +         CLosed(IBlkNS,IBlkEW)*Sel(Ispec,Iage)* 
+     +         Temp1(Ispec,Isex,IBlkNS,IBlkEw,Iage)*
+     +         Wght(Ispec,Isex,Iage,Itime)      
+			 CatArea(Ispec,IBlkNS,IBlkEW,Year) = 
      +         CatArea(Ispec,IBlkNS,IBlkEW,Year) +
      +         CatN*Wght(Ispec,ISex,Iage,Itime)
 25210   CONTINUE        
@@ -3571,7 +3613,7 @@ C
 C	MinOpt = 2 to find the effort level that produces the quota.
       MinOpt = 2
 
-      dummy = 0.5
+      dummy = 0.1
 C	ELSE
       DO 1000 II = 1,NeffortAreas
        X(II) = dummy
@@ -3584,6 +3626,12 @@ C     Problem with this is that Fit is not getting at all close to the quota som
 C	ENDIF
       SS = FUNK3(X,Ispec)
       
+      ! Second round optimization if the first one didn't make it
+	if (SS.GT.1) THEN
+      X(1) = 0.5
+      CareyGRD = 0.99 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
       ! Second round optimization if the first one didn't make it
 	if (SS.GT.1) THEN
       X(1) = 1.0
@@ -3608,6 +3656,7 @@ C	ENDIF
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
+      ENDIF
       ENDIF
       ENDIF
       ENDIF
@@ -4240,7 +4289,7 @@ C     Generate the catchability error terms
          DO 21000 IBlkEW = 1,NEWBlock
           Error2 = XNORM(1,0.0d0,SigmaSpat(Ispec),ISEEDP)
      +                             -SigmaSpat(ISpec)**2.0/2.0
-         RecQ(ISim,ISpec,IBlkNS,IBlkEW) = EXP(Error2)
+         RecQ(ISim,ISpec,IBlkNS,IBlkEW) = 1
 21000   CONTINUE         
 20000  CONTINUE       
       ELSE

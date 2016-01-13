@@ -22,9 +22,9 @@ Phase / Bound Logistic Selex a50 slope  3  3.0   2.5
 ---------------------------------------------- 
 Assumed CVs and effective sample sizes
 Cpue CV (-1 means set to true)          -1.0000
-Effective sample size (catches)         100.0
+Effective sample size (catches)         20.0
 Survey CV (-1 means set to true         -1.0000
-Effective sample size (Surveys)         100.0
+Effective sample size (Surveys)         20.0
 Year to start estimating rec devs       1
 Debug Assessment?                       0        (1 for debug; 0 ow)
 NoCPUEMPA                               0

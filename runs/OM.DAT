@@ -1,5 +1,5 @@
 Start nb of simulations                 1
-End nb of simulations                   50
+End nb of simulations                   90
 Operating model only (no assessments)   0
 Use old values (1=Yes)                  0
 Number of projection years (MSE)        30
@@ -135,15 +135,15 @@ Upper limit (EW)                        1   1
 
 Specifications for data generation
 Data are deterministic (1=Yes)          0
-First year with catch comp data         5
+First year with catch comp data         20
 Coefficient of variation (CPUE)         0.2      
-Effective sample size (Catch)           100      (Pre-MPA)
-Effective sample size (Catch)           100      (With-MPA)
-First year with survey data             5
-Frequency of surveys                    1
+Effective sample size (Catch)           20      (Pre-MPA)
+Effective sample size (Catch)           20      (With-MPA)
+First year with survey data             30
+Frequency of surveys                    2
 Coefficient of variation (surveys)      0.1
-Effective sample size (surveys)         100      (Pre-MPA)
-Effective sample size (surveys)         100      (With MPA)
+Effective sample size (surveys)         50      (Pre-MPA)
+Effective sample size (surveys)         50      (With MPA)
 No Surveys in closed areas (1=Yes)      0
 
 Number of pre-history assessments       0

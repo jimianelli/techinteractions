@@ -1,17 +1,16 @@
-## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints with a simpler definition of fishing strategies. This is the updated version of the "Multsp_techint_KO_LP" branch
+## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS
 
-## To compile 'techinteractions.for' using gfortran use the following code
-gfortran -ffixed-line-length-none TechInteractions.for -o TechInteractions.exe
+1. Structure of the {techinteractions} folder
+- {doc} contains documentations for the model and the MS
+- {R} contains all R codes used in this study
+- {runs} contains all files needed to run the model. Simulation results will be stored in a subfolder named {results}
+- {src} contains all source codes
 
-## Information about the branch:
-1. OM.dat file controls the population dynamics of the Operating Model + the specifics of the data generation process (used in the Estimation Model) + how the fishing strategies changes over time in the OM
-2. EM.dat file controls the setting the the assessment model (i.e CAB) 
-3. CR.dat mostly controls whether to use the P* approach or the AFSC tier 3 HCR rule
+2. Steps to run the models
 
-## Main changes compared to the "Multsp_techint_KO_LP" branch
-1. the fishing strategy is based on the last 5 years.
-2. any deviation from it is controlled by the CV of fishing strategies
-3. for scenarios with changing fishing strategies, the fortran code needs to run "fishing_strategy.Rexec"
+2.1. Create/specify scenarios
+See documentation in the {doc} folder
 
-
-blabla
+2.2. Compile & run
+2.2.1. the {src} folder contains all the source code. Open the command line within this folder and use the {make} command. This will compile all necessary files to run the model
+2.2.2. move back to the {runs} folder. Then execute the {run} batch file. Thie will run the models
