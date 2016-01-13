@@ -1,6 +1,6 @@
 ## This version of the technical interaction model has the capability of implementing a HCR with multispecies catch constraints under uncertainty as mentioned in the MS
 
-## Structure of the 'techinteractions' folder
+## Structure of the '"techinteractions"' folder
 1. 'doc' contains documentations for the model and the MS
 2. 'R' contains all R codes used in this study
 3. 'runs' contains all files needed to run the model. Simulation results will be stored in a subfolder named {results}
