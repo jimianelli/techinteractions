@@ -12,6 +12,6 @@ To begin with, make sure that you have the path to the `R` folder in your enviro
 
 1. Create/specify scenarios. For this, see documentation in the `doc` folder
 
-2. Compile & run
+2. Compile & run 
   2.1. To compile: the `src` folder contains all the source code. Open the command line within this folder and use the `make` command. This will compile all necessary files to run the model
   2.2. To Run: move back to the `runs` folder. Then execute the `run` batch file. This will run the models
