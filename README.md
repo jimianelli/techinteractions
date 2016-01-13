@@ -12,5 +12,5 @@
 See documentation in the `doc` folder
 
 2. Compile & run
-2.1. the `src` folder contains all the source code. Open the command line within this folder and use the `make` command. This will compile all necessary files to run the model
-2.2. move back to the `runs` folder. Then execute the `run` batch file. Thie will run the models
+	2.1. the `src` folder contains all the source code. Open the command line within this folder and use the `make` command. This will compile all necessary files to run the model
+	2.2. move back to the `runs` folder. Then execute the `run` batch file. Thie will run the models
