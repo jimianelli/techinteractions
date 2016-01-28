@@ -226,7 +226,7 @@
 		## If Net price is changing with the abundance of a stock
 		True_exploitable <- read.table("TruExp_history.dat")
 		start_year_exp_biomass <- True_exploitable[1,]
-		DoOMEM <- scan("DoOMEM.dat")
+		DoOMEM <- read.table("DoOMEM.dat")
 		if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
 		if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
 

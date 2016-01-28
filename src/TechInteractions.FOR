@@ -1052,6 +1052,7 @@ C       Impose MPA
 C
 C       Conduct stock assessments
         ! DoEstAll is effectively happening in the previous year (data aren't generated for TheProjYr yet)
+        Current_val = EM_fish(Isim, TheProjYear)
         CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet      
         
 C		VERY important step: If the estimated TAC is above TruExp, then replace the TAC value with the TruExp
@@ -1328,7 +1329,7 @@ C      Save the ABC output
         
         IF(OM_strategy.EQ.1) THEN 
             OPEN(unit=5354, FILE="seed.dat")
-            write(5354, *) EM_fish(Isim, TheProjYear) 
+            write(5354, *) Current_val
             CLOSE(5354)
             OPEN(unit=5355, FILE="DoOMEM.dat")
             write(5355, *) 'EM'
