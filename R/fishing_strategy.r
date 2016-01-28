@@ -171,7 +171,7 @@
 	
 			
 ##################### Case 1: without the gear constraints:
-	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777)
+	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -220,10 +220,15 @@
 		duplicated(test)
 		
 		## Price of the species
-		price <- c(0.57,0.53,0.63,0)
-		price <- c(0.57,0.63,0.63,0)		# cod, pollock, yellowfin
-		price <- c(0.57,0.63,0.63,0)		# cod, pollock, yellowfin
-		price <- c(rep(1,3),0)
+		# price <- c(0.57,0.63,0.63,0)		# cod, pollock, yellowfin
+		# price <- c(rep(1,3),0)
+		
+		## If Net price is changing with the abundance of a stock
+		True_exploitable <- read.table("TruExp_history.dat")
+		start_year_exp_biomass <- True_exploitable[1,]
+		DoOMEM <- scan("DoOMEM.dat")
+		if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
+		if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
 
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
@@ -305,5 +310,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val)
+	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val, price_min=0.2, price_factor=0.5)
 	

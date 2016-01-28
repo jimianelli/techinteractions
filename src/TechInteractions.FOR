@@ -1052,7 +1052,6 @@ C       Impose MPA
 C
 C       Conduct stock assessments
         ! DoEstAll is effectively happening in the previous year (data aren't generated for TheProjYr yet)
-        Current_val = EM_fish(Isim, TheProjYear)
         CALL DoEstAll(TheProjYear) !calculated the quota calculations i.e ABC but it is not the realized cach yet      
         
 C		VERY important step: If the estimated TAC is above TruExp, then replace the TAC value with the TruExp
@@ -1088,6 +1087,9 @@ C		VERY important step: If the estimated TAC is above TruExp, then replace the T
             OPEN(unit=5353, FILE="seed.dat")
             write(5353, *) OM_fish(Isim, TheProjYear) 
             CLOSE(5353)
+            OPEN(unit=5355, FILE="DoOMEM.dat")
+            write(5355, *) 'OM'
+            CLOSE(5355)				
             CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
             Write(*,*) 'Finished OM technical interaction model'
         ENDIF
@@ -1182,7 +1184,7 @@ C This CONTINUE refers to SuperSim = 1,2, which does not optimize, but performs 
 	CLOSE(25)
 	CLOSE(39)
 	CLOSE(3)
-
+    
       !Close Pstar files:
       CLOSE(400) !Pstar1.out
       CLOSE(401) !Pstar2.out
@@ -1275,9 +1277,13 @@ C     Conduct stock assessments
 10000  CONTINUE 
        
 C 		Save the true exploitable biomass
-      OPEN(UNIT=715,FILE="TruExp.dat")      ! this is needed in the technical interaction model for the realized catch
+  	  OPEN(UNIT=715,FILE="TruExp.dat")      ! this is needed in the technical interaction model for the realized catch
       WRITE(715,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
       CLOSE(715)       
+
+  	  OPEN(UNIT=716,FILE="TruExp_history.dat",ACCESS='APPEND')      ! this is needed in the technical interaction model for the realized catch
+      WRITE(716,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
+      CLOSE(716)       
 		
 C      Save the ABC output
        OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
@@ -1321,15 +1327,13 @@ C      Save the ABC output
         ENDIF 
         
         IF(OM_strategy.EQ.1) THEN 
-            IF(TheProjYear.EQ.FinDepYr+1) THEN
-              CALL SYSTEM("main_code_average.exe")
-            ENDIF 
-            if (TheProjYear.GT.FinDepYr+1) THEN
-                OPEN(unit=5354, FILE="seed.dat")
-                write(5354, *) Current_val 
-                CLOSE(5354)
-                CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
-            ENDIF    
+            OPEN(unit=5354, FILE="seed.dat")
+            write(5354, *) EM_fish(Isim, TheProjYear) 
+            CLOSE(5354)
+            OPEN(unit=5355, FILE="DoOMEM.dat")
+            write(5355, *) 'EM'
+            CLOSE(5355)				
+            CALL SYSTEM("Rscript ..\R\fishing_strategy.R")
         ENDIF 
         
         ! Read in the output from the tech int model
