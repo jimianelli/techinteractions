@@ -44,7 +44,7 @@
 ##############################################################################	
 
 	### LOAD data for the anlaysis
-	load(file="All_data_Cluster_simple_2010_2014_pca_FALSE_.Rdata")	# species comp data for each cluster
+	load("../R/All_data_Cluster_simple_2010_2014_pca_FALSE_.Rdata")	# species comp data for each cluster
 	
 	if (Choose_fish_strategies == "Year") 
 	{
@@ -111,7 +111,7 @@
 		{
 			datdat <- Data_to_use[which(Data_to_use$Clust == BSAI_data$Cluster[clust]),]
 			val <- tapply(datdat$Total_catch, list(datdat$YEAR), sum)/1000
-			new[clust] <- mean(val)
+			new[clust] <- median(val)
 		}
 		
 		#### and now adjust this value so that the sum of the target species catch is the amount specified = 1.7 million ton in this study

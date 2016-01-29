@@ -143,7 +143,7 @@ FUNCTION  Get_Actual_Catch
        if (ierr(1))
        {
         cout<< "reDoing simplex with a different initial relative catch value dk,t=1"<<ierr<<endl;
-		relative_catch *= 0.9;
+		relative_catch *= 1.001;
 		for (int it=1;it<=(nb_b1-Nb_species-1);it++){
 		b1(it+Nb_species+1) = 5*relative_catch(it);
 		}
