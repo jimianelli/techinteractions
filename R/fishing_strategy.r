@@ -24,7 +24,7 @@
 
 	rm(list=ls())
 	gc()
-  library(reshape2)
+	library(reshape2)
 
 #	source("C:\\R functions\\All_functions.r")
 #	source("C:\\R functions\\WestCoastMap.R")
@@ -43,6 +43,9 @@
 #
 ##############################################################################	
 
+	### LOAD data for the anlaysis
+	load(file="All_data_Cluster_simple_2010_2014_pca_FALSE_.Rdata")	# species comp data for each cluster
+	
 	if (Choose_fish_strategies == "Year") 
 	{
 		YEARS <- 2000:2014 #1991:2014
@@ -56,121 +59,106 @@
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
 	GOA <- c(610, 620, 630, 640, 650)
-	Best_cluster <- lapply(1:length(YEARS), function(x) lapply(1:length(NMFS_area), function(y) vector("list", 4)))
-	
-	Select_data <- ALL_clust[,(colnames(ALL_clust) %in% c("POLLOCK", "PACIFIC.COD", "PACIFIC.HALIBUT", "YELLOWFIN.SOLE"))]
-	if (Choose_fish_strategies == "Year") Select_data <- as.data.frame(cbind(ALL_clust[,c(1:3, ncol(ALL_clust))], Select_data))
-	if (Choose_fish_strategies == "Average") Select_data <- as.data.frame(cbind(ALL_clust[,c(1:2, ncol(ALL_clust))], Select_data))
-	Select_data$Gear <- factor(Select_data$Gear, labels=c("non pelagic trawl", "pelagic trawl", "trap/pot", "longline"))
-	if (Choose_fish_strategies == "Year") BSAI_data <- subset(Select_data, Area %in% BSAI & Yr %in% YEARS)
-	if (Choose_fish_strategies == "Average") BSAI_data <- Select_data
-	BSAI_data$PACIFIC.COD <- as.numeric(as.vector(BSAI_data$PACIFIC.COD))
-	BSAI_data$PACIFIC.HALIBUT <- as.numeric(as.vector(BSAI_data$PACIFIC.HALIBUT))
-	BSAI_data$POLLOCK <- as.numeric(as.vector(BSAI_data$POLLOCK))
-	BSAI_data$YELLOWFIN.SOLE <- as.numeric(as.vector(BSAI_data$YELLOWFIN.SOLE))
-	BSAI_data$Cluster <- as.factor(BSAI_data$Cluster)
-	BSAI_data[is.na(BSAI_data)] <- 0
-	BSAI_data <- BSAI_data[which(apply(BSAI_data[,-c(1:4)], 1, sum)>0),]
+	Species_interest <- c("POLLOCK", "PACIFIC.COD", "PACIFIC.HALIBUT", "YELLOWFIN.SOLE")
 
-	if (Choose_fish_strategies == "Year") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,1:4], t(apply(BSAI_data[,-c(1:4)], 1, function(x) x/sum(x)))))
-	if (Choose_fish_strategies == "Average") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,1:3], t(apply(BSAI_data[,-c(1:3)], 1, function(x) x/sum(x)))))
+	for (i in 3:115)
+	{
+		ALL_clust[,i] <- as.numeric(as.vector(ALL_clust[,i]))
+	}
+	
+	#### Filter the data based so that the cluster examined catch at least one of the species of interest
+	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest==TRUE)]),1,sum)>0
+	Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
+	ALL_clust <- ALL_clust[clust_keep,]
+	
+	#### Organise the data
+	ALL_clust$Gear <- factor(ALL_clust$Gear, labels=c("non pelagic trawl", "pelagic trawl", "trap/pot", "longline"))
+	if (Choose_fish_strategies == "Year") BSAI_data <- subset(ALL_clust, Area %in% BSAI & Yr %in% YEARS)
+	if (Choose_fish_strategies == "Average") BSAI_data <- ALL_clust
+	BSAI_data$Cluster <- as.factor(BSAI_data$Cluster)
+
+	if (Choose_fish_strategies == "Year") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,c(1:4,117)], t(apply(BSAI_data[,-c(1:4)], 1, function(x) x/sum(x)))))
+	if (Choose_fish_strategies == "Average") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,c(1:2,116)], t(apply(BSAI_data[,-c(1:2, 116)], 1, function(x) x/sum(x)))))	
 	BSAI_data_partial[is.na(BSAI_data_partial)] <- 0
 
-	### remove from start strategies in which halibut is the main catch (proportion > 0.5)
-	if (Choose_fish_strategies == "Years") to_keep <- which(BSAI_data_partial$PACIFIC.HALIBUT<0.5)
-	if (Choose_fish_strategies == "Average") to_keep <- which(BSAI_data_partial$PACIFIC.HALIBUT<0.5)
+	if (Choose_fish_strategies == "Year") 
+	{
+		BSAI_data <- BSAI_data[,c(1:3,117,which(colnames(BSAI_data) %in% Species_interest==TRUE))]
+		BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]
+	}
+	if (Choose_fish_strategies == "Average") 
+	{
+		BSAI_data <- BSAI_data[,c(1:2,116,which(colnames(BSAI_data) %in% Species_interest == TRUE))]
+		BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]	
+	}		
 	
-	BSAI_data_partial <- BSAI_data_partial[to_keep,]
-	BSAI_data <- BSAI_data[to_keep,]
+	### Determine the weight to associate to each of the metier = cluster (based on the data)
+	### The weight is the sum of catch of all species of interest based on this specific cluster for a specific Sector
 
-	Catch_data <- reshape2::melt(BSAI_data)
-	Catch_data$variable <- factor(Catch_data$variable, levels=c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE", "PACIFIC.HALIBUT"))
-	if (Choose_fish_strategies == "Year")
-	{
-		Catch_ys <- tapply(Catch_data$value, list(Catch_data$Yr, Catch_data$variable), sum)
-		Catch_data <- subset(Catch_data, Yr%in%YEARS)
-	}
-	Weight_gear_species <- array(NA, dim=c(4,4,length(YEARS)))
-
-	
-	if (Choose_fish_strategies == "Year")
-	{
-		for (yr in seq_along(YEARS))
-		{
-			Data_subset <- subset(Catch_data, Yr == YEARS[yr])
-			new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
-			Weight_gear_species[,,yr] <- (apply(new, 2, function(x) x/sum(x)))
-		}
-	}
-	if (Choose_fish_strategies == "Average")
-	{
-		Data_subset <- Catch_data
-		new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
-		Weight_gear_species[,,1] <- (apply(new, 2, function(x) x/sum(x)))
-	}
-	
-####### The initial weight for each strategy should be based on the original observer data
-####### 1. aggregate each catch observation by fishing strategy
-####### 2. expand the above so that the total catch is 1.700.000 t.
-####### --> but this causes problems BECAUSE the observer data does not sample ALL the catches
-	
-	Catch_strategy <- c()
-	Weight_strategy <- list()
-	
 	Withgear_constraint = FALSE
+	Weight_metier <- list()
+
+	if (Choose_fish_strategies == "Average")
+	{
+		new <-rep(0, nrow(BSAI_data))
+
+		tapply(Data_to_use$POLLOCK, Data_to_use$YEAR, sum, na.rm=T)/1000		
+		tapply(Data_to_use$PACIFIC.COD, Data_to_use$YEAR, sum, na.rm=T)/1000		
+		tapply(Data_to_use$YELLOWFIN.SOLE, Data_to_use$YEAR, sum, na.rm=T)/1000		
+		tapply(Data_to_use$Total_catch, Data_to_use$YEAR, sum, na.rm=T)/1000		
+
+		for (clust in seq_along(BSAI_data$Cluster))
+		{
+			datdat <- Data_to_use[which(Data_to_use$Clust == BSAI_data$Cluster[clust]),]
+			val <- tapply(datdat$Total_catch, list(datdat$YEAR), sum)/1000
+			new[clust] <- mean(val)
+		}
+		
+		#### and now adjust this value so that the sum of the target species catch is the amount specified = 1.7 million ton in this study
+		Adj_factor <- 1700000/sum((new%*%as.matrix(BSAI_data_partial[,-c(1:3)]))[1,c(1,3,4)])
+		Weight_metier[[1]] <- new*Adj_factor
+	}
+	
 	if (Choose_fish_strategies == "Year")
 	{
 		for (yr in seq_along(YEARS))
 		{
-			Data_subset <- subset(Catch_data, Yr == YEARS[yr])
-			Data_input1 <- subset(BSAI_data_partial, Yr == YEARS[yr])
-			Sp = c("Cod","Halibut","Pollock","Yellowfin")
-			new <- tapply(Data_subset$value, list(Data_subset$Cluster), sum, na.rm=T)
-			Catch_strategy <- rbind(Catch_strategy, new)
-			weight_new <- as.numeric(new[which(!is.na(new) & new!=0)])
-			# print(sum(weight_new)/(1.7*1e9)*100)			# This is less than 1% of the  
-			weight_new1 <- weight_new/sum(weight_new)*1.7*1e6		# this is the weight "dk" which shows the importance of each fishing strategy
-			if (Withgear_constraint == FALSE) Weight_strategy[[yr]] <- weight_new1		
-			
-			test <- data.frame(Data_input1[,1:4],weight_new1*Data_input1[,-c(1:4)])
-			essai <- reshape2::melt(test)
-			print(tapply(essai$value, list(essai$variable), sum))
-			
-			### to make things reasonable
-			if (Withgear_constraint == TRUE) 
+			new <-rep(0, nrow(BSAI_data))
+
+			for (clust in seq_along(BSAI_data$Cluster))
 			{
-				test <- data.frame(Data_input1[,1:4],as.numeric(weight_new1)*as.matrix(Data_input1[,-c(1:4)]))
-				test1 <- data.frame(Data_input1[,1:4],as.matrix(Data_input1[,-c(1:4)]))
-				weight_new1[which(test[,6] >400 & Data_input1[,6]<0.5)] <- weight_new1[which(test[,6] >400 & Data_input1[,6]<0.5)]/10
-				weight_new1[which(test1[,3]=="trap/pot" & test1[,5]>0.9)] <- weight_new1[which(test1[,3]=="trap/pot" & test1[,5]>0.9)]/10
-				weight_new1[which(test1[,3]=="longline" & test1[,5]>0.9)] <- weight_new1[which(test1[,3]=="longline" & test1[,5]>0.9)]/10
-				Weight_strategy[[yr]] <- weight_new1
+				datdat <- Data_to_use[which(Data_to_use$YEAR == YEARS[yr] & Data_to_use$Clust == BSAI_data$Cluster[clust]),]
+				new[clust] <- sum(datdat$Total_catch)/1000
 			}
-			# par(ask=TRUE)
+			
+			new <- new/sum(new)*1.7*1e6
+			Weight_metier[[yr]] <- new
+
 		}
 	}
-	if (Choose_fish_strategies == "Average")
-	{
-		Data_subset <- Catch_data
-		Data_input1 <- BSAI_data_partial
-		new <- tapply(Data_subset$value, list(Data_subset$Cluster), sum, na.rm=T)
-		Catch_strategy <- rbind(Catch_strategy, new)
-		weight_new <- as.numeric(new[which(!is.na(new) & new!=0)])
-		weight_new1 <- weight_new/sum(weight_new)*1.7*1e6		# this is the weight "dk" which shows the importance of each fishing strategy
-		if (Withgear_constraint == FALSE) Weight_strategy[[1]] <- weight_new1		
-		
-		### to make things reasonable
-		test <- data.frame(Data_input1[,1:3],as.numeric(weight_new1)*as.matrix(Data_input1[,-c(1:3)]))
-		test1 <- data.frame(Data_input1[,1:3],as.matrix(Data_input1[,-c(1:3)]))
-		weight_new1[which(test[,6] >400 & Data_input1[,6]<0.5)] <- weight_new1[which(test[,6] >400 & Data_input1[,6]<0.5)]/10
-		weight_new1[which(test1[,3]=="trap/pot" & test1[,5]>0.9)] <- weight_new1[which(test1[,3]=="trap/pot" & test1[,5]>0.9)]/10
-		weight_new1[which(test1[,3]=="longline" & test1[,5]>0.9)] <- weight_new1[which(test1[,3]=="longline" & test1[,5]>0.9)]/10
-		if (Withgear_constraint == TRUE) Weight_strategy[[1]] <- weight_new1		
-		
-	}
+
+
+	# if (Choose_fish_strategies == "Year")
+	# {
+		# for (yr in seq_along(YEARS))
+		# {
+			# Data_subset <- subset(Catch_data, Yr == YEARS[yr])
+			# new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
+			# Weight_gear_species[,,yr] <- (apply(new, 2, function(x) x/sum(x)))
+		# }
+	# }
+	# if (Choose_fish_strategies == "Average")
+	# {
+		# Data_subset <- Catch_data
+		# new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
+		# Weight_gear_species[,,1] <- (apply(new, 2, function(x) x/sum(x)))
+	# }
 	
 			
 ##################### Case 1: without the gear constraints:
+Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_factor=0.5
+	
+
 	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
@@ -180,12 +168,12 @@
 		{
 			Yr_select <- Yr
 			# select <- c(1:10)
-			Data_weigthing <- as.numeric(Weight_strategy[[which(YEARS == Yr_select)]])
+			Data_weigthing <- as.numeric(Weight_metier[[which(YEARS == Yr_select)]])
 			Data_input <- subset(BSAI_data_partial, Yr == Yr_select)
 		}
 		if (Choose_fish_strategies == "Average") 
 		{
-			Data_weigthing <- as.numeric(Weight_strategy[[1]])
+			Data_weigthing <- as.numeric(Weight_metier[[1]])
 			Data_input <- BSAI_data_partial
 		}
 		select_non_pelagic <- which(Data_input$Gear == "non pelagic trawl")
@@ -209,7 +197,7 @@
 		if(!is.null(CV_strategy)) 
 		{
 			## adding some random error 
-			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy*x); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
+			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy*x); aaa <- replace(aaa,which(aaa<0),0); ifelse(sum(aaa)>1, bbb <- aaa/sum(aaa), bbb <- aaa); return(bbb)}))
 			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = x+runif(4,-CV_strategy,CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
 			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
 			Data_input <- Data_input_fake

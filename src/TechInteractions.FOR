@@ -1078,12 +1078,12 @@ C		VERY important step: If the estimated TAC is above TruExp, then replace the T
 
         ! Run the technical interaction model to determine the TRUE realized catch (OEM) based on the OM_fish value
         IF(OM_strategy.EQ.0) THEN 
-
-        CALL get_environment_variable("HOME", homedir)
-            WRITE (*,*) TRIM(homedir)
-            CALL SYSTEM("main_code_average.exe")
-        
+            OPEN(unit=5355, FILE="DoOMEM.dat")
+            write(5355, *) 'OM'
+            CLOSE(5355)				
+            CALL SYSTEM("Rscript ..\R\fishing_strategy_average.R")      
         ENDIF
+
         IF(OM_strategy.EQ.1) THEN 
             OPEN(unit=5353, FILE="seed.dat")
             write(5353, *) OM_fish(Isim, TheProjYear) 
@@ -1324,7 +1324,10 @@ C      Save the ABC output
       
         ! Run the technical interaction model to determine the QUOTA based on the EM_fish value
         IF(OM_strategy.EQ.0) THEN 
-            CALL SYSTEM("main_code_average.exe")
+            OPEN(unit=5355, FILE="DoOMEM.dat")
+            write(5355, *) 'OM'
+            CLOSE(5355)				
+            CALL SYSTEM("Rscript ..\R\fishing_strategy_average.R")
         ENDIF 
         
         IF(OM_strategy.EQ.1) THEN 
