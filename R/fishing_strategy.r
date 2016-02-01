@@ -159,7 +159,7 @@
 Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_factor=0.5
 	
 
-	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5)
+	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -215,9 +215,13 @@ Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_fac
 		True_exploitable <- read.table("TruExp_history.dat")
 		start_year_exp_biomass <- True_exploitable[1,]
 		DoOMEM <- read.table("DoOMEM.dat")
-		if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
-		if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
-
+		if(price_change == TRUE) 
+		{
+			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
+			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
+		}
+		if(price_change == FALSE) price <- c(1,1,1,0)
+		
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
 		D_upper <- diag(1, nrow=Nb_strategy, ncol=Nb_strategy)
@@ -298,5 +302,5 @@ Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_fac
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val, price_min=0.2, price_factor=0.5)
+	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.5)
 	
