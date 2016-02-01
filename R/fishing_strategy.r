@@ -138,28 +138,45 @@
 	}
 
 
-	# if (Choose_fish_strategies == "Year")
-	# {
-		# for (yr in seq_along(YEARS))
-		# {
-			# Data_subset <- subset(Catch_data, Yr == YEARS[yr])
-			# new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
-			# Weight_gear_species[,,yr] <- (apply(new, 2, function(x) x/sum(x)))
-		# }
-	# }
-	# if (Choose_fish_strategies == "Average")
-	# {
-		# Data_subset <- Catch_data
-		# new <- tapply(Data_subset$value, list(Data_subset$Gear, Data_subset$variable), sum, na.rm=T)
-		# Weight_gear_species[,,1] <- (apply(new, 2, function(x) x/sum(x)))
-	# }
+	#### Filter the data based so that the cluster examined catch at least one of the species of interest
+	Data_to_use$Total_catch <- apply(Data_to_use[,which(names(Data_to_use) %in% c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE"))], 1, sum, na.rm=T)
 	
+#### Species catch variation within each defined CLUSTER	
+		
+	Total_catch_variation <- tapply(Data_to_use$Total_catch, list(Data_to_use$YEAR, Data_to_use$Clust), sum, na.rm=T)
 			
+	### If we decide to put a bound on variability based on cluster
+		vals <- apply(Total_catch_variation, 2, function(x) x/median(x, na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) max(x/median(x, na.rm=T),na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) min(x/median(x, na.rm=T),na.rm=T))
+		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, median(max_dk_clust))
+		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, median(min_dk_clust))
+				
+	### If we decide to put a bound on variability based on GEAR type (broader)
+		gear_clust <- lapply(c("non pelagic trawl", "pelagic trawl", "trap/pot", "longline"), function(x) ALL_clust$Clust[which(ALL_clust$Gear == x)])
+		ALL_var <- lapply(1:4, function(x) c(Total_catch_variation[,which(colnames(Total_catch_variation) %in% gear_clust[[x]])]))
+		ALL_vars <- sapply(ALL_var, function(x) x/median(x, na.rm=T))
+		boxplot(ALL_vars, ylim=c(0,10))
+		max_val <- sapply(ALL_vars, function(x) quantile(x, 0.75, na.rm=T))
+		min_val <- sapply(ALL_vars, function(x) quantile(x, 0.25, na.rm=T))
+		max_dk_gear <- rep(0,nrow(ALL_clust))
+		min_dk_gear <- rep(0,nrow(ALL_clust))
+		for (i in 1:4) 
+		{ 
+			max_dk_gear <- replace(max_dk_gear, which(colnames(Total_catch_variation) %in% gear_clust[[i]]), max_val[i])
+			min_dk_gear <- replace(min_dk_gear, which(colnames(Total_catch_variation) %in% gear_clust[[i]]), min_val[i])
+		}
+		
 ##################### Case 1: without the gear constraints:
-Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_factor=0.5
-	
+	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)
+	Bounds_base = "cluster";	## whether the bounds are based on total catch variation within a cluster ("cluster") or among_cluster based on gear type ("gear")
+	CV_strategy=0.1;			## How variable are the catch composition between years
+	seed=1;						## Random seed for reproducibility	
+	price_min=0.2; 				## The minimum net price for a fish	
+	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
+		
 
-	Without_gear_constraints <- function(Yr, max_dk=3, min_dk=0.3, CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE)
+	Without_gear_constraints <- function(Yr, Bounds_base == "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -234,8 +251,20 @@ Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_fac
 		# TACs
 			TACs <- scan("TAC.dat",skip=1)
 		# Without the double constraint on the bounds (dk,t=1, and dkt-1)
+			if (Bounds_base == "cluster") 
+			{
+				max_dk <- max_dk_clust
+				min_dk <- min_dk_clust
+			}
+			Bounds_b1 <- c(rep(0,Nb_species), 1700000, max_dk*Data_weigthing)		# Need to figure this out
+			if (Bounds_base == "gear") 
+			{
+				max_dk <- max_dk_gear
+				min_dk <- min_dk_gear
+			}
 			Bounds_b1 <- c(rep(0,Nb_species), 1700000, max_dk*Data_weigthing)		# Need to figure this out
 			Bounds_b2 <- c(min_dk*Data_weigthing)
+			
 		# Obj func
 			obj_fun <- as.vector(Data_input%*%price)
 			
@@ -302,5 +331,5 @@ Yr=NULL; max_dk=5; min_dk=0.2; CV_strategy=0.1; seed=1; price_min=0.2; price_fac
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL,max_dk=5, min_dk=0.2, CV_strategy=0.1, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.5)
+	Without_gear_constraints(Yr=NULL, Bounds_base == "cluster", CV_strategy=0.1, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.5)
 	
