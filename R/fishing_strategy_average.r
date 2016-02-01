@@ -192,7 +192,7 @@
 		
 
 
-	Without_gear_constraints <- function(Yr, Bounds_base == "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
+	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -273,7 +273,6 @@
 				max_dk <- max_dk_clust
 				min_dk <- min_dk_clust
 			}
-			Bounds_b1 <- c(rep(0,Nb_species), 1700000, max_dk*Data_weigthing)		# Need to figure this out
 			if (Bounds_base == "gear") 
 			{
 				max_dk <- max_dk_gear
@@ -348,5 +347,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL, Bounds_base == "cluster", CV_strategy=NULL, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.5)
+	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", CV_strategy=NULL, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.5)
 	
