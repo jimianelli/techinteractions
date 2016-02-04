@@ -66,8 +66,8 @@
 		ALL_clust[,i] <- as.numeric(as.vector(ALL_clust[,i]))
 	}
 	
-	#### Filter the data based so that the cluster examined catch at least one of the species of interest
-	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest==TRUE)]),1,sum)>0
+	#### Filter the data based so that the cluster examined catch at least one of the species of interest (but not only halibut)
+	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest[-3]==TRUE)]),1,sum)>0
 	Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
 	ALL_clust <- ALL_clust[clust_keep,]
 	
@@ -112,7 +112,7 @@
 		for (clust in seq_along(BSAI_data$Cluster))
 		{
 			datdat <- Data_to_use[which(Data_to_use$Clust == BSAI_data$Cluster[clust]),]
-			val <- tapply(datdat$Total_catch, list(datdat$YEAR), sum)/1000
+			val <- tapply(datdat$Total_catch, list(datdat$YEAR), sum, na.rm=T)/1000
 			new[clust] <- median(val)
 		}
 		
