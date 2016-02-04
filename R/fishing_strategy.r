@@ -84,12 +84,14 @@
 	if (Choose_fish_strategies == "Year") 
 	{
 		BSAI_data <- BSAI_data[,c(1:3,117,which(colnames(BSAI_data) %in% Species_interest==TRUE))]
-		BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]
+		BSAI_data_partial <- BSAI_data_partial[,c(1:4,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]
+		BSAI_data_partial[,-c(1:4)] <- t(apply(BSAI_data_partial[,-c(1:4)],1,function(x) x/sum(x)))
 	}
 	if (Choose_fish_strategies == "Average") 
 	{
 		BSAI_data <- BSAI_data[,c(1:2,116,which(colnames(BSAI_data) %in% Species_interest == TRUE))]
 		BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]	
+		BSAI_data_partial[,-c(1:3)] <- t(apply(BSAI_data_partial[,-c(1:3)],1,function(x) x/sum(x)))
 	}		
 	
 	### Determine the weight to associate to each of the metier = cluster (based on the data)
@@ -208,10 +210,7 @@
 			Data_input <- as.matrix(Data_input[,-c(1:3)])
 			Data_input_true <- Data_input[,c(1,3,4,2)]
 		}
-		
-		## Standardize the Data input so that the sum of catch probabilities among the species of interest = 1
-		Data_input_true <- t(apply(Data_input_true, 1, function(x) x/sum(x)))
-		
+				
 		## Choosing the data to use
 		if(is.null(CV_strategy)) Data_input <- Data_input_true
 		if(!is.null(CV_strategy)) 
