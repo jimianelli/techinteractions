@@ -147,8 +147,8 @@
 			
 	### If we decide to put a bound on variability based on cluster
 		vals <- apply(Total_catch_variation, 2, function(x) x/median(x, na.rm=T))
-		max_dk_clust <- apply(Total_catch_variation, 2, function(x) max(x/median(x, na.rm=T),na.rm=T))
-		min_dk_clust <- apply(Total_catch_variation, 2, function(x) min(x/median(x, na.rm=T),na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),0.75,na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),0.25,na.rm=T))
 		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, median(max_dk_clust))
 		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, median(min_dk_clust))
 				
