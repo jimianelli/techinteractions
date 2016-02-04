@@ -208,7 +208,10 @@
 			Data_input <- as.matrix(Data_input[,-c(1:3)])
 			Data_input_true <- Data_input[,c(1,3,4,2)]
 		}
-
+		
+		## Standardize the Data input so that the sum of catch probabilities among the species of interest = 1
+		Data_input_true <- t(apply(Data_input_true, 1, function(x) x/sum(x)))
+		
 		## Choosing the data to use
 		if(is.null(CV_strategy)) Data_input <- Data_input_true
 		if(!is.null(CV_strategy)) 
@@ -307,7 +310,7 @@
 		# the a1 matrix
 		write("# The A1 matrix", file=file_save, append=T)
 		write((Data_input), file=file_save, ncolumns = Nb_strategy, append=T)			# constraints about the ABC
-		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)	# constraint about OY
+		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY
 		write(D_upper, file=file_save, ncolumns = Nb_strategy, append=T)				# constraint on the "dK' upper bound
 		# the a2 matrix
 		write("# The A2 matrix", file=file_save, append=T)
