@@ -1247,19 +1247,20 @@ C     Conduct stock assessments
       ENDIF
       
       if(DOCAB.EQ.0) THEN 
+          ThoseNs(:,:)=0
           MyWeight(:,:) = Wght(Ispec,:,:,1) 
           TheM = M(Ispec)       
           DO 2117 Isex = 1,Nsex
             DO 2117 Iage = 0,Amax(Ispec)
-             ThoseNs(Isex,Iage) = N(Ispec,Isex,1,1,TheYr-1,Iage)
+             ThoseNs(Isex,Iage) = N(Ispec,Isex,1,1,TheYr,Iage)
 2117      CONTINUE !End Isex and Iage loop
          TheSelex(1,:) = Sel(Ispec, :)
          TheSelex(2,:) = Sel(Ispec, :)
          
           !Here you should cal FIT.
-          CALL FindFofl(Ispec,TheYr-1) 
+         CALL FindFofl(Ispec,TheYr) 
        
-          TheX = TrueFOFL(Ispec, TheYr-1)
+          TheX = TrueFOFL(Ispec, TheYr)
           CALL CalcCatchFromF(TheX,TheM,
      +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
 
@@ -1270,7 +1271,7 @@ C     Conduct stock assessments
           
 !--------------------------------------------------------------------------
 !     To determine the true exploitable biomass
-      TheEffort(1) = TotEffort(TheYr-1)
+      TheEffort(1) = 1
       CALL ProjYrInd(TheYr,TheEffort,Ispec)
 !--------------------------------------------------------------------------
       
@@ -7103,7 +7104,7 @@ C
           DO 100 Isex = 1,Nsex
              DO 100 Iage = 0,Maxage
           pCatAge(Isex,Iage) = TheNs(Isex,Iage)*
-     +    exp(-Mval/2)*SelexVec(Isex,Iage)*Fval
+     +    exp(-Mval/2)*SelexVec(Isex,Iage)*min(0.99, Fval)
           
           pCatBio = pCatBio + pCatAge(Isex,Iage)*
      +              WeightA(Isex,Iage)    !Assumes Itime = 1 for Wght (I've never run the model under other settings (CRM)) 
