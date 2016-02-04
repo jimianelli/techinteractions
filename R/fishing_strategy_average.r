@@ -140,21 +140,6 @@
 
 	#### Filter the data based so that the cluster examined catch at least one of the species of interest
 	Data_to_use$Total_catch <- apply(Data_to_use[,which(names(Data_to_use) %in% c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE"))], 1, sum, na.rm=T)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	
 #### Species catch variation within each defined CLUSTER	
 		
@@ -162,8 +147,8 @@
 			
 	### If we decide to put a bound on variability based on cluster
 		vals <- apply(Total_catch_variation, 2, function(x) x/median(x, na.rm=T))
-		max_dk_clust <- apply(Total_catch_variation, 2, function(x) max(x/median(x, na.rm=T),na.rm=T))
-		min_dk_clust <- apply(Total_catch_variation, 2, function(x) min(x/median(x, na.rm=T),na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),0.75,na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),0.25,na.rm=T))
 		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, median(max_dk_clust))
 		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, median(min_dk_clust))
 				
@@ -190,7 +175,6 @@
 	price_min=0.2; 				## The minimum net price for a fish	
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
 		
-
 
 	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
 	{	
@@ -224,7 +208,8 @@
 			Data_input <- as.matrix(Data_input[,-c(1:3)])
 			Data_input_true <- Data_input[,c(1,3,4,2)]
 		}
-
+		## Standardize the Data input so that the sum of catch probabilities among the species of interest = 1
+		Data_input_true <- t(apply(Data_input_true, 1, function(x) x/sum(x)))
 		## Choosing the data to use
 		if(is.null(CV_strategy)) Data_input <- Data_input_true
 		if(!is.null(CV_strategy)) 
@@ -255,7 +240,6 @@
 		}
 		if(price_change == FALSE) price <- c(1,1,1,0)
 		
-
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
 		D_upper <- diag(1, nrow=Nb_strategy, ncol=Nb_strategy)
@@ -324,7 +308,7 @@
 		# the a1 matrix
 		write("# The A1 matrix", file=file_save, append=T)
 		write((Data_input), file=file_save, ncolumns = Nb_strategy, append=T)			# constraints about the ABC
-		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)	# constraint about OY
+		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY
 		write(D_upper, file=file_save, ncolumns = Nb_strategy, append=T)				# constraint on the "dK' upper bound
 		# the a2 matrix
 		write("# The A2 matrix", file=file_save, append=T)
