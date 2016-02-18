@@ -623,7 +623,8 @@ C     Debugging variables:
       REAL(8) :: Bycatch_val
       INTEGER :: DOCAB,optMSY
       REAL(8) :: SSB_MSY(MaxSpec)
-      
+      REAL(8) :: Predicted_catch(MaxSpec)
+     
       ! Added the bycatch information to be read in from outside fortran (created within R for example. 
       ! We assume that the quota setting for the halibut bycatch is performed outside and that we do not have any control) 
       
@@ -1129,6 +1130,9 @@ C        IF(OM_strategy.EQ.0 .OR. OM_strategy.EQ.1) THEN
             QuotaAct(II) = QuotaAct(II)*1000
 2015    CONTINUE 
 C        ENDIF
+
+        ! write the realized profit
+        CALL SYSTEM("Rscript ..\R\calc_profit.R")   
         
         ! Now rerun the pop dyn model to adjust for the realized catch 
         CALL AnnualProj()
@@ -3745,6 +3749,7 @@ C      Calculate the predicted catch - for MinOpt = 2, FUNK minimizes diffs betw
          CatPred(Ispec) = CatPred(Ispec)+CatBio(Ispec,Iarea,TheProjYear)
 21000   CONTINUE
         Tmp = CatPred(Ispec) - QuotaAct(Ispec)
+        Predicted_catch(Ispec) = CatPred(Ispec)
         IF (ImplOpt.EQ.0) THEN
          Funk3 = Funk3 + Tmp**2.0
         ELSEIF (ImplOpt.EQ.1) THEN 
