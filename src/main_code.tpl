@@ -173,12 +173,13 @@ FUNCTION  store_results
   // - Actual catch for each species (including the bycatch species)
   // - The value of the "dk" matrix for the specific year 
 
-  //ofstream results("coeff.dat");   // this is to create an output file names "result.sso" with the results obtained from the step above
+  ofstream results("coeff.dat");   // this is to create an output file names "result.sso" with the results obtained from the step above
   ofstream catches("catches.out");   // this is to create an output file names "result.sso" with the results obtained from the step above
   catches << "# Catch by species" << endl; 
   catches << Actual_Catch << endl;
   //results << "# dk,t" << endl;
-  //results << relative_catch << endl;
+  results << relative_catch << endl;
+  //results << Catch_strategy << endl;
   //results << "# b1" << endl;
   //results <<  b1 << endl;
   //results << "# b2" << endl;
