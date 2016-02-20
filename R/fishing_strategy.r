@@ -176,7 +176,7 @@
 	seed=1;						## Random seed for reproducibility	
 	price_min=0.2; 				## The minimum net price for a fish	
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
-		
+	price_change=FALSE 		## Whether net price changes over time		
 
 	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
 	{	
@@ -239,7 +239,7 @@
 			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
 			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
 		}
-		if(price_change == FALSE) price <- c(1,1,1,0)
+		if(price_change == FALSE) price <- c(1,0.5,1,0)
 		
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
@@ -309,7 +309,7 @@
 		# the a1 matrix
 		write("# The A1 matrix", file=file_save, append=T)
 		write((Data_input), file=file_save, ncolumns = Nb_strategy, append=T)			# constraints about the ABC
-		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY i.e. sum(catch)<1.7 million)
+		write(apply(Data_input,1,function(x) sum(x[-4])), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY i.e. sum(catch)<1.7 million)
 		write(D_upper, file=file_save, ncolumns = Nb_strategy, append=T)				# constraint on the "dK' upper bound
 		# the a2 matrix
 		write("# The A2 matrix", file=file_save, append=T)
