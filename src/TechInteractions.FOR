@@ -1275,8 +1275,22 @@ C     Conduct stock assessments
           
 !--------------------------------------------------------------------------
 !     To determine the true exploitable biomass
-      TheEffort(1) = 1
-      CALL ProjYrInd(TheYr,TheEffort,Ispec)
+          ThoseNs(:,:)=0
+          MyWeight(:,:) = Wght(Ispec,:,:,1) 
+          TheM = M(Ispec)       
+          DO 21170 Isex = 1,Nsex
+            DO 21170 Iage = 0,Amax(Ispec)
+             ThoseNs(Isex,Iage) = N(Ispec,Isex,1,1,TheYr,Iage)
+21170      CONTINUE !End Isex and Iage loop
+         TheSelex(1,:) = Sel(Ispec, :)
+         TheSelex(2,:) = Sel(Ispec, :)
+         
+         TheX = 0.99
+         CALL CalcCatchFromF(TheX,TheM,
+     +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
+
+          ! to retun the result I want
+          TruExp(Ispec,1,TheYr) = pCatBio
 !--------------------------------------------------------------------------
       
          CLOSE(957)
@@ -1288,7 +1302,8 @@ C 		Save the true exploitable biomass
       CLOSE(715)       
 
   	  OPEN(UNIT=716,FILE="TruExp_history.dat",ACCESS='APPEND')      ! this is needed in the technical interaction model for the realized catch
-      WRITE(716,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
+      WRITE(716,'(I2,1x,I2,1x,10(F17.2,1x))') 
+     + Isim, TheYr, (TruExp(II,1,TheYr),II=1,MaxSpec) 
       CLOSE(716)       
 		
 C      Save the ABC output
