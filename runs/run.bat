@@ -1,5 +1,7 @@
 @echo off
 if EXIST results (rmdir /S /Q results)
+if EXIST profit.dat (del profit.dat)
+if EXIST TruExp_history.dat (del TruExp_history.dat)
 set exec=..\src\\cab.exe 
 set exec2=..\src\main_code_average.exe 
 set exec3=..\src\TechInteractions.exe 
