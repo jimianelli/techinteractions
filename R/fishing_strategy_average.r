@@ -309,7 +309,7 @@
 		# the a1 matrix
 		write("# The A1 matrix", file=file_save, append=T)
 		write((Data_input), file=file_save, ncolumns = Nb_strategy, append=T)			# constraints about the ABC
-		write(rep(1,Nb_strategy), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY
+		write(apply(Data_input,1,function(x) sum(x[-4])), file=file_save, ncolumns = Nb_strategy, append=T)		# constraint about OY i.e. sum(catch)<1.7 million)
 		write(D_upper, file=file_save, ncolumns = Nb_strategy, append=T)				# constraint on the "dK' upper bound
 		# the a2 matrix
 		write("# The A2 matrix", file=file_save, append=T)
@@ -323,6 +323,12 @@
 		# the b2 bounds (the upper bounds value of each b2 constraints)
 		write("# The b2 bounds ", file=file_save, append=T)
 		write(Bounds_b2, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
+		# the multiplier for the b1 bounds i.e max_dk
+		write("# max_dk ", file=file_save, append=T)
+		write(max_dk, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
+		# the multiplier for the b2 bounds i.e min_dk
+		write("# min_dk ", file=file_save, append=T)
+		write(min_dk, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
 				
 		# Now run the admb code and copy it to a different name
 			#shell("admb main_code")

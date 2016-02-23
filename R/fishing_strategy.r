@@ -239,7 +239,7 @@
 			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
 			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[(nrow(True_exploitable)-1),x]/start_year_exp_biomass[x])))),0)
 		}
-		if(price_change == FALSE) price <- c(1,0.5,1,0)
+		if(price_change == FALSE) price <- c(1,1,1,0)
 		
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
@@ -323,6 +323,12 @@
 		# the b2 bounds (the upper bounds value of each b2 constraints)
 		write("# The b2 bounds ", file=file_save, append=T)
 		write(Bounds_b2, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
+		# the multiplier for the b1 bounds i.e max_dk
+		write("# max_dk ", file=file_save, append=T)
+		write(max_dk, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
+		# the multiplier for the b2 bounds i.e min_dk
+		write("# min_dk ", file=file_save, append=T)
+		write(min_dk, file=file_save, ncolumns = Nb_strategy, append=T)			# constraint on the "dK' lower bound
 				
 		# Now run the admb code and copy it to a different name
 			#shell("admb main_code")
