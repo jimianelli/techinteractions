@@ -11,12 +11,9 @@
 	- modify "runs/OM.dat" (L137-147)
 	- modify "runs/EM.dat" (L25, 27)
 4. Optimization (total catch, revenue. These are the only options available for now)
-	- modify "R/fishing strategy.r" (L223-226)
+	- modify "R/fishing strategy.r" (L237-242)
 5. 	Constraints
-	- copy the "main_code_average.tpl" file from one one of the three folders "runs/LP with base constraints", "runs/LP with less constraints", "runs/LP with stricter constraint" to "src/main_code_average.tpl"
-	- copy the "main_code_average.dat" file from one one of the three folders "runs/LP with base constraints", "runs/LP with less constraints", "runs/LP with stricter constraint" to "runs/main_code_average.dat"
-	- copy the "main_code.tpl" file from one one of the three folders "runs/LP with base constraints", "runs/LP with less constraints", "runs/LP with stricter constraint" to "src/main_code.tpl"
-	- modify "R/fishing_strategy.r" (L308)
+	- modify "R/fishing_strategy.r" (L148-178)
 6. Bycatch
 	- modify "runs/Bycatch.DAT"
 7. The type of process error (none, random, correlated)	
