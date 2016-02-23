@@ -97,10 +97,10 @@ PARAMETER_SECTION
 PRELIMINARY_CALCULATIONS_SECTION
   opt_sim();
   for (int it=1;it<=(nb_b1-Nb_species-1);it++){
-  b1(it+Nb_species+1) = max_dk*relative_catch(it);
+  b1(it+Nb_species+1) = max_dk(it)*relative_catch(it);
   }
   for (int it=1;it<=(nb_b2);it++){
-  b2(it) = min_dk*relative_catch(it);
+  b2(it) = min_dk(it)*relative_catch(it);
   }
   store_results();
   exit(1);
@@ -147,10 +147,10 @@ FUNCTION  Get_Actual_Catch
         cout<< "reDoing simplex with a different initial relative catch value dk,t=1"<<ierr<<endl;
 		relative_catch *= 1.001;
 		for (int it=1;it<=(nb_b1-Nb_species-1);it++){
-		b1(it+Nb_species+1) = max_dk*relative_catch(it);
+		b1(it+Nb_species+1) = max_dk(it)*relative_catch(it);
 		}
 		for (int it=1;it<=(nb_b2);it++){
-		b2(it) = min_dk*relative_catch(it);
+		b2(it) = min_dk(it)*relative_catch(it);
 		}
 		lpsimplex(a0,a1,a2,a3,b1,b2,b3,relative_catch,ierr);
   		cout << "the current value of relative_catch is:" << relative_catch << endl;
