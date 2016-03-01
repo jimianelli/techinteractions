@@ -36,7 +36,7 @@
 ##############################################################################	
 
 	Choose_fish_strategies = "Average"    # Option of "Average" or "Year" 		
-	Bounds_strategy <- 0.75	
+	Bounds_strategy <- 1	
 	Flex_adj <- 1
 		
 ##############################################################################	
@@ -45,19 +45,12 @@
 #
 ##############################################################################	
 
-	### LOAD data for the anlaysis
-	load("../R/All_data_Cluster_simple_2010_2014_pca_FALSE_.Rdata")	# species comp data for each cluster
+	### LOAD data for the analysis
+	load("../R/All_data_Cluster_simple_2010_2014_.Rdata")	# species comp data for each cluster
 	
-	if (Choose_fish_strategies == "Year") 
-	{
-		YEARS <- 2000:2014 #1991:2014
-		load("../R/Cluster_2000_2014_pca_FALSE_.Rdata")
-	}
-	if (Choose_fish_strategies == "Average") 
-	{
-		YEARS <- 2010:2014 #1991:2014
-		load("../R/Cluster_simple_2010_2014_pca_FALSE_.Rdata")
-	}
+	YEARS <- 2010:2014 #1991:2014
+	load("../R/Cluster_simple_2010_2014_.Rdata")
+	
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
 	GOA <- c(610, 620, 630, 640, 650)
@@ -242,7 +235,7 @@
 			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
 			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[max(1,(nrow(True_exploitable)-1)),x]/start_year_exp_biomass[x])))),0)
 		}
-		if(price_change == FALSE) price <- c(1,1,1,0)
+		if(price_change == FALSE) price <- c(1.0,0.80,0.78,0)
 		
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
