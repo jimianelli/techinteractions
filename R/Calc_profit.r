@@ -18,6 +18,8 @@
 
 	### 
 	Weight_strategy <- scan("coeff.dat")
+	write(Weight_strategy, file="coeff_save.dat", append=T, ncolumns=length(Weight_strategy))
+
 	N_Strategy <- length(Weight_strategy)
 	price <- scan("main_code.dat", skip=5, nlines=1)
 	Catch_proportion <- matrix(scan("main_code.dat", skip=7, nlines=4), nrow=4, byrow=T)
