@@ -45,11 +45,11 @@
 #
 ##############################################################################	
 
-	### LOAD data for the analysis
-	load("../R/All_data_Cluster_simple_2010_2014_.Rdata")	# species comp data for each cluster
+	YEARS <- 2011:2014 #1991:2014
 	
-	YEARS <- 2010:2014 #1991:2014
-	load("../R/Cluster_simple_2010_2014_.Rdata")
+	### LOAD data for the analysis
+	load("../R/All_data_Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata")	# species comp data for each cluster
+	load("../R/Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata")
 	
 	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
 	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
