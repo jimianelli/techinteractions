@@ -230,12 +230,12 @@
 		True_exploitable <- True_exploitable[,-c(1,2)]
 		start_year_exp_biomass <- True_exploitable[1,]
 		DoOMEM <- read.table("DoOMEM.dat")
+		price <- c(1.0,0.73,0.71,0)
 		if(price_change == TRUE) 
 		{
-			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
-			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(1+price_factor*(1-True_exploitable[max(1,(nrow(True_exploitable)-1)),x]/start_year_exp_biomass[x])))),0)
+			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
+			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[max(1,(nrow(True_exploitable)-1)),x]/start_year_exp_biomass[x])))),0)
 		}
-		if(price_change == FALSE) price <- c(1.0,0.80,0.78,0)
 
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
