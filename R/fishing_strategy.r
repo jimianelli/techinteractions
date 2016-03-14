@@ -144,18 +144,20 @@
 			
 	### If we decide to put a bound on variability based on cluster
 		vals <- apply(Total_catch_variation, 2, function(x) x/median(x, na.rm=T))
-		max_dk_clust <- Flex_adj*apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),Bounds_strategy,na.rm=T))
-		min_dk_clust <- 1/Flex_adj*apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),Bounds_strategy,na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
 		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, median(max_dk_clust))
 		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, median(min_dk_clust))
+		max_dk_clust <- Flex_adj*max_dk_clust
+		min_dk_clust <- 1/Flex_adj*min_dk_clust
 				
 	### If we decide to put a bound on variability based on GEAR type (broader)
 		gear_clust <- lapply(c("non pelagic trawl", "pelagic trawl", "trap/pot", "longline"), function(x) ALL_clust$Clust[which(ALL_clust$Gear == x)])
 		ALL_var <- lapply(1:4, function(x) c(Total_catch_variation[,which(colnames(Total_catch_variation) %in% gear_clust[[x]])]))
 		ALL_vars <- sapply(ALL_var, function(x) x/median(x, na.rm=T))
 		boxplot(ALL_vars, ylim=c(0,10))
-		max_val <- Flex_adj*sapply(ALL_vars, function(x) quantile(x, Bounds_strategy, na.rm=T))
-		min_val <- 1/Flex_adj*sapply(ALL_vars, function(x) quantile(x, (1-Bounds_strategy), na.rm=T))
+		max_val <- sapply(ALL_vars, function(x) quantile(x, Bounds_strategy, na.rm=T))
+		min_val <- sapply(ALL_vars, function(x) quantile(x, (1-Bounds_strategy), na.rm=T))
 		max_dk_gear <- rep(0,nrow(ALL_clust))
 		min_dk_gear <- rep(0,nrow(ALL_clust))
 		for (i in 1:4) 
@@ -163,6 +165,8 @@
 			max_dk_gear <- replace(max_dk_gear, which(colnames(Total_catch_variation) %in% gear_clust[[i]]), max_val[i])
 			min_dk_gear <- replace(min_dk_gear, which(colnames(Total_catch_variation) %in% gear_clust[[i]]), min_val[i])
 		}
+		max_dk_gear <- Flex_adj*max_dk_gear
+		min_dk_gear <- 1/Flex_adj*min_dk_gear
 		
 ##################### Case 1: without the gear constraints:
 	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)
