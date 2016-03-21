@@ -171,7 +171,7 @@
 ##################### Case 1: without the gear constraints:
 	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)
 	Bounds_base = "cluster";	## whether the bounds are based on total catch variation within a cluster ("cluster") or among_cluster based on gear type ("gear")
-	CV_strategy=0.1;			## How variable are the catch composition between years
+	Change_strategy=TRUE;		## YES or NO
 	seed=1;						## Random seed for reproducibility	
 	price_min=0.2; 				## The minimum net price for a fish	
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
@@ -210,20 +210,6 @@
 			Data_input_true <- Data_input[,c(1,3,4,2)]
 		}
 				
-		## Choosing the data to use
-		if(is.null(CV_strategy)) Data_input <- Data_input_true
-		if(!is.null(CV_strategy)) 
-		{
-			## adding some random error 
-			Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy*x); aaa <- replace(aaa,which(aaa<0),0); ifelse(sum(aaa)>1, bbb <- aaa/sum(aaa), bbb <- aaa); return(bbb)}))
-			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = x+runif(4,-CV_strategy,CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
-			#Data_input_fake <- t(apply(Data_input_true, 1, function(x) { aaa = rnorm(4, x, CV_strategy); aaa <- replace(aaa,which(aaa<0),0); bbb = aaa/sum(aaa); return(bbb)}))
-			Data_input <- Data_input_fake
-		}
-		
-		## See what is the initial solution
-		test <- Data_weigthing%*%Data_input
-		duplicated(test)
 		
 		## Price of the species
 		# price <- c(0.57,0.63,0.63,0)		# cod, pollock, yellowfin
@@ -240,6 +226,19 @@
 			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
 			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[max(1,(nrow(True_exploitable)-1)),x]/start_year_exp_biomass[x])))),0)
 		}
+
+		## Choosing the data to use
+		if(Change_strategy == FALSE) Data_input <- Data_input_true
+		if(Change_strategy == TRUE) 
+		{
+			## adding some random error 
+			Data_input_fake <- cbind(t(sapply(1:nrow(Data_input_true), function(x) Data_input_true[x,-4]*True_exploitable[nrow(True_exploitable),]/start_year_exp_biomass)),Data_input_true[,4])
+			Data_input <- Data_input_fake
+		}
+		
+		## See what is the initial solution
+		test <- Data_weigthing%*%Data_input
+		duplicated(test)
 		
 		Nb_strategy <- nrow(Data_input)
 		Nb_species <- ncol(Data_input)
@@ -338,5 +337,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", CV_strategy=0.1, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.1)
+	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.1)
 	
