@@ -95,59 +95,21 @@
 	Withgear_constraint = FALSE
 	Weight_metier <- list()
 
-	if (Choose_fish_strategies == "Average")
-	{
-		new <-rep(0, nrow(BSAI_data))
-
-		tapply(Data_to_use$POLLOCK, Data_to_use$YEAR, sum, na.rm=T)/1000		
-		tapply(Data_to_use$PACIFIC.COD, Data_to_use$YEAR, sum, na.rm=T)/1000		
-		tapply(Data_to_use$YELLOWFIN.SOLE, Data_to_use$YEAR, sum, na.rm=T)/1000		
-		tapply(Data_to_use$Total_catch, Data_to_use$YEAR, sum, na.rm=T)/1000		
-
-		for (clust in seq_along(BSAI_data$Cluster))
-		{
-			datdat <- Data_to_use[which(Data_to_use$Clust == BSAI_data$Cluster[clust]),]
-			val <- tapply(datdat$Total_catch, list(datdat$YEAR), sum, na.rm=T)/1000
-			new[clust] <- median(val)
-		}
-		
-		#### and now adjust this value so that the sum of the target species catch is the amount specified = 1.7 million ton in this study
-		Adj_factor <- 1700000/sum((new%*%as.matrix(BSAI_data_partial[,-c(1:3)]))[1,c(1,3,4)])
-		Weight_metier[[1]] <- new*Adj_factor
-	}
-	
-	if (Choose_fish_strategies == "Year")
-	{
-		for (yr in seq_along(YEARS))
-		{
-			new <-rep(0, nrow(BSAI_data))
-
-			for (clust in seq_along(BSAI_data$Cluster))
-			{
-				datdat <- Data_to_use[which(Data_to_use$YEAR == YEARS[yr] & Data_to_use$Clust == BSAI_data$Cluster[clust]),]
-				new[clust] <- sum(datdat$Total_catch)/1000
-			}
-			
-			new <- new/sum(new)*1.7*1e6
-			Weight_metier[[yr]] <- new
-
-		}
-	}
-
-
 	#### Filter the data based so that the cluster examined catch at least one of the species of interest
 	Data_to_use$Total_catch <- apply(Data_to_use[,which(names(Data_to_use) %in% c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE"))], 1, sum, na.rm=T)
 	
 #### Species catch variation within each defined CLUSTER	
 		
 	Total_catch_variation <- tapply(Data_to_use$Total_catch, list(Data_to_use$YEAR, Data_to_use$Clust), sum, na.rm=T)
+	Total_catch_variation <- 1700000000*Total_catch_variation/apply(Total_catch_variation,1,sum,na.rm=T)
 			
 	### If we decide to put a bound on variability based on cluster
-		vals <- apply(Total_catch_variation, 2, function(x) x/median(x, na.rm=T))
-		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),Bounds_strategy,na.rm=T))
-		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/median(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
-		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, median(max_dk_clust))
-		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, median(min_dk_clust))
+		Weight_metier[[1]] <- apply(Total_catch_variation,2,mean,na.rm=T)
+		vals <- apply(Total_catch_variation, 2, function(x) x/mean(x, na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),Bounds_strategy,na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
+		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, mean(max_dk_clust))
+		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, mean(min_dk_clust))
 		max_dk_clust <- Flex_adj*max_dk_clust
 		min_dk_clust <- 1/Flex_adj*min_dk_clust
 				
