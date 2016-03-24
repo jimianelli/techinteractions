@@ -44,44 +44,44 @@
 	## Catch info
 		# for cod
 			output_catch_cod <- c(Sim_info, Catch_sector[1,])
-			if(!file.exists("Metier_catch.dat"))  write(ID, file="Metier_catch_cod.dat", append=F, ncolumns=length(output_catch_cod))
+			if(!file.exists("Metier_catch_cod.dat"))  write(ID, file="Metier_catch_cod.dat", append=F, ncolumns=length(output_catch_cod))
 			write(output_catch_cod, file="Metier_catch_cod.dat", append=T, ncolumns=length(output_catch_cod))
 		# for pollock
 			output_catch_pollock <- c(Sim_info, Catch_sector[2,])
-			if(!file.exists("Metier_catch.dat"))  write(ID, file="Metier_catch_pollock.dat", append=F, ncolumns=length(output_catch_pollock))
+			if(!file.exists("Metier_catch_pollock.dat"))  write(ID, file="Metier_catch_pollock.dat", append=F, ncolumns=length(output_catch_pollock))
 			write(output_catch_pollock, file="Metier_catch_pollock.dat", append=T, ncolumns=length(output_catch_pollock))
 		# for yellowfin
 			output_catch_yellowfin <- c(Sim_info, Catch_sector[3,])
-			if(!file.exists("Metier_catch.dat"))  write(ID, file="Metier_catch_yellowfin.dat", append=F, ncolumns=length(output_catch_yellowfin))
+			if(!file.exists("Metier_catch_yellowfin.dat"))  write(ID, file="Metier_catch_yellowfin.dat", append=F, ncolumns=length(output_catch_yellowfin))
 			write(output_catch_yellowfin, file="Metier_catch_yellowfin.dat", append=T, ncolumns=length(output_catch_yellowfin))
 		# for halibut
 			output_catch_halibut <- c(Sim_info, Catch_sector[4,])
-			if(!file.exists("Metier_catch.dat"))  write(ID, file="Metier_catch_halibut.dat", append=F, ncolumns=length(output_catch_halibut))
+			if(!file.exists("Metier_catch_halibut.dat"))  write(ID, file="Metier_catch_halibut.dat", append=F, ncolumns=length(output_catch_halibut))
 			write(output_catch_halibut, file="Metier_catch_halibut.dat", append=T, ncolumns=length(output_catch_halibut))
 		# for ALL
 			output_catch_all <- c(Sim_info, Catch_sector_sum)
-			if(!file.exists("Metier_catch.dat"))  write(ID, file="Metier_catch_all.dat", append=F, ncolumns=length(output_catch_all))
+			if(!file.exists("Metier_catch_all.dat"))  write(ID, file="Metier_catch_all.dat", append=F, ncolumns=length(output_catch_all))
 			write(output_catch_all, file="Metier_catch_all.dat", append=T, ncolumns=length(output_catch_all))
 	
 	## Profit info
 		# for cod
 			output_profit_cod <- c(Sim_info, Profit_sector[1,])
-			if(!file.exists("Metier_profit.dat"))  write(ID, file="Metier_profit_cod.dat", append=F, ncolumns=length(output_profit_cod))
+			if(!file.exists("Metier_profit_cod.dat"))  write(ID, file="Metier_profit_cod.dat", append=F, ncolumns=length(output_profit_cod))
 			write(output_profit_cod, file="Metier_profit_cod.dat", append=T, ncolumns=length(output_profit_cod))
 		# for pollock
 			output_profit_pollock <- c(Sim_info, Profit_sector[2,])
-			if(!file.exists("Metier_profit.dat"))  write(ID, file="Metier_profit_pollock.dat", append=F, ncolumns=length(output_profit_pollock))
+			if(!file.exists("Metier_profit_pollock.dat"))  write(ID, file="Metier_profit_pollock.dat", append=F, ncolumns=length(output_profit_pollock))
 			write(output_profit_pollock, file="Metier_profit_pollock.dat", append=T, ncolumns=length(output_profit_pollock))
 		# for yellowfin
 			output_profit_yellowfin <- c(Sim_info, Profit_sector[3,])
-			if(!file.exists("Metier_profit.dat"))  write(ID, file="Metier_profit_yellowfin.dat", append=F, ncolumns=length(output_profit_yellowfin))
+			if(!file.exists("Metier_profit_yellowfin.dat"))  write(ID, file="Metier_profit_yellowfin.dat", append=F, ncolumns=length(output_profit_yellowfin))
 			write(output_profit_yellowfin, file="Metier_profit_yellowfin.dat", append=T, ncolumns=length(output_profit_yellowfin))
 		# for halibut
 			output_profit_halibut <- c(Sim_info, Profit_sector[4,])
-			if(!file.exists("Metier_profit.dat"))  write(ID, file="Metier_profit_halibut.dat", append=F, ncolumns=length(output_profit_halibut))
+			if(!file.exists("Metier_profit_halibut.dat"))  write(ID, file="Metier_profit_halibut.dat", append=F, ncolumns=length(output_profit_halibut))
 			write(output_profit_halibut, file="Metier_profit_halibut.dat", append=T, ncolumns=length(output_profit_halibut))
 		# for ALL
 			output_profit_all <- c(Sim_info, Profit_sector_sum)
-			if(!file.exists("Metier_profit.dat"))  write(ID, file="Metier_profit_all.dat", append=F, ncolumns=length(output_profit_all))
+			if(!file.exists("Metier_profit_all.dat"))  write(ID, file="Metier_profit_all.dat", append=F, ncolumns=length(output_profit_all))
 			write(output_profit_all, file="Metier_profit_all.dat", append=T, ncolumns=length(output_profit_all))
 	

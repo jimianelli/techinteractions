@@ -159,6 +159,7 @@
 			## adding some random error 
 			Data_input_fake <- cbind(t(sapply(1:nrow(Data_input_true), function(x) Data_input_true[x,-4]*True_exploitable[nrow(True_exploitable),]/start_year_exp_biomass)),Data_input_true[,4])
 			Data_input <- matrix(unlist(Data_input_fake),ncol=length(YEARS),byrow=F) 
+			Data_input <- t(apply(Data_input,1,function(x) x/sum(x))) 
 		}
 		
 		## See what is the initial solution
