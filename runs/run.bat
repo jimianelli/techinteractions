@@ -2,6 +2,17 @@
 if EXIST results (rmdir /S /Q results)
 if EXIST profit.dat (del profit.dat)
 if EXIST TruExp_history.dat (del TruExp_history.dat)
+if EXIST Metier_catch_all.dat (del Metier_catch_all.dat)
+if EXIST Metier_catch_cod.dat (del Metier_catch_cod.dat)
+if EXIST Metier_catch_pollock.dat (del Metier_catch_pollock.dat)
+if EXIST Metier_catch_yellowfin.dat (del Metier_catch_yellowfin.dat)
+if EXIST Metier_catch_halibut.dat (del Metier_catch_halibut.dat)
+if EXIST Metier_profit_all.dat (del Metier_profit_all.dat)
+if EXIST Metier_profit_cod.dat (del Metier_profit_cod.dat)
+if EXIST Metier_profit_pollock.dat (del Metier_profit_pollock.dat)
+if EXIST Metier_profit_yellowfin.dat (del Metier_profit_yellowfin.dat)
+if EXIST Metier_profit_halibut.dat (del Metier_profit_halibut.dat)
+
 set exec=..\src\\cab.exe 
 set exec2=..\src\main_code_average.exe 
 set exec3=..\src\TechInteractions.exe 
