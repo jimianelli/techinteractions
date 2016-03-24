@@ -1,6 +1,6 @@
 ##############################################################################	
 ##############################################################################	
-#
+# 
 #	Objective: 
 #	To detect fishing strategy from the observer data
 #	
@@ -8,7 +8,7 @@
 #	Kotaro Ono
 #
 #	Version:
-#	V1: 
+#	V1:  
 #
 #	TO DO LISTS:
 #   - Creates the data that goes into the ADMB code
@@ -119,7 +119,7 @@
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
 	price_change=FALSE 		## Whether net price changes over time		
 
-	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", CV_strategy=NULL, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
+	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=FALSE, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -145,7 +145,7 @@
 		True_exploitable <- True_exploitable[,-c(1,2)]
 		start_year_exp_biomass <- True_exploitable[1,]
 		DoOMEM <- read.table("DoOMEM.dat")
-		price <- c(1.0,0.76,0.70,0)
+		price <- c(1.0,0.80,0.76,0)
 		if(price_change == TRUE) 
 		{
 			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
