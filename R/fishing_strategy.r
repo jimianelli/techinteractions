@@ -105,10 +105,25 @@
 		vals <- apply(Total_catch_variation, 2, function(x) x/mean(x, na.rm=T))
 		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),Bounds_strategy,na.rm=T))
 		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
-		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, mean(max_dk_clust))
-		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, mean(min_dk_clust))
-		max_dk_clust <- Flex_adj*max_dk_clust
-		min_dk_clust <- 1/Flex_adj*min_dk_clust
+		max_dk_clust1 <- replace(max_dk_clust, max_dk_clust==1, mean(max_dk_clust))
+		min_dk_clust1 <- replace(min_dk_clust, min_dk_clust==1, mean(min_dk_clust))
+		
+		max_dk_clust <- replace(max_dk_clust, max_dk_clust==1, NA)
+		min_dk_clust <- replace(min_dk_clust, min_dk_clust==1, NA)
+		fake_max <- data.frame(ALL_clust[,c(1:2,116)], max_dk_clust)
+		fake_min <- data.frame(ALL_clust[,c(1:2,116)], min_dk_clust)
+		Average_dk_clust_max <- tapply(fake_max$max_dk_clust, list(fake_max$Sector), mean, na.rm=T)
+		Average_dk_clust_min <- tapply(fake_min$min_dk_clust, list(fake_min$Sector), mean, na.rm=T)
+		for (i in seq_along(unique(fake_max$Sect)))
+		{
+			to_replace <- which(fake_max$Sector == unique(fake_max$Sect)[i] & is.na(fake_max$max_dk_clust))
+			if(length(to_replace)>0) fake_max[to_replace, 'max_dk_clust'] <- Average_dk_clust_max[i]
+			to_replace <- which(fake_min$Sector == unique(fake_min$Sect)[i] & is.na(fake_min$min_dk_clust))
+			if(length(to_replace)>0) fake_min[to_replace, 'min_dk_clust'] <- Average_dk_clust_min[i]
+		}
+
+		max_dk_clust <- Flex_adj*fake_max[,'max_dk_clust']
+		min_dk_clust <- 1/Flex_adj*fake_min[,'min_dk_clust']
 				
 ################### Case 1: without the gear constraints:
 	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)
