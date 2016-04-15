@@ -549,8 +549,9 @@ C     Debugging variables:
       REAL(8) :: AFSC_alpha
       INTEGER :: AFSC_MinusYrs
       REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs,1:MaxMVN) 
-     +:: EstFOFL,SSEstFOFL
+     +:: EstFOFL,SSEstFOFL,EstFABC
       REAL(8),DIMENSION(1:MaxSpec,MinPYr:MaxPYr) :: TrueFOFL
+      REAL(8),DIMENSION(1:MaxSpec,MinPYr:MaxPYr) :: TrueFABC
       REAL(8),DIMENSION(1:MaxSpec,MinPYr:MaxPYr) :: TrueB35,TrueB40
       REAL(8),DIMENSION(1:MaxSpec) :: TrueF35,TrueF40
 !      REAL(8),DIMENSION(1:MaxSpec) :: SeedQuota
@@ -592,7 +593,9 @@ C     Debugging variables:
       !AFSC_alpha                 - The alpha used in the AFSC OFL control rule (usually 0.05)
       !AFSC_MinusYrs              - The number of years to leave out of calculating Avg Recruitment for the AFSC OFL control rule
       !EstFOFL                    - The estimated FOFL for each configuration and random Natage vector for use in the P* control rule.
+      !EstFOFL                    - The estimated FABC for each configuration and random Natage vector for use in the P* control rule.
       !TrueFOFL                   - The true AFSC FOFL based on the OM
+      !TrueFOFL                   - The true AFSC FABC based on the OM
       !TrueF35,TrueF40,TrueB35,TrueB40 - true ref pts needed to calculate TrueFOFL
       !SeedQuota                  - The seed value (a trial ABC value to start with for doing the calculations necessary to come up with a quota with a pr(overfishing) = p* as specified.
       !Pstar                      - The p* specified in CR.dat that represents a (manager-determined) acceptable p* (probability of overfishing).
@@ -1264,7 +1267,7 @@ C     Conduct stock assessments
           !Here you should cal FIT.
          CALL FindFofl(Ispec,TheYr) 
        
-          TheX = TrueFOFL(Ispec, TheYr)
+          TheX = TrueFABC(Ispec, TheYr)
           CALL CalcCatchFromF(TheX,TheM,
      +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
 
@@ -4419,11 +4422,11 @@ C     GlobalEffort def'n has to be changed if spatial effort blocks become activ
 	if (Year.GT.BaseYr) THEN
           IF (DoCAB.EQ.1) THEN 
               WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim,  
-     +        Ispec, Year, EstFOFL(Ispec,1,1)/Qval(Ispec)
+     +        Ispec, Year, EstFABC(Ispec,1,1)/Qval(Ispec)
               ENDIF
           IF (DoCAB.EQ.0) THEN 
               WRITE(38,'(2I2,1x,I2,1x,F15.5)') Isim,  
-     +        Ispec, Year, TrueFOFL(Ispec,Year-1)/Qval(Ispec)
+     +        Ispec, Year, TrueFABC(Ispec,Year-1)/Qval(Ispec)
               ENDIF
       ENDIF  
                
@@ -7435,14 +7438,19 @@ C        ENDIF
 
           IF (Depl.GT.1) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)
+            EstFABC(Ispec,Iconfig,1) = EstF40(Ispec,Iconfig)
 
           ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
             EstFOFL(Ispec,Iconfig,1) = EstF35(Ispec,Iconfig)*
      +      (EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
      +      -AFSC_alpha)/(1-AFSC_alpha)
+            EstFABC(Ispec,Iconfig,1) = EstF40(Ispec,Iconfig)*
+     +      (EstSB(Ispec,1,Iyear)/EstB40(Ispec,Iconfig)
+     +      -AFSC_alpha)/(1-AFSC_alpha)
 
           ELSE
             EstFOFL(Ispec,Iconfig,1) = 0.0
+            EstFABC(Ispec,Iconfig,1) = 0.0
           ENDIF
 		  
         ENDIF	
