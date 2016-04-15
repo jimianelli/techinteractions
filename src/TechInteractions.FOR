@@ -7244,7 +7244,7 @@ C
        !Here you should cal FIT.
            CALL FindFofl(Ispec,Iyear) 
        
-          TheX = EstFOFL(Ispec,Iconfig,1)
+          TheX = EstFABC(Ispec,Iconfig,1)
            CALL CalcCatchFromF(TheX,TheM,
      +        ThoseNs(:,:),TheSelex(:,:),MyWeight(:,:)) 
       
