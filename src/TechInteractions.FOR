@@ -1298,7 +1298,12 @@ C     Conduct stock assessments
       
          CLOSE(957)
 10000  CONTINUE 
-       
+
+C 		Save the TRUE SSB
+  	  OPEN(UNIT=714,FILE="TruSSB.dat")      ! this is needed in the technical interaction model for the realized catch
+      WRITE(714,'(10(F17.2,1x))') (SpBioTot(II,TheYr),II=1,MaxSpec) 
+      CLOSE(714)       
+      
 C 		Save the true exploitable biomass
   	  OPEN(UNIT=715,FILE="TruExp.dat")      ! this is needed in the technical interaction model for the realized catch
       WRITE(715,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 

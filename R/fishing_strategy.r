@@ -45,7 +45,7 @@
 #
 ##############################################################################	
 
-	YEARS <- 2011:2014 #1991:2014
+	YEARS <- 2010:2014 #1991:2014
 	
 	### LOAD data for the analysis
 	load(paste0("../R/All_data_Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata"))	# species comp data for each cluster
@@ -62,8 +62,10 @@
 	}
 	
 	#### Filter the data based so that the cluster examined catch at least one of the species of interest (but not only halibut)
+	if(length(grep("2014", Data_to_use$Cluster))>0) Data_to_use$Clust <- substr(Data_to_use$Cluster, start=6, nchar(Data_to_use$Cluster))
+	if(length(grep("2014", Data_to_use$Cluster))==0) Data_to_use$Clust <- Data_to_use$Cluster
 	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest[-3]==TRUE)]),1,sum)>0
-	Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
+	Data_to_use <- Data_to_use[Data_to_use$Cluster %in% ALL_clust$Cluster[clust_keep], ]
 	ALL_clust <- ALL_clust[clust_keep,]
 	
 	### Sectors to save
@@ -134,7 +136,7 @@
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
 	price_change=FALSE 		## Whether net price changes over time		
 
-	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=FALSE, seed=777, price_min=0.2, price_factor=0.5, price_change=TRUE, ...)
+	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=FALSE, seed=777, price_change=TRUE, ...)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -155,24 +157,44 @@
 			Data_input_true <- Data_input[,c(1,3,4,2)]
 		}
 						
-		## If Net price is changing with the abundance of a stock
-		True_exploitable <- read.table("TruExp_history.dat")
-		True_exploitable <- True_exploitable[,-c(1,2)]
-		start_year_exp_biomass <- True_exploitable[1,]
+		## Changes in net price with 
+		# ABC for quota allocation
+		# TAC for vessel dynamics
+		# Dealing with quota allocation (EM) or vessel dynamics (OM)?
 		DoOMEM <- read.table("DoOMEM.dat")
-		price <- c(1.0,0.80,0.76,0)
+		# Loading results from the net price changes with species ABC and TAC
+		load("Vessel_dyn.Rdata"); Vessel_dyn <- RES
+		load("Quota_dyn.Rdata"); Quota_dyn <- RES
+		# TACs
+		TACs <- scan("TAC.dat")
+		# price <- c(1.0,0.80,0.76,0)
 		if(price_change == TRUE) 
 		{
-			if (DoOMEM == "OM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[nrow(True_exploitable),x]/start_year_exp_biomass[x])))),0)
-			if (DoOMEM == "EM") price <- c(sapply(1:ncol(True_exploitable), function(x) max(price_min, as.numeric(price[x]+price_factor*(1-True_exploitable[max(1,(nrow(True_exploitable)-1)),x]/start_year_exp_biomass[x])))),0)
+			if (DoOMEM == "OM") 
+			{
+				newdat <- as.data.frame(t(TACs))
+				colnames(newdat) <- c("q_cod","q_pol", "q_yel", "q_hal")
+				price <- sapply(1:3, function(x) { aaa <- predict(Vessel_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- rnorm(1, aaa$fit, aaa$se.fit); return(bbb) })
+				price <- c(10, price)			
+			}
+			if (DoOMEM == "EM") 
+			{
+				newdat <- as.data.frame(t(TACs))
+				colnames(newdat) <- c("q_cod","q_pol", "q_yel", "q_hal")
+				price <- sapply(1:2, function(x) { aaa <- predict(Quota_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- rnorm(1, aaa$fit, aaa$se.fit); return(bbb) })
+				price <- c(10, price)			
+			}
 		}
 
-		## Choosing the data to use
+		## Changes in species catch composition 
+		# Exploitable biomass
+		SSB_2010 <- c(180952,1913000,713513)
+		True_SSB <- read.table("TruSSB.dat")/1000
 		if(Change_strategy == FALSE) Data_input <- Data_input_true
 		if(Change_strategy == TRUE) 
 		{
-			## adding some random error 
-			Data_input_fake <- cbind(t(sapply(1:nrow(Data_input_true), function(x) Data_input_true[x,-4]*True_exploitable[nrow(True_exploitable),]/start_year_exp_biomass)),Data_input_true[,4])
+			## catch composition changes with species abundance 
+			Data_input_fake <- cbind(t(sapply(1:nrow(Data_input_true), function(x) Data_input_true[x,-4]*True_SSB/SSB_2010)),Data_input_true[,4])
 			Data_input <- matrix(unlist(Data_input_fake),ncol=length(YEARS),byrow=F) 
 			Data_input <- t(apply(Data_input,1,function(x) x/sum(x))) 
 		}
@@ -189,8 +211,6 @@
 		# Without the double constraint on the bounds (dk,t=1, and dkt-1)
 			Nb_constraints_b1 <- c(Nb_species,1,Nb_strategy)
 			Nb_constraints_b2 <- c(Nb_strategy)
-		# TACs
-			TACs <- scan("TAC.dat",skip=1)
 		# Without the double constraint on the bounds (dk,t=1, and dkt-1)
 			if (Bounds_base == "cluster") 
 			{
@@ -206,8 +226,13 @@
 		##### Now write the file
 			file_save <- "main_code.dat"
 			file_exe <- "main_code.exe"
-		
-		# Number fishing strategies 
+			price_save <- "price.dat"	
+
+		# Price of species (price.dat)
+		if(!file.exists("price.dat")) write("# Price species (including bycatch sp)", file=price_save)
+		write(c(DoOMEM, price), file=price_save, append=T)
+						
+		# Number fishing strategies (main_code.dat)
 		write("# Number of fishing strategy", file=file_save)
 		write(Nb_strategy, file=file_save, append=T)
 		# Number of species
@@ -272,5 +297,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = FALSE, price_min=0.2, price_factor=0.1)
+	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = TRUE)
 	
