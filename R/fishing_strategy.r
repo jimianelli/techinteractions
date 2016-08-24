@@ -65,7 +65,7 @@
 	if(length(grep("2014", Data_to_use$Cluster))>0) Data_to_use$Clust <- substr(Data_to_use$Cluster, start=6, nchar(Data_to_use$Cluster))
 	if(length(grep("2014", Data_to_use$Cluster))==0) Data_to_use$Clust <- Data_to_use$Cluster
 	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest[-3]==TRUE)]),1,sum)>0
-	Data_to_use <- Data_to_use[Data_to_use$Cluster %in% ALL_clust$Cluster[clust_keep], ]
+	Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
 	ALL_clust <- ALL_clust[clust_keep,]
 	
 	### Sectors to save
@@ -134,9 +134,10 @@
 	seed=1;						## Random seed for reproducibility	
 	price_min=0.2; 				## The minimum net price for a fish	
 	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
-	price_change=FALSE 		## Whether net price changes over time		
-
-	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=FALSE, seed=777, price_change=TRUE, ...)
+	price_change=TRUE 			## Whether net price changes over time		
+	price_sd = FALSE
+	
+	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=TRUE, seed=777, price_change=TRUE, price_sd=TRUE, ...)
 	{	
 		##### Begin writing the file into a .dat file (not slack variables)
 
@@ -161,28 +162,57 @@
 		# ABC for quota allocation
 		# TAC for vessel dynamics
 		# Dealing with quota allocation (EM) or vessel dynamics (OM)?
-		DoOMEM <- read.table("DoOMEM.dat")
+		DoOMEM <- as.character(unlist(read.table("DoOMEM.dat")))
 		# Loading results from the net price changes with species ABC and TAC
-		load("Vessel_dyn.Rdata"); Vessel_dyn <- RES
-		load("Quota_dyn.Rdata"); Quota_dyn <- RES
+		load("../R/Vessel_dyn.Rdata"); Vessel_dyn <- RES
+		load("../R/Quota_dyn.Rdata"); Quota_dyn <- RES
 		# TACs
 		TACs <- scan("TAC.dat")
 		# price <- c(1.0,0.80,0.76,0)
 		if(price_change == TRUE) 
 		{
-			if (DoOMEM == "OM") 
+			if (DoOMEM == "OM") 	# this is the price for the vessel dynamics 
 			{
 				newdat <- as.data.frame(t(TACs))
 				colnames(newdat) <- c("q_cod","q_pol", "q_yel", "q_hal")
-				price <- sapply(1:3, function(x) { aaa <- predict(Vessel_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- rnorm(1, aaa$fit, aaa$se.fit); return(bbb) })
+				if (price_sd==FALSE) price <- sapply(1:3, function(x) { aaa <- predict(Vessel_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- aaa$fit; return(bbb) })
+				if (price_sd==TRUE) price <- sapply(1:3, function(x) { aaa <- predict(Vessel_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- rnorm(1, aaa$fit, aaa$se.fit); return(bbb) })
 				price <- c(10, price)			
 			}
-			if (DoOMEM == "EM") 
+			if (DoOMEM == "EM") 	# this is the price for the quota allocation
 			{
 				newdat <- as.data.frame(t(TACs))
 				colnames(newdat) <- c("q_cod","q_pol", "q_yel", "q_hal")
-				price <- sapply(1:2, function(x) { aaa <- predict(Quota_dyn[[x]], newdata=newdat,se.fit=TRUE); bbb <- rnorm(1, aaa$fit, aaa$se.fit); return(bbb) })
-				price <- c(10, price)			
+				Logistic <- function(x,XX,YY,x.new,pred=FALSE)
+				{
+					if(pred == FALSE) 
+					{
+						y = min(YY)+diff(range(YY))/(1+exp(-x[1]*(XX-x[2])))
+						ss <- sum((y - YY)^2)
+						plot(XX,YY,type="p", cex=3, xlim=c(0.75*min(XX), 1.5*max(XX)))
+						points(XX,y,pch=19,cex=2,col="blue")
+						lines(seq(min(XX), 2*max(XX), by=1000), min(YY)+diff(range(YY))/(1+exp(-x[1]*(seq(min(XX), 2*max(XX), by=1000)-x[2]))), col="blue")
+						return(ss)
+					}	
+					if(pred == TRUE) 
+					{
+						y = min(YY)+diff(range(YY))/(1+exp(-x[1]*(x.new-x[2])))
+						return(y)
+					}	
+				}
+				if (price_sd==FALSE) 
+				{
+					pred_pol = as.numeric(Logistic(Quota_dyn[[2]]$par,XX=Quota_dyn[[1]]$q_pol,YY=Quota_dyn[[1]]$p_pol,x.new=newdat[2], pred=TRUE))
+					pred_yel = as.numeric(Logistic(Quota_dyn[[3]]$par,XX=Quota_dyn[[1]]$q_yel,YY=Quota_dyn[[1]]$p_yel,x.new=newdat[3], pred=TRUE))					
+					price <- c(pred_pol, pred_yel)
+				}
+				if (price_sd==TRUE) 
+				{
+					pred_pol = as.numeric(Logistic(Quota_dyn[[2]]$par,XX=Quota_dyn[[1]]$q_pol,YY=Quota_dyn[[1]]$p_pol,x.new=newdat[2], pred=TRUE))
+					pred_yel = as.numeric(Logistic(Quota_dyn[[3]]$par,XX=Quota_dyn[[1]]$q_yel,YY=Quota_dyn[[1]]$p_yel,x.new=newdat[3], pred=TRUE))					
+					price <- c(pred_pol, pred_yel)
+				}
+				price <- c(10, price, 0)			
 			}
 		}
 
@@ -195,8 +225,8 @@
 		{
 			## catch composition changes with species abundance 
 			Data_input_fake <- cbind(t(sapply(1:nrow(Data_input_true), function(x) Data_input_true[x,-4]*True_SSB/SSB_2010)),Data_input_true[,4])
-			Data_input <- matrix(unlist(Data_input_fake),ncol=length(YEARS),byrow=F) 
-			Data_input <- t(apply(Data_input,1,function(x) x/sum(x))) 
+			Data_input <- matrix(unlist(Data_input_fake),ncol=4,byrow=F) 
+			Data_input <- t(apply(Data_input,1,function(x) c(x[-4]/sum(x[-4]),x[4]))) 
 		}
 		
 		## See what is the initial solution
@@ -297,5 +327,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = TRUE)
+	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = TRUE, price_sd=FALSE)
 	

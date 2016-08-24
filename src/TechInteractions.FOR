@@ -560,7 +560,7 @@ C     Debugging variables:
       REAL(8) :: EstimatedP
       INTEGER :: Nconfigs
       REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: ConfigWts !,hConfigs, MConfigs
-      REAL(8) :: TheM,TheX
+      REAL(8) :: TheM,TheX,QQ
       REAL(8), DIMENSION(1:Nsex,0:Maxage) :: ThoseNs
       REAL(8), DIMENSION(1:Nsex,0:Maxage) :: TheSelex
       REAL(8), DIMENSION(1:Nsex,0:Maxage) :: MyWeight
@@ -4588,7 +4588,7 @@ C     Carey is adding 2 files, one for catch cpue and one for survey cpue
 601   FORMAT(1x,2I3,1x,I4,1x,200(F15.2,1x))
 602   FORMAT(1x,I2,1x,I4,1x,200(F8.4,1x))
 612   FORMAT(1x,I2,1x,I2,1x,I2,1x,200(F8.6,1x))
-613   FORMAT(1x,I2,1x,I4,1x,I4,1x,200(F20.12,1x))
+613   FORMAT(1x,I2,1x,I4,1x,I4,1x,200(F25.4,1x))
 614   FORMAT(1x,I4,1x,F8.2,1x,F6.3,1x,F8.2,1x)
 615   FORMAT(1x,I2,1x,I2,1x,I2,1x,200(F8.6,1x))
 616   FORMAT(1x,I2,1x,I4,1x,3(F10.6),1x,2(F10.3),1x,2(I4))
@@ -7529,14 +7529,19 @@ C      ENDIF
 
         IF ((Depl.GT.1)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
+          TrueFABC(Ispec,Iconfig) = TrueF40(Ispec)
 
         ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
      +    ((SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear))
      +    -AFSC_alpha)/(1-AFSC_alpha)
+          TrueFABC(Ispec,IYear) = TrueF40(Ispec)*
+     +    ((SpBioTot(Ispec,IYear)/TrueB40(Ispec,IYear))
+     +    -AFSC_alpha)/(1-AFSC_alpha)
 
         ELSE
           TrueFOFL(Ispec,IYear) = 0.0
+          TrueFABC(Ispec,IYear) = 0.0
         ENDIF    
 C        Depl = SpBioTot(Ispec,IYear)/Kvec(Ispec)
 C
@@ -7954,3 +7959,6 @@ C 10. the recvec in the "AFSC_SPR" subroutine needs to be changed so that the re
 
 
 C MERGE to cbisection  
+
+
+C L7135 changed from min(0.99, fval) to fval
