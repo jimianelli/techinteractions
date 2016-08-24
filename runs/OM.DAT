@@ -22,7 +22,7 @@ Final Dep (out of date; see below)      40.0   40.0   40.0
 Does Qval equal 1 (DR project)?         0
 Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
 Recruitment specifications
- Include process error? (1=yes;0=no)    1
+ Include process error? (1=yes;0=no)    1										! 0= no; 1=yes (random); 2=yes (correlated)
  Sigma(Global)                          0.57      0.90      0.41  
  Sigma (Local)                          0.000001 0.000001 0.000001 
  Steepness                              0.99 0.99 0.99 
