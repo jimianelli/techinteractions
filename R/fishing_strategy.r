@@ -124,8 +124,8 @@
 			if(length(to_replace)>0) fake_min[to_replace, 'min_dk_clust'] <- Average_dk_clust_min[i]
 		}
 
-		max_dk_clust <- Flex_adj*fake_max[,'max_dk_clust']
-		min_dk_clust <- 1/Flex_adj*fake_min[,'min_dk_clust']
+		max_dk_clust <- ifelse(Flex_adj*fake_max[,'max_dk_clust'] >= 1.01, Flex_adj*fake_max[,'max_dk_clust'], 1.01)
+		min_dk_clust <- ifelse(1/Flex_adj*fake_min[,'min_dk_clust'] <= 0.99, 1/Flex_adj*fake_min[,'min_dk_clust'], 0.99)
 				
 ################### Case 1: without the gear constraints:
 	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)

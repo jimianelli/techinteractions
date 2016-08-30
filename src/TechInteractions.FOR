@@ -103,6 +103,7 @@ C     Global N variables
       REAL*8 SRAlpha(MaxSpec,MaxNSBlk,MaxEWBlk)
       REAL*8 SRBeta(MaxSpec,MaxNSBlk,MaxEWBlk)
       REAL*8 SRR0(MaxSpec,MaxNSBlk,MaxEWBlk)
+      REAL*8 Rec_add(MaxSpec)
       INTEGER SrTYpe(MaxSpec)
 	INTEGER RecruitOpt(MaxSpec)
 
@@ -121,6 +122,7 @@ C      SrR0(s,ans,aew)    - SR virgin recruitment
 C      RecSum(s,y,n,s)    - Recruitment (age 0)
 C      RecVirg(s,n,s)     - Distribution of recruits
 C      SpBioArea(s,a,y)   - Spawning biomass (by assessment area)
+C      Rec_add(s)  	  - Changes in mean recruitment after 10years
 C
 C     Biological parameters
       REAL*8 M(MaxSpec),SBPR(MaxSpec),Fec(MaxSpec,0:MaxAge)
@@ -1460,6 +1462,7 @@ C      IF (SolFinDepl.NE.1) FinDepYr = BaseYr
       READ(13,'(40X,5(F8.5,1x))') (SigmaR2(Ispec),Ispec=1,Nspec)
       READ(13,'(40X,5(F4.3,1x))') (Steep(ISpec),Ispec=1,Nspec)
       READ(13,'(40X,5(  I4,1x))') (SrType(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,5(F8.5,1x))') (Rec_add(Ispec),Ispec=1,Nspec)
 	READ(13,'(40X,5(  I4,1x))') (RecruitOpt(ISpec),Ispec=1,Nspec)
       READ(13,'(40X,5(F7.3,1x))') (RecX(Ispec),Ispec=1,Nspec)
       READ(13,'(40X,5(F7.3,1x))') (RecY(Ispec),Ispec=1,Nspec)
@@ -2469,7 +2472,7 @@ C
 C
 C     Global variables
       INTEGER Year
-      REAL*8 TheEffort(10),TheQ
+      REAL*8 TheEffort(10),TheQ,Add_rec
 C
 C     Local variables
       INTEGER Ispec,Isex,IBlkNS,IBlkEW,Iage,Itime,AmaxM,Iarea,Jarea
@@ -2864,12 +2867,16 @@ C      How to proceed depends on the form of density dependence
 C      ========================================================
 C
 C      Type = 1; Global density-dependence
+       Add_rec=0;
+	   IF (Year .EQ. 62) THEN 
+             Add_rec=Rec_add(Ispec)
+         ENDIF
        IF (SrType(Ispec).EQ.1) THEN
         Depl =  SPBioTot(Ispec,Year+1)/SPBioTot(Ispec,MinPYr)
         DO 33100 IBlkNS = 1,NNSBlock
          DO 33100 IBlkEW = 1,NEWBlock
-          Alpha = SRalpha(Ispec,IBlkNS,IBlkEW)
-          Beta = SRbeta(Ispec,IBlkNS,IBlkEW)
+          Alpha = SRalpha(Ispec,IBlkNS,IBlkEW)*1/(1+Add_rec)
+          Beta = SRbeta(Ispec,IBlkNS,IBlkEW)*1/(1+Add_rec)
           DO 33110 Isex = 1,Nsex
            N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) = 
      +        Depl / (Alpha + Beta * Depl)
@@ -3028,7 +3035,7 @@ C
 C
 C     Global variables
       INTEGER Year,Ispec
-      REAL*8 TheEffort(10),TheQ
+      REAL*8 TheEffort(10),TheQ, Add_rec
 C
 C     Local variables
       INTEGER Isex,IBlkNS,IBlkEW,Iage,Itime,AmaxM,Iarea,Jarea
@@ -3407,12 +3414,16 @@ C      How to proceed depends on the form of density dependence
 C      ========================================================
 C
 C      Type = 1; Global density-dependence
-       IF (SrType(Ispec).EQ.1) THEN
+       Add_rec = 0
+	   IF(Year .EQ. 62) THEN
+             Add_rec = Rec_add(Ispec)
+         ENDIF
+	   IF (SrType(Ispec).EQ.1) THEN
         Depl =  SPBioTot(Ispec,Year+1)/SPBioTot(Ispec,MinPYr)
         DO 33100 IBlkNS = 1,NNSBlock
          DO 33100 IBlkEW = 1,NEWBlock
-          Alpha = SRalpha(Ispec,IBlkNS,IBlkEW)
-          Beta = SRbeta(Ispec,IBlkNS,IBlkEW)
+          Alpha = SRalpha(Ispec,IBlkNS,IBlkEW)*1/(1+Add_rec)
+          Beta = SRbeta(Ispec,IBlkNS,IBlkEW)*1/(1+Add_rec)
           DO 33110 Isex = 1,Nsex
            N(Ispec,Isex,IBlkNs,IBlkEW,Year+1,0) = 
      +        Depl / (Alpha + Beta * Depl)
