@@ -7540,7 +7540,7 @@ C      ENDIF
 
         IF ((Depl.GT.1)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
-          TrueFABC(Ispec,Iconfig) = TrueF40(Ispec)
+          TrueFABC(Ispec,IYear) = TrueF40(Ispec)
 
         ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
