@@ -2868,7 +2868,7 @@ C      ========================================================
 C
 C      Type = 1; Global density-dependence
        Add_rec=0;
-	   IF (Year .EQ. 62) THEN 
+	   IF (Year .GT. 62) THEN 
              Add_rec=Rec_add(Ispec)
          ENDIF
        IF (SrType(Ispec).EQ.1) THEN
@@ -3415,7 +3415,7 @@ C      ========================================================
 C
 C      Type = 1; Global density-dependence
        Add_rec = 0
-	   IF(Year .EQ. 62) THEN
+	   IF(Year .GT. 62) THEN
              Add_rec = Rec_add(Ispec)
          ENDIF
 	   IF (SrType(Ispec).EQ.1) THEN
@@ -7540,7 +7540,7 @@ C      ENDIF
 
         IF ((Depl.GT.1)) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)
-          TrueFABC(Ispec,IYear) = TrueF40(Ispec)
+          TrueFABC(Ispec,Iconfig) = TrueF40(Ispec)
 
         ELSEIF (Depl.LE.1.AND.Depl.GT.AFSC_alpha) THEN
           TrueFOFL(Ispec,IYear) = TrueF35(Ispec)*
