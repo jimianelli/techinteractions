@@ -783,7 +783,7 @@ C     Carey: Add a file for analyzing movement characteristics
       OPEN(UNIT=34,FILE="results/SUMM13.OUT",ACCESS='APPEND')
       OPEN(UNIT=35,FILE="results/SUMM14.OUT",ACCESS='APPEND')
 	OPEN(UNIT=38,FILE="results/SUMM17.OUT",ACCESS='APPEND')
-      OPEN(UNIT=22,FILE="results/SAVE.ALL")
+      OPEN(UNIT=22,FILE="results/SAVE.ALL",ACCESS='APPEND')
 	OPEN(UNIT=40,FILE="results/SUMM19.OUT")
 	OPEN(UNIT=41,FILE="results/SUMM20.OUT")
 	OPEN(UNIT=49,FILE="results/SUMM27.OUT")
@@ -804,7 +804,7 @@ C     Carey: Add a file for analyzing movement characteristics
       WRITE(402,*) "The_following_assessments_didnt_produce_cor_or_MVNn"
       WRITE(402,*) "Isim, GlobalProjYr, Ispec, Iconfig, TestMVN"
       
-      OPEN(UNIT = 5000,FILE = "results/F_output.OUT")
+      OPEN(UNIT = 5000,FILE = "results/F_output.OUT",ACCESS='APPEND')
       !Make character variables of historical assessment years to then string together file names containing info on assessment year
 !      Write(HistChar1,'(I2)') HistAssYr(1)
 !      Write(HistChar2,'(I2)') HistAssYr(2)
