@@ -1,6 +1,4 @@
-## Documentation for the multispecies technical interaction model ##
-
-### A. How to create scenario: file-list to check/modify for creating scenario ###
+## How to create scenario: file-list to check/modify for creating scenario 
 
 1. The HCR (Naive or Conscientious manager)
 	- modify "runs/OM.dat" (L165)
@@ -24,7 +22,7 @@
 		- modify "runs/EM.dat" (L1)
 		
 		
-### B. Description of the quota allocation steps: ###
+## Description of the quota allocation steps: ###
 
 1. Quota allocation steps:
 	1. fix EM_fish = the seed (from Random_seed_EM.dat)
