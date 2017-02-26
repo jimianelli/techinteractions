@@ -1,14 +1,23 @@
-# techinteraction
+#	techinteraction
 
 ## Description
 _techinteractions_ is a program that allows implementing a management strategy evaluation (MSE) for a multispecies fishery with catch constraints e.g. bycatch constraints, cap in total species catch, mixed-species cap. The model combines a biological module, a quota allocation module and a vessel dynamics module to mimic the fishery. 
 Quota allocation and vessel dynamics modules are both implemented using linear programming (a constrained optimization approach). This simple yet flexible approach is ideal for MSE as it allows including much complexity of both quota and vessel dynamics while saving time for running the MSE (generally takes few seconds to run these modules).
 Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishery example. 
 
-## Contents
-- [Structure of the _techinteraction_ program](#structure-of-the-techinteraction_program)
-- [Computer setup for running the MSE](#computer-setup-for-running-the-MSE)
-- [_techinteraction_ MSE setup](#techinteractions-mse-setup)
+**Table of Contents**  
+
+- [techinteraction](#)
+	- [Description](#)
+	- [Contents](#)
+	- [Structure of the techinteraction program](#)
+	- [Computer setup for running the MSE](#)
+		- [Programs to install](#)
+		- [Setup the path](#)
+	- [techinteraction MSE setup](#)
+		- [Creating a scenario for the multispecies MSE](#)
+		- [Compiling and running the scenario](#)
+	- [Description of all files present in the techinteraction program](#)
 
 ## Structure of the _techinteraction_ program
 - `doc` contains documentations for the model and the MS
@@ -52,12 +61,12 @@ Creating a scenario requires changes to many nodes in the program:
 * the vessel dynamics: this defines/mimics fishers' behavior 
 
 **ALL** these configurations are controlled by several important files in the program:
-* [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
-* [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
+* [`runs/OM.dat`] (../blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
+* [`runs/EM.dat`] (../blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
 * [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.DAT) : This file controls the harvest control rule 
-* [`runs/Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_OM.dat) :
-* [`runs/Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_EM.dat) :
-* [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r) :
+* [`runs/Random_seed_OM.dat`] (../blob/trial/runs/Random_seed_OM.dat) :
+* [`runs/Random_seed_EM.dat`] (../blob/trial/runs/Random_seed_EM.dat) :
+* [`R/fishing strategy.r`] (../blob/trial/R/fishing_strategy.r) :
 
 Step by step detail for setting an MSE scenario are provided in [`specifying-scenario` file] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
 ### Compiling and running the scenario
