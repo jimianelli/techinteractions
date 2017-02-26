@@ -54,7 +54,7 @@ Creating a scenario requires changes to many nodes in the program:
 **ALL** these configurations are controlled by several important files in the program:
 * [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
 * [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
-* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.DAT) : This file controls the harvest control rule 
+* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.dat) : This file controls the harvest control rule 
 * [`runs/Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_OM.dat) :
 * [`runs/Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_EM.dat) :
 * [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r) :
