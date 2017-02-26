@@ -29,23 +29,22 @@ Therefore, users are required to have the following software in order to run thi
 ### Setup the path
 The next step is to set the path.
 * path to `ADMB`
-Follow the instructions written [here] (http://www.admb-project.org/downloads/) to check whether the path was correctly set. If not, please set the path to `ADMB` in your environment variables i.e. it should be the location where you installed `AMDB` e.g. `C:\ADMB\bin`
+Follow the instructions written [here] (http://www.admb-project.org/downloads/) to check whether the path was correctly set. If not, please set the path to `ADMB` in your environment variables i.e. it should be the location where you installed `AMDB` e.g. _C:\ADMB\bin_
 * path to `fortran`
 * path to `R`
-Go to the directory where you cloned `techinteractions`. _shift + right mouse click_ above the `techinteractions` folder and select the option `Open command window here`. Run the command script 
+Go to the directory where you cloned _techinteractions_. _shift + right mouse click_ above the _techinteractions_ folder and select the option _Open command window here_. Run the command script 
 
 ```R
 rscript R/test.r
 ```
 
-If it prints the message `path to R is already setup`, you are all good. If not, please set the path to `R` in your environment variables i.e. it should be the location where you installed `R` e.g. `C:\Program Files\R\R-3.2.2\bin`
+If it prints the message _path to R is already setup_, you are all good. If not, please set the path to `R` in your environment variables i.e. it should be the location where you installed `R` e.g. _C:\Program Files\R\R-3.2.2\bin_
 
 
 ## _techinteraction_ MSE setup
 
 Below is the illustration of the full MSE cycle
-![MSE cycle] (https://github.com/Kotkot/techinteractions/tree/trial/doc/MSE_fig.png) 
- the 
+![MSE cycle] (https://raw.github.com/Kotkot/techinteractions/tree/trial/doc/MSE_fig.png) 
 
 ### Creating a scenario for the multispecies MSE 
 Creating a scenario requires changes to many nodes in the program:
@@ -55,12 +54,12 @@ Creating a scenario requires changes to many nodes in the program:
 * the vessel dynamics: this defines/mimics fishers' behavior 
 
 **ALL** these configurations are controlled by several important files in the program:
-* [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/tree/trial/runs/OM.dat) : controls the operating model i.e. the underlying truth of the model 
-* [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/tree/trial/runs/EM.dat) : controls the estimation/assessment model
-* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/tree/trial/runs/CR.dat) : controls the harvest control rule 
-* [`runs/Random_strategy_OM.dat`] (https://github.com/Kotkot/techinteractions/tree/trial/runs/Random_strategy_OM.dat) 
-* [`runs/Random_strategy_EM.dat`] (https://github.com/Kotkot/techinteractions/tree/trial/runs/Random_strategy_EM.dat) 
-* [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/tree/trial/R/fishing_strategy.r) 
+* [`runs/OM.dat`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/runs/OM.dat) : controls the operating model i.e. the underlying truth of the model 
+* [`runs/EM.dat`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/runs/EM.dat) : controls the estimation/assessment model
+* [`runs/CR.dat`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/runs/CR.dat) : controls the harvest control rule 
+* [`runs/Random_strategy_OM.dat`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/runs/Random_strategy_OM.dat) 
+* [`runs/Random_strategy_EM.dat`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/runs/Random_strategy_EM.dat) 
+* [`R/fishing strategy.r`] (https://raw.github.com/Kotkot/techinteractions/tree/trial/R/fishing_strategy.r) 
 
 Step by step detail for setting an MSE scenario are provided in [`specifying-scenario` file] (https://github.com/Kotkot/techinteractions/tree/trial/doc/specifying-scenario.Rmd) 
 
