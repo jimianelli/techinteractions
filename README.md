@@ -1,20 +1,3 @@
----
-output:
-  md_document:
-    variant: markdown_github
----
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-figs/",
-  cache.path = "README-cache/"
-)
-```
-
 # techinteraction
 
 ## Description
@@ -26,9 +9,6 @@ Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishe
 - [Structure of the _techinteraction_ program](#structure-of-the-techinteraction_program)
 - [Computer setup for running the MSE](#computer-setup-for-running-the-MSE)
 - [_techinteraction_ MSE setup](#techinteractions-mse-setup)
-
-<!-- end toc -->
-
 
 ## Structure of the _techinteraction_ program
 - `doc` contains documentations for the model and the MS
