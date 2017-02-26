@@ -6,11 +6,9 @@ Quota allocation and vessel dynamics modules are both implemented using linear p
 Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishery example. 
 
 ## Contents
-- [Structure of the _techinteraction_ program] (#structure_of_the_techinteraction_program)
-- [Computer setup for running the MSE] (#computer_setup_for_running_the_MSE)
-- [Techinteraction MSE setup] (#techinteractions_mse_setup)
-
-<!-- end toc -->
+- [Structure of the _techinteraction_ program](#structure_of_the_techinteraction_program)
+- [Computer setup for running the MSE](#computer_setup_for_running_the_MSE)
+- [_techinteraction_ MSE setup](#techinteractions_mse_setup)
 
 ## Structure of the _techinteraction_ program
 - `doc` contains documentations for the model and the MS
@@ -57,8 +55,8 @@ Creating a scenario requires changes to many nodes in the program:
 * [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
 * [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
 * [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.DAT) : This file controls the harvest control rule 
-* [`runs/Random_strategy_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_strategy_OM.dat) :
-* [`runs/Random_strategy_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_strategy_EM.dat) :
+* [`runs/Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_OM.dat) :
+* [`runs/Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_EM.dat) :
 * [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r) :
 
 Step by step detail for setting an MSE scenario are provided in [`specifying-scenario` file] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
