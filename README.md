@@ -7,7 +7,7 @@ Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishe
 
 ## Contents
 - [Structure of the _techinteraction_ program](#structure-of-the-techinteraction-program)
-- [Computer setup for running the MSE](#computer-setup-for-running-the-MSE)
+- [Computer setup for running the MSE](#computer-setup-for-running-the-mse)
 - [_techinteraction_ MSE setup](#techinteractions-mse-setup)
 
 ## Structure of the _techinteraction_ program
