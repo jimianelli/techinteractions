@@ -1,22 +1,34 @@
-#	techinteraction
+---
+output:
+  md_document:
+    variant: markdown_github
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-figs/",
+  cache.path = "README-cache/"
+)
+```
+
+# techinteraction
 
 ## Description
 _techinteractions_ is a program that allows implementing a management strategy evaluation (MSE) for a multispecies fishery with catch constraints e.g. bycatch constraints, cap in total species catch, mixed-species cap. The model combines a biological module, a quota allocation module and a vessel dynamics module to mimic the fishery. 
 Quota allocation and vessel dynamics modules are both implemented using linear programming (a constrained optimization approach). This simple yet flexible approach is ideal for MSE as it allows including much complexity of both quota and vessel dynamics while saving time for running the MSE (generally takes few seconds to run these modules).
 Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishery example. 
 
-**Table of Contents**  
+## Contents
+- [Structure of the _techinteraction_ program](#structure-of-the-techinteraction_program)
+- [Computer setup for running the MSE](#computer-setup-for-running-the-MSE)
+- [_techinteraction_ MSE setup](#techinteractions-mse-setup)
 
-- [techinteraction](#)
-	- [Description](#)
-	- [Structure of the techinteraction program](#)
-	- [Computer setup for running the MSE](#)
-		- [Programs to install](#)
-		- [Setup the path](#)
-	- [techinteraction MSE setup](#)
-		- [Creating a scenario for the multispecies MSE](#)
-		- [Compiling and running the scenario](#)
-	- [Description of all files present in the techinteraction program](#)
+<!-- end toc -->
+
 
 ## Structure of the _techinteraction_ program
 - `doc` contains documentations for the model and the MS
