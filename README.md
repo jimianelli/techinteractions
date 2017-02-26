@@ -52,14 +52,14 @@ Creating a scenario requires changes to many nodes in the program:
 * the vessel dynamics: this defines/mimics fishers' behavior 
 
 **ALL** these configurations are controlled by several important files in the program:
-* [`runs/OM.dat`] (../blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
-* [`runs/EM.dat`] (../blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
-* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.DAT) : This file controls the harvest control rule 
-* [`runs/Random_seed_OM.dat`] (../blob/trial/runs/Random_seed_OM.dat) :
-* [`runs/Random_seed_EM.dat`] (../blob/trial/runs/Random_seed_EM.dat) :
-* [`R/fishing strategy.r`] (../blob/trial/R/fishing_strategy.r) :
+* [`runs/OM.dat`] (/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
+* [`runs/EM.dat`] (/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
+* [`runs/CR.dat`] (/blob/trial/runs/CR.DAT) : This file controls the harvest control rule 
+* [`runs/Random_seed_OM.dat`] (/blob/trial/runs/Random_seed_OM.dat) :
+* [`runs/Random_seed_EM.dat`] (/blob/trial/runs/Random_seed_EM.dat) :
+* [`R/fishing strategy.r`] (/blob/trial/R/fishing_strategy.r) :
 
-Step by step detail for setting an MSE scenario are provided in [`specifying-scenario` file] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
+Step by step detail for setting an MSE scenario are provided in [`specifying-scenario`] file (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
 ### Compiling and running the scenario
 Once you have set-up the scenario, now it is time to run it. This is done in two steps:
   1. Compile the source codes. Open the command line within the `src` folder and type in `make` (this will run the `Makefile`). This will compile all necessary files to run the model
