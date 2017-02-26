@@ -6,9 +6,9 @@ Quota allocation and vessel dynamics modules are both implemented using linear p
 Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishery example. 
 
 ## Contents
-- [Structure of the _techinteraction_ program](#structure_of_the_techinteraction_program)
-- [Computer setup for running the MSE](#computer_setup_for_running_the_MSE)
-- [_techinteraction_ MSE setup](#techinteractions_mse_setup)
+- [Structure of the _techinteraction_ program](#structure-of-the-techinteraction_program)
+- [Computer setup for running the MSE](#computer-setup-for-running-the-MSE)
+- [_techinteraction_ MSE setup](#techinteractions-mse-setup)
 
 ## Structure of the _techinteraction_ program
 - `doc` contains documentations for the model and the MS
