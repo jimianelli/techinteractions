@@ -36,7 +36,7 @@ Go to the directory where you cloned `techinteractions`. _shift + right mouse cl
 
 ```R
 rscript R/test.r
-```R
+```
 
 If it prints the message `path to R is already setup`, you are all good. If not, please set the path to `R` in your environment variables i.e. it should be the location where you installed `R` e.g. `C:\Program Files\R\R-3.2.2\bin`
 
