@@ -1,3 +1,16 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [techinteraction](#)
+	- [Description](#)
+	- [Structure of the techinteraction program](#)
+	- [Computer setup for running the MSE](#)
+		- [Programs to install](#)
+		- [Setup the path](#)
+	- [techinteraction MSE setup](#)
+		- [Creating a scenario for the multispecies MSE](#)
+		- [Compiling and running the scenario](#)
+	- [Description of all files present in the techinteraction program](#)
+	
 # techinteraction
 
 ## Description
