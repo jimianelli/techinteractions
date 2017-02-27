@@ -6,7 +6,7 @@
 #' @param	Bounds_base; this defines how bounds on the fishery expansion factor are defined. The option are 1. the bounds are based on total catch variation within a cluster ("cluster") or 2. among_cluster based on gear type ("gear"). Currently only option 1 is implemented. Default = "cluster"
 #' @param	Change_strategy; This determines whether catch composition by metier changes with the abundance of the species. Options are TRUE or FALSE. Default = TRUE
 #' @param	seed;	the seed value that controls the variability in catch composition by metier. If 2 runs have the same seed, they have the exact same catch composition by metier. 
-#' @param	price_change; This determines whether net price changes annually (prediction are based on: i/ a species by species logistic regression of the estimated perceived net price to the 2010-2014 ABC values for fishery managers; and ii/ a multivariate linear regression of the estimated realized net price to the 2010-2014 TAC values for all species). Options are TRUE or FALSE. Default = TRUE
+#' @param	price_change; This determines whether net price changes annually (prediction are based on: i/ a species by species logistic regression of the estimated perceived net price to the 2010-2014 ABC values for fishery managers; and ii/ a linear regression of the estimated realized net price to the 2010-2014 TAC values for all species). Options are TRUE or FALSE. Default = TRUE
 #' @param	price_sd; This controls whether we want to add variability around the predicted for next year. Options are TRUE or FALSE. Default = FALSE	
 #' @export
 

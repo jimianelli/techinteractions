@@ -21,62 +21,60 @@ This file shows the files one needs to modify to create a new scenario
 This is where all the R codes and data are stored to run various pieces of program
 
 * [`All_data_Cluster_simple_2010_2014_.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/All_data_Cluster_simple_2010_2014_.Rdata)
-This file 
+This is the catch composition data from the observer program. Each observation is affiliated to a specific metier. 
 * [`Calc_profit.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Calc_profit.r)
-This file 
+This file is called within `fortran` and calculates the catch and "net revenue" by sector for each iteration and saves the results within `runs`
 * [`Cluster_simple_2010_2014_.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Cluster_simple_2010_2014_.Rdata)
-This file 
+This is the data file that describes the metier with its median catch composition.
 * [`Codes_plots.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_plots.r)
-This file 
+This file allows to explore, debug, analyse, and interpret the results produced from the simulation
 * [`Codes_testmodel.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_testmodel.r)
-This file 
+This file is a simplified version of `Codes_plots.r` and allow unit testing of the simulation results
 * [`fishing_strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r)
-This file 
+This file controls in essence both the quota allocation and the vessel dynamics models and requires several user input parameters
 * [`fishing_strategy_average.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy_average.r)
-This file 
+This file is similar to `fishing_strategy.r` but is only used when debugging the model i.e. when the input parameter for the quota allocation and vessel dynamics are static over time. This includes the net price change, and fish catch composition.
 * [`gen_random_seed.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/gen_random_seed.r)
-This file 
+This file was used to create both the `Random_seed_EM.dat` and `Random_seed_OM.dat` files in the `runs` folder.
 * [`Metier_sector.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Metier_sector.Rdata)
-This file 
+This file shows which metier belongs to which sector
 * [`Quota_dyn.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Quota_dyn.Rdata)
-This file 
+This file contains information on the species by species logistic regression fit of the estimated perceived net price to the ABC for the 2010-2014 period. This results is used to predict future perceived net price based on individual species ABC, if the option `price_change` is activated in `fishing_strategy.r` file. 
 * [`Test.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Test.r)
 This file 
 * [`Vessel_dyn.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Vessel_dyn.Rdata)
-This file 
+This file contains information on the linear regression fit of the estimated realized net price for a species to the TACs of all species for the 2010-2014 period. This results is used to predict future realized net price based on TAC values of all species, if the option `price_change` is activated in `fishing_strategy.r` file. 
 
 ## runs
 This is where all model configuration files (where we specify scenarios) are found. Simulation results will be stored in a subfolder named `results`
 
 * [`Bycatch.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Bycatch.DAT)
-This file 
+This file contains the value of halibut PSC limit for the projection period. The vector needs to be of length equal to the projection period
 * [`CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/CR.dat)
-This file 
+This file defines the harvest control rule (HCR). Currently, there is a choice between a Pstar approach and an AFSC tier 3 HCR
 * [`CreateFolder.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/CreateFolder.bat)
-This file 
+This is a batch file that create the `results` subfolder within the `runs` folder if it does not already exist 
 * [`DeleteCabStuff - Copy.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/DeleteCabStuff - Copy.bat)
-This file 
+This is a batch file that deletes some of the output files coming from running the CAB model. This version includes files that were specifically created when using the Pstar HCR.
 * [`DeleteCabStuff.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/DeleteCabStuff.bat)
-This file 
+This is a batch file that deletes some of the output files coming from running the CAB model. This version includes files that were specifically created when using the AFSC tier 3 HCR.
 * [`EM.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/EM.DAT)
-This file 
+This file controls the assessment model (see more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md) and [here] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd))
 * [`main_code_average.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/main_code_average.dat)
-This file 
+This file is used for running linear progrmaming when we do not include any temporal dynamics in catch composition by metier and net price. This is a static version mostly used for debugging purpose.
 * [`OM.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/OM.DAT)
-This file 
+This file controls the operating model (see more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md) and [here] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd))
 * [`Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Random_seed_EM.dat)
-This file 
+This file controls the seed for changing the catch composition in the quota allocation model (see more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md) and [here] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)) 
 * [`Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Random_seed_OM.dat)
-This file 
-* [`RANDOM4.NUM`] (https://github.com/Kotkot/techinteractions/blob/trial/R/RANDOM4.NUM)
-This file 
+This file controls the seed for changing the catch composition in the vessel dynamics model (see more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md) and [here] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)) 
 * [`RANDOMTRY.NUM`] (https://github.com/Kotkot/techinteractions/blob/trial/R/RANDOMTRY.NUM)
-This file 
+This file controls the seeds in running the fortran program for reproducibility. 
 * [`run.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/run.bat)
-This file 
+This is the **main** batch file that users have to call to run the program. 
 * [`SaveCabStuff.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuff.bat)
-This file 
+This file copies the assessment model results i.e. CAB into the `results` subfolder for later exploration. This version includes files that were specifically created when using the AFSC tier 3 HCR.
 * [`SaveCabStuffPstar.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuffPstar.bat)
-This file 
+This file copies the assessment model results i.e. CAB into the `results` subfolder for later exploration. This version includes files that were specifically created when using the Pstar HCR.
 * [`Saveresults.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Saveresults.bat)
-This file 
+This file stacks the resulting quota, and catch by species from each year and simulation in a single file. 

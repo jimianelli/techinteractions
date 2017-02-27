@@ -745,7 +745,6 @@ C	Input Files
           READ(2,*)  rand_file(II,:)
 9875  enddo
 	  CLOSE(2)
-	  OPEN(UNIT=3,FILE="RANDOM4.NUM")
       
 	  ! Now read in the fishing strategy for the OM
       OPEN(UNIT=1234,FILE = "Random_seed_OM.dat")
@@ -1193,7 +1192,6 @@ C This CONTINUE refers to SuperSim = 1,2, which does not optimize, but performs 
 	CLOSE(24)
 	CLOSE(25)
 	CLOSE(39)
-	CLOSE(3)
     
       !Close Pstar files:
       CLOSE(400) !Pstar1.out
