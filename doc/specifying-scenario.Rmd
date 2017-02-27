@@ -17,7 +17,7 @@ We summarize in the table below the link between the two sections above.
 | Model section			     			 		| Files		    							  											|
 | ------------------------------- | -------------------------------------------------:| 
 | *Operating model* 							|  																									|
-| Simulation number								| OM.dat										    										|
+| <sub>Simulation number</sub>		| OM.dat										    										|
 | Burn-in/projection years				| OM.dat			 							   											|
 | Fish biology										| OM.dat			  							  										|
 | Fish movement										| OM.dat			     																	|
