@@ -1,4 +1,46 @@
-## Description of all files present in the program
+# Description of all files found within the program folders
 
-*
-*
+* [`doc`] (#doc)
+* [`R`] (#r)
+* [`runs`] (#runs)
+* [`src`] (#src)
+
+## doc
+This is where we have documentations for understanding, learning, and running the program.
+
+* [`Description-techint-model.Rmd`] (https://github.com/Kotkot/techinteractions/blob/trial/doc/Description-techint-model.Rmd)
+This file shows how to actual fortran program works with a step by step description of the process. 
+* [`File-description.Rmd`] (https://github.com/Kotkot/techinteractions/blob/trial/doc/File-description.Rmd)
+This is the current file with quick description of each file found in the program
+* [`MSE_fig.png`] (https://github.com/Kotkot/techinteractions/blob/trial/doc/MSE_fig.png)
+Schematic of the MSE 
+* [`specifying-scenario.Rmd`] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
+This file shows the files one needs to modify to create a new scenario
+
+## R
+This is where all the R codes and data are stored to run various pieces of program
+
+* [`All_data_Cluster_simple_2010_2014_.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/All_data_Cluster_simple_2010_2014_.Rdata)
+This file 
+* [`Calc_profit.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Calc_profit.r)
+This file 
+* [`Cluster_simple_2010_2014_.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Cluster_simple_2010_2014_.Rdata)
+This file 
+* [`Codes_plots.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_plots.r)
+This file 
+* [`Codes_testmodel.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_testmodel.r)
+This file 
+* [`fishing_strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r)
+This file 
+* [`fishing_strategy_average.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy_average.r)
+This file 
+* [`gen_random_seed.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/gen_random_seed.r)
+This file 
+* [`Metier_sector.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Metier_sector.Rdata)
+This file 
+* [`Quota_dyn.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Quota_dyn.Rdata)
+This file 
+* [`Test.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Test.r)
+This file 
+* [`Vessel_dyn.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Vessel_dyn.Rdata)
+This file 

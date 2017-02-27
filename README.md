@@ -13,8 +13,8 @@ Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishe
 - [File description](#file-description)
 
 ## Structure of the _techinteractions_ program
-- `doc` contains documentations for the model and the MS
-- `R` contains various `R` codes and data needed to run the model
+- `doc` contains documentations for understanding, learning, and running program, in addition to the manuscript
+- `R` contains all the `R` codes and data needed to run various pieces of program
 - `runs` contains all model configuration files (where we specify scenarios). Simulation results will be stored in a subfolder named `results`
 - `src` contains all source codes (both `fortran` and `ADMB`)
 
@@ -74,5 +74,5 @@ There are many files that are produced by the program that could be used to debu
 [`R/Codes_plots.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_plots.r)  is one utility function that allows to do the above.
 	
 ## File description
-Please refer to [this document] (https://github.com/Kotkot/techinteractions/tree/trial/doc/File-description.Rmd) 
+If one want to have a better understanding of what each file does, please refer to [this document] (https://github.com/Kotkot/techinteractions/tree/trial/doc/File-description.Rmd) 
  	
