@@ -9,6 +9,7 @@ Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishe
 - [Structure of the _techinteractions_ program](#structure-of-the-techinteractions-program)
 - [Computer setup for running the MSE](#computer-setup-for-running-the-mse)
 - [_techinteractions_ MSE setup](#techinteractions-mse-setup)
+- [Output files](#output-files)
 - [File description](#file-description)
 
 ## Structure of the _techinteractions_ program
@@ -66,6 +67,10 @@ Step by step detail for setting an MSE scenario are provided in [`specifying-sce
 Once you have set-up the scenario, now it is time to run it. This is done in two steps:
   1. Compile the source codes. Open the command line within the `src` folder and type in `make` (this will run the `Makefile`). This will compile all necessary files to run the model
   2. Run the model. Either open the command line within the `runs` folder and type `run` (this will run the `run` batch file) or _double-click_ the `run` batch file. This will run the models
+
+## Output files
+There are many files that are produced by the program that could be used to debug, explore, analyse, and interpret the results.
+[`R/Codes_plots.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Codes_plots.r)  is one utility function that allows to do the above.
 	
 ## File description
 Please refer to [this document] (https://github.com/Kotkot/techinteractions/tree/trial/doc/File-description.Rmd) 
