@@ -1,2 +1,2 @@
-# Documentation for the _techinteractions_ program
+# Documentations for the _techinteractions_ program
 
