@@ -71,10 +71,28 @@ This file controls the seed for changing the catch composition in the vessel dyn
 * [`RANDOMTRY.NUM`] (https://github.com/Kotkot/techinteractions/blob/trial/R/RANDOMTRY.NUM)
 This file controls the seeds in running the fortran program for reproducibility. 
 * [`run.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/run.bat)
-This is the **main** batch file that users have to call to run the program. 
+This is the **main** batch file that users have to call to run the program. See more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md)
 * [`SaveCabStuff.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuff.bat)
 This file copies the assessment model results i.e. CAB into the `results` subfolder for later exploration. This version includes files that were specifically created when using the AFSC tier 3 HCR.
 * [`SaveCabStuffPstar.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuffPstar.bat)
 This file copies the assessment model results i.e. CAB into the `results` subfolder for later exploration. This version includes files that were specifically created when using the Pstar HCR.
 * [`Saveresults.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Saveresults.bat)
 This file stacks the resulting quota, and catch by species from each year and simulation in a single file. 
+
+## src
+This is where we have all the source files that require compiling before running the program.
+
+* [`Cab.tpl`] (https://github.com/Kotkot/techinteractions/blob/trial/src/Cab.tpl)
+This is the source code for CAB, the assessment model, written in `ADMB`  
+* [`COMMON.FOR`] (https://github.com/Kotkot/techinteractions/blob/trial/src/COMMON.FOR)
+This fortran file includes any functions that are required to run the main `fortran` code
+* [`main_code.tpl`] (https://github.com/Kotkot/techinteractions/blob/trial/src/main_code.tpl)
+This is the source code for performing the constrained linear optimization for either the quota allocation model or the vessel dynamics model, via linear programming. Written in `ADMB`.
+* [`main_code_average.tpl`] (https://github.com/Kotkot/techinteractions/blob/trial/src/main_code_average.tpl)
+This is the source code for performing the constrained linear optimization for either the quota allocation model or the vessel dynamics model, via linear programming. It is almost exactly the same except as `main_code.tpl` but reads in the `main_code_average.dat` file
+* [`Makefile`] (https://github.com/Kotkot/techinteractions/blob/trial/src/Makefile)
+This is a makefile that compiles all the source code and keeps only the `.exe` files. This code needs to be run first to perform the MSE. See more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md)
+* [`README.md`] (https://github.com/Kotkot/techinteractions/blob/trial/src/README.md)
+This file contains the general summary of the _techinteraction_ program
+* [`TechInteractions.FOR`] (https://github.com/Kotkot/techinteractions/blob/trial/src/TechInteractions.FOR)
+This is the main `fortran` code that put all pieces together and runs the MSE.
