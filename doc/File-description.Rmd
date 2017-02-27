@@ -44,3 +44,39 @@ This file
 This file 
 * [`Vessel_dyn.Rdata`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Vessel_dyn.Rdata)
 This file 
+
+## runs
+This is where all model configuration files (where we specify scenarios) are found. Simulation results will be stored in a subfolder named `results`
+
+* [`Bycatch.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Bycatch.DAT)
+This file 
+* [`CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/CR.dat)
+This file 
+* [`CreateFolder.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/CreateFolder.bat)
+This file 
+* [`DeleteCabStuff - Copy.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/DeleteCabStuff - Copy.bat)
+This file 
+* [`DeleteCabStuff.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/DeleteCabStuff.bat)
+This file 
+* [`EM.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/EM.DAT)
+This file 
+* [`main_code_average.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/main_code_average.dat)
+This file 
+* [`OM.DAT`] (https://github.com/Kotkot/techinteractions/blob/trial/R/OM.DAT)
+This file 
+* [`Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Random_seed_EM.dat)
+This file 
+* [`Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Random_seed_OM.dat)
+This file 
+* [`RANDOM4.NUM`] (https://github.com/Kotkot/techinteractions/blob/trial/R/RANDOM4.NUM)
+This file 
+* [`RANDOMTRY.NUM`] (https://github.com/Kotkot/techinteractions/blob/trial/R/RANDOMTRY.NUM)
+This file 
+* [`run.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/run.bat)
+This file 
+* [`SaveCabStuff.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuff.bat)
+This file 
+* [`SaveCabStuffPstar.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/SaveCabStuffPstar.bat)
+This file 
+* [`Saveresults.bat`] (https://github.com/Kotkot/techinteractions/blob/trial/R/Saveresults.bat)
+This file 

@@ -80,18 +80,10 @@ DATA_SECTION
     vector Actual_Catch(1,Nb_species);
     matrix Actual_Catch_sub(1,Nb_species,1,Nb_strategy)
 
-    !! ad_comm::change_datafile_name("simple.dat");
-	init_int nobs
-	init_vector Y(1,nobs)
-	init_vector x(1,nobs)	
-
 	int rnseed           // Random number seed
 	!! rnseed = 123;
 	
 PARAMETER_SECTION
-  init_number a   
-  init_number b   
-  vector pred_Y(1,nobs)
   objective_function_value obj_fun   
 
 PRELIMINARY_CALCULATIONS_SECTION
@@ -108,9 +100,7 @@ PRELIMINARY_CALCULATIONS_SECTION
 //  cout << b2 << endl;exit(1);
   
 PROCEDURE_SECTION
-  pred_Y=a*x+b;
-  obj_fun=(norm2(pred_Y-Y)); 
-  obj_fun=nobs/2.*log(obj_fun);    // make it a likelihood function so that
+  obj_fun=2;    // make it a likelihood function so that
 
   
 FUNCTION opt_sim
