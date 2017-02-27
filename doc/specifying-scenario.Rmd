@@ -14,7 +14,7 @@ And **all** of this are controlled by few important files:
 
 We summarize in the table below the link between the two sections above.
 
-| **Model section**      			 		| **Files**    							  											|
+| Model section			     			 		| Files		    							  											|
 | ------------------------------- | -------------------------------------------------:| 
 | *Operating model* 							|  																									|
 | -------------------------------:| -------------------------------------------------:|  
