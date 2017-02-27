@@ -1,20 +1,20 @@
 # How to create a scenario: file-list to check/modify for creating scenario 
 
-To recapitulate, to create a scenario, we need to specify:
+To create a scenario, we need to following **models**:
 * The operating model 
 * The assessment model 
 * The management model 
 * The vessel dynamics model
 
-And **all** of this are controlled by few important files:
+And **all** of these are controlled by few important files:
 * `OM.dat`
 * `EM.dat`
 * `CR.dat`
 * `fishing strategy.r`
 
-We summarize in the table below the link between the two sections above.
+We summarize in the table below the link between the models and the **files** described above.
 
-| Model section	| Files	|
+| Models 	| Files	|
 | ---- | ----:| 
 | *Operating model* |  	|
 | <subsub>.....................</subsub> Simulation number | OM.dat|
