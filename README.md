@@ -9,6 +9,7 @@ Currently, the code is based on the Bering Sea Aleutian Islands groundfish fishe
 - [Structure of the _techinteractions_ program](#structure-of-the-techinteractions-program)
 - [Computer setup for running the MSE](#computer-setup-for-running-the-mse)
 - [_techinteractions_ MSE setup](#techinteractions-mse-setup)
+- [File description](#file-description)
 
 ## Structure of the _techinteractions_ program
 - `doc` contains documentations for the model and the MS
@@ -52,19 +53,20 @@ Creating a scenario requires changes to many nodes in the program:
 * the vessel dynamics: this defines/mimics fishers' behavior 
 
 **ALL** these configurations are controlled by several important files in the program:
-* [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying truth of the model 
-* [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model
-* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.dat) : This file controls the harvest control rule 
-* [`runs/Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_OM.dat) :
-* [`runs/Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_EM.dat) :
-* [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r) :
+* [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying biological truth of the model (this includes growth, death, recruitment, but also fishing)
+* [`runs/EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/EM.DAT) : This file controls the estimation/assessment model (quantity and quality of data that goes into the assessment and what is estimated and what is not)
+* [`runs/CR.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/CR.dat) : This file controls the harvest control rule (option between the AFSC tier 3-like control rule of a P* approach)
+* [`runs/Random_seed_OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_OM.dat) : This file controls the random seed that is used in the vessel dynamics model. More specifically, the seeds controls the catch composition in each metier. Important for reproducibility.  
+* [`runs/Random_seed_EM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/Random_seed_EM.dat) : This file controls the random seed that is used in the quota allocation model. More specifically, the seeds controls the catch composition in each metier. Possibility are to make i/ the exact copy of `Random_seed_OM.dat` i.e. fishery managers know what vessel will catch in the future, ii/ lag it by one year so that fishery managers set quota based on what fishers did in the previous year, and iii/ random so that fishery managers set quota assuming they know nothing about fishers behavior. 
+* [`R/fishing strategy.r`] (https://github.com/Kotkot/techinteractions/blob/trial/R/fishing_strategy.r) : This file controls in essence both the quota allocation and the vessel dynamics models. The above two files i.e. `Random_seed_OM.dat` and `Random_seed_EM.dat` are input values for this file. This `R` file runs linear programming to determine either the quota or the realized catch for a year. This file also controls the temporal dynamics of the linear programming i.e. how species' net prices (users' relative preference between species) change over time.
 
 Step by step detail for setting an MSE scenario are provided in [`specifying-scenario.Rmd`] (https://github.com/Kotkot/techinteractions/blob/trial/doc/specifying-scenario.Rmd)
+
 ### Compiling and running the scenario
 Once you have set-up the scenario, now it is time to run it. This is done in two steps:
   1. Compile the source codes. Open the command line within the `src` folder and type in `make` (this will run the `Makefile`). This will compile all necessary files to run the model
   2. Run the model. Either open the command line within the `runs` folder and type `run` (this will run the `run` batch file) or _double-click_ the `run` batch file. This will run the models
 	
-## Description of all files present in the _techinteractions_ program
+## File description
 Please refer to [this document] (https://github.com/Kotkot/techinteractions/tree/trial/doc/File-description.Rmd) 
  	

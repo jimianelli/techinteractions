@@ -4,7 +4,7 @@
 	- modify "runs/OM.dat" (L165)
 2. OM fishing strategy (fixed, time varying, or none)
 	- modify "runs/OM.dat" (L166)
-	- modify "runs/Random_seed_EM.dat" to match or not "runs/Random_seed_OM.dat" 
+	- modify "runs/Random_seed_EM.dat" to match or not "runs/Random_seedy_OM.dat" 
 3. Data richness (length, frequency, noise)
 	- modify "runs/OM.dat" (L137-147)
 	- modify "runs/EM.dat" (L25, 27)
