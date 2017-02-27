@@ -17,27 +17,20 @@ We summarize in the table below the link between the two sections above.
 | Model section			     			 		| Files		    							  											|
 | ------------------------------- | -------------------------------------------------:| 
 | *Operating model* 							|  																									|
-| -------------------------------:| -------------------------------------------------:|  
 | Simulation number								| OM.dat										    										|
 | Burn-in/projection years				| OM.dat			 							   											|
 | Fish biology										| OM.dat			  							  										|
 | Fish movement										| OM.dat			     																	|
 | Fishery characteristics					| OM.dat			     																	|
-| -------------------------------	| -------------------------------------------------:|  
 | *Assessment model*							|							     																	|
-| -------------------------------:| -------------------------------------------------:|  
 | Data generation for assessment	|	OM.dat			     																	|
 | Fix/estimate parameters?				|	EM.dat																						| 
 | Effective sample size						|	EM.dat			     																	|
-| -------------------------------	| --------------------------------------------------|  
 | *Management model*							| 																									|
-| -------------------------------:| -------------------------------------------------:|  
 | Harvest control rule						| CR.dat																						|
 | Quota allocation dynamics				| fishing strategy.r, OM.dat, Random_seed_EM.dat		|
-| -------------------------------	| ------------------------------------------------- | 
 | *Vessel dynamics model*					| 
 | Vessel dynamis									| OM.dat, random_seed_EM														|
-| -------------------------------:| -------------------------------------------------:| 
 
 
 
