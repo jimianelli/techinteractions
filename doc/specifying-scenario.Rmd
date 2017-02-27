@@ -17,82 +17,20 @@ We summarize in the table below the link between the two sections above.
 | Model section	| Files	|
 | ---- | ----:| 
 | *Operating model* |  	|
-| <subsub>.....................</subsub> Simulation number	| OM.dat|
-| <subsub>.....................</subsub> Burn-in/projection years				| OM.dat |
-| <subsub>.....................</subsub> Fish biology										| OM.dat |
-| <subsub>.....................</subsub> Fish movement										| OM.dat |
-| <subsub>.....................</subsub> Fishery characteristics					| OM.dat |
+| <subsub>.....................</subsub> Simulation number | OM.dat|
+| <subsub>.....................</subsub> Burn-in/projection years	| OM.dat |
+| <subsub>.....................</subsub> Fish biology	| OM.dat |
+| <subsub>.....................</subsub> Fish movement| OM.dat |
+| <subsub>.....................</subsub> Fishery characteristics | OM.dat |
 | *Assessment model* 	|		|					     											  
 | <subsub>.....................</subsub> Data generation for assessment	|	OM.dat |
-| <subsub>.....................</subsub> Fix/estimate parameters?				|	EM.dat | 
-| <subsub>.....................</subsub> Effective sample size						|	EM.dat |
+| <subsub>.....................</subsub> Fix/estimate parameters? |	EM.dat | 
+| <subsub>.....................</subsub> Effective sample size |	EM.dat |
 | *Management model*  |   |
-| <subsub>.....................</subsub> Harvest control rule						| CR.dat |
-| <subsub>.....................</subsub> Quota allocation dynamics				| fishing strategy.r, OM.dat, Random_seed_EM.dat |
+| <subsub>.....................</subsub> Harvest control rule	 | CR.dat |
+| <subsub>.....................</subsub> Quota allocation dynamics | fishing strategy.r, OM.dat, Random_seed_EM.dat |
 | *Vessel dynamics model*					|  |
-| <subsub>.....................</subsub> Vessel dynamis									| OM.dat, random_seed_EM |
+| <subsub>.....................</subsub> Vessel dynamis | fishing strategy.r, OM.dat, random_seed_OM.dat |
 
 
-
-## The operating model (OM)
-
-The OM specifies the underlying truth about the population dynamics. These includes:
-- fish biology 
-
-1. The HCR (Naive or Conscientious manager)
-	- modify 'runs/OM.dat' (L165)
-2. OM fishing strategy (fixed, time varying, or none)
-	- modify 'runs/OM.dat' (L166)
-	- modify 'runs/Random_seed_EM.dat' to match or not 'runs/Random_seedy_OM.dat' 
-3. Data richness (length, frequency, noise)
-	- modify 'runs/OM.dat' (L137-147)
-	- modify 'runs/EM.dat' (L25, 27)
-4. Optimization (total catch, revenue. These are the only options available for now)
-	- modify 'R/fishing strategy.r' (L237-242)
-5. 	Constraints
-	- modify 'R/fishing_strategy.r' (L148-178)
-6. Bycatch
-	- modify 'runs/Bycatch.DAT'
-7. The type of process error (none, random, correlated)	
-	- modify 'OM.dat' (L25)
-8. Variability of metier over time
-	- modify 'R/fishing_strategy.r' (L308)
-9. Do assessment or not?
-		- modify 'runs/EM.dat' (L1)
-		
-		
-## Description of the quota allocation steps: ###
-
-1. Quota allocation steps:
-	1. fix EM_fish = the seed (from Random_seed_EM.dat)
-	2. Run DoEstAll
-		1. run assessment --> QuotaAct=ABC (based on Tier 3 HCR)
-		2. Save True exploitable biomass (TruExp.dat)
-		3. Save ABC.dat
-		4. Determine the TAC
-			1. Naive approach: 
-				1. TAC = QuotaAct/sum(QuotaAct)*min(1.7e6, sum(QuotaAct))
-				2. TAC_statusquo.out produced
-				3. Save proposed quota in TAC.dat
-			2. Conciecious approach: 
-				1. Save ABC value in TAC.dat
-				2. Run technical interaction model with the above ABC limits
-				3. Read in values from the technical interaction run and save in QuotaAct
-				4. Save this results in TAC_techint.out = Proposed quota
-				5. Do the same and save to TAC.dat = Proposed quota
-				
-2. Operating model update
-	1. Read in true exploitable biomass = TruExp.dat
-	2. Read in the proposed quota = TAC.dat
-	3. IF proposed quota > exploitable biomass, then proposed quota = exploitable biomass
-	4. Save the final proposed quota for the OM in TAC.dat
-	5. Calculate OM realized catch
-		1. Run technical interaction model (using seed from Random_seed_OM.dat)
-		2. Read in values from the technical interaction run and save in QuotaAct
-		3. This becomes the 'realized catch' 
-		4. The TRUE REALIZED CATCH: this updates the population dynamics by finding effort level that match catch... some optimization error can happen if not careful
-			
-			
-		
-	
 		

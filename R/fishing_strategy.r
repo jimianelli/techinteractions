@@ -1,112 +1,80 @@
-##############################################################################	
-##############################################################################	
-# 
-#	Objective: 
-#	To detect fishing strategy from the observer data
-#	
-#	Author:
-#	Kotaro Ono
-#
-#	Version:
-#	V1:  
-#
-#	TO DO LISTS:
-#   - Creates the data that goes into the ADMB code
-#
-##############################################################################	
-##############################################################################	
+#' This file controls the input values that goes into the quota allocation and vessel dynamics model and run them. 
+#'
+#' Below is the list of parameters that goes into the function
+#' @param	Choose_fish_strategies; This controls how catch composition by metier are determined. "Average" uses all data across all years. Other options are not developped yet. Default = "Average"
+#' @param	Flex_adj; this corresponds to the fishery expansion factors (basically how metier decide to concentrate/leave some metier for others). Default = 1
+#' @param	Bounds_base; this defines how bounds on the fishery expansion factor are defined. The option are 1. the bounds are based on total catch variation within a cluster ("cluster") or 2. among_cluster based on gear type ("gear"). Currently only option 1 is implemented. Default = "cluster"
+#' @param	Change_strategy; This determines whether catch composition by metier changes with the abundance of the species. Options are TRUE or FALSE. Default = TRUE
+#' @param	seed;	the seed value that controls the variability in catch composition by metier. If 2 runs have the same seed, they have the exact same catch composition by metier. 
+#' @param	price_change; This determines whether net price changes annually (prediction are based on: i/ a species by species logistic regression of the estimated perceived net price to the 2010-2014 ABC values for fishery managers; and ii/ a multivariate linear regression of the estimated realized net price to the 2010-2014 TAC values for all species). Options are TRUE or FALSE. Default = TRUE
+#' @param	price_sd; This controls whether we want to add variability around the predicted for next year. Options are TRUE or FALSE. Default = FALSE	
+#' @export
 
-##############################################################################	
-#
-#		directory and libraries	
-#
-##############################################################################	
-
-	rm(list=ls())
-	gc()
-	library(reshape2)
-
-#	source("C:\\R functions\\All_functions.r")
-#	source("C:\\R functions\\WestCoastMap.R")
-
-##############################################################################	
-#
-#		Choose how to model the fishing strategies 	
-#
-##############################################################################	
-
-	Choose_fish_strategies = "Average"    # Option of "Average" or "Year" 		
-	Bounds_strategy <- 1	
-	Flex_adj <- 1
+	Fishing_strategy <- function(Choose_fish_strategies = "Average", Bounds_base = "cluster", Flex_adj = 1, Change_strategy=TRUE, seed=777, price_change=TRUE, price_sd=FALSE, ...)
+	{	
+	
+		### Select years
+		YEARS <- 2010:2014 #1991:2014
 		
-##############################################################################	
-#
-#		Get the data ready to be written into a .dat file to be read by ADMB 	
-#
-##############################################################################	
-
-	YEARS <- 2010:2014 #1991:2014
-	
-	### LOAD data for the analysis
-	load(paste0("../R/All_data_Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata"))	# species comp data for each cluster
-	load(paste0("../R/Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata"))
-	
-	NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
-	BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
-	GOA <- c(610, 620, 630, 640, 650)
-	Species_interest <- c("POLLOCK", "PACIFIC.COD", "PACIFIC.HALIBUT", "YELLOWFIN.SOLE")
-
-	for (i in 3:115)
-	{
-		ALL_clust[,i] <- as.numeric(as.vector(ALL_clust[,i]))
-	}
-	
-	#### Filter the data based so that the cluster examined catch at least one of the species of interest (but not only halibut)
-	if(length(grep("2014", Data_to_use$Cluster))>0) Data_to_use$Clust <- substr(Data_to_use$Cluster, start=6, nchar(Data_to_use$Cluster))
-	if(length(grep("2014", Data_to_use$Cluster))==0) Data_to_use$Clust <- Data_to_use$Cluster
-	clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest[-3]==TRUE)]),1,sum)>0
-	Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
-	ALL_clust <- ALL_clust[clust_keep,]
-	
-	### Sectors to save
-		A80 <- grep("A80", ALL_clust$Cluster)
-		Longline <- grep("Longline", ALL_clust$Cluster)
-		CDQ <- grep("CDQ", ALL_clust$Cluster)
-		TLA <- grep("BSAI", ALL_clust$Cluster)
-		Metier_sector <- list(A80, Longline, CDQ, TLA)
-		if(!file.exists("Metier_sector.Rdata")) save(Metier_sector, file="Metier_sector.Rdata") 
-	
-	#### Organise the data
-	# ALL_clust$Gear <- factor(ALL_clust$Gear, labels=c("non pelagic trawl", "pelagic trawl", "trap/pot", "longline"))
-	if (Choose_fish_strategies == "Average") BSAI_data <- ALL_clust
-	BSAI_data$Cluster <- as.factor(BSAI_data$Cluster)
-
-	if (Choose_fish_strategies == "Average") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,c(1:2,116)], t(apply(BSAI_data[,-c(1:2, 116)], 1, function(x) x/sum(x)))))	
-	BSAI_data_partial[is.na(BSAI_data_partial)] <- 0
-
-	if (Choose_fish_strategies == "Average") 
-	{
-		BSAI_data <- BSAI_data[,c(1:2,116,which(colnames(BSAI_data) %in% Species_interest == TRUE))]
-		BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]	
-		BSAI_data_partial[,-c(1:3)] <- t(apply(BSAI_data_partial[,-c(1:3)],1,function(x) x/sum(x)))
-	}		
-	
-	#### Filter the data based so that the cluster examined catch at least one of the species of interest
-	Data_to_use$Total_catch <- apply(Data_to_use[,which(names(Data_to_use) %in% c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE"))], 1, sum, na.rm=T)
-	
-#### Species catch variation within each defined CLUSTER	
+		### LOAD data for the analysis
+		load(paste0("../R/All_data_Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata"))	# species comp data for each cluster
+		load(paste0("../R/Cluster_simple_", min(YEARS), "_", max(YEARS), "_.Rdata"))
 		
-	Total_catch_variation <- tapply(Data_to_use$Total_catch, list(Data_to_use$YEAR, Data_to_use$Clust), sum, na.rm=T)
-	Total_catch_variation <- Total_catch_variation[,order(match(colnames(Total_catch_variation), BSAI_data$Cluster))]
-	Total_catch_variation <- 1700000*Total_catch_variation/apply(Total_catch_variation,1,sum,na.rm=T)
+		NMFS_area <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550, 610, 620, 630, 640, 650)
+		BSAI <- c(508, 509, 512, 513, 514, 516, 517, 518, 519, 521, 523, 524, 530, 541, 542, 543, 550)#, 610, 620, 630, 640, 650)
+		GOA <- c(610, 620, 630, 640, 650)
+		Species_interest <- c("POLLOCK", "PACIFIC.COD", "PACIFIC.HALIBUT", "YELLOWFIN.SOLE")
+
+		for (i in 3:115)
+		{
+			ALL_clust[,i] <- as.numeric(as.vector(ALL_clust[,i]))
+		}
+		
+		### Filter the data based so that the cluster examined catch at least one of the species of interest (but not only halibut)
+		if(length(grep("2014", Data_to_use$Cluster))>0) Data_to_use$Clust <- substr(Data_to_use$Cluster, start=6, nchar(Data_to_use$Cluster))
+		if(length(grep("2014", Data_to_use$Cluster))==0) Data_to_use$Clust <- Data_to_use$Cluster
+		clust_keep <- apply((ALL_clust[,which(colnames(ALL_clust) %in% Species_interest[-3]==TRUE)]),1,sum)>0
+		Data_to_use <- Data_to_use[Data_to_use$Clust %in% ALL_clust$Cluster[clust_keep], ]
+		ALL_clust <- ALL_clust[clust_keep,]
+		
+		### Sectors to save
+			A80 <- grep("A80", ALL_clust$Cluster)
+			Longline <- grep("Longline", ALL_clust$Cluster)
+			CDQ <- grep("CDQ", ALL_clust$Cluster)
+			TLA <- grep("BSAI", ALL_clust$Cluster)
+			Metier_sector <- list(A80, Longline, CDQ, TLA)
+			if(!file.exists("Metier_sector.Rdata")) save(Metier_sector, file="Metier_sector.Rdata") 
+		
+		### Organise the data
+		if (Choose_fish_strategies == "Average") BSAI_data <- ALL_clust
+		BSAI_data$Cluster <- as.factor(BSAI_data$Cluster)
+
+		if (Choose_fish_strategies == "Average") BSAI_data_partial <- as.data.frame(cbind(BSAI_data[,c(1:2,116)], t(apply(BSAI_data[,-c(1:2, 116)], 1, function(x) x/sum(x)))))	
+		BSAI_data_partial[is.na(BSAI_data_partial)] <- 0
+
+		if (Choose_fish_strategies == "Average") 
+		{
+			BSAI_data <- BSAI_data[,c(1:2,116,which(colnames(BSAI_data) %in% Species_interest == TRUE))]
+			BSAI_data_partial <- BSAI_data_partial[,c(1:3,which(colnames(BSAI_data_partial) %in% Species_interest==TRUE))]	
+			BSAI_data_partial[,-c(1:3)] <- t(apply(BSAI_data_partial[,-c(1:3)],1,function(x) x/sum(x)))
+		}		
+		
+		### Filter the data based so that the cluster examined catch at least one of the species of interest
+		Data_to_use$Total_catch <- apply(Data_to_use[,which(names(Data_to_use) %in% c("PACIFIC.COD", "POLLOCK", "YELLOWFIN.SOLE"))], 1, sum, na.rm=T)
+		
+		### Species catch variation within each defined CLUSTER	
 			
-	### If we decide to put a bound on variability based on cluster
+		Total_catch_variation <- tapply(Data_to_use$Total_catch, list(Data_to_use$YEAR, Data_to_use$Clust), sum, na.rm=T)
+		Total_catch_variation <- Total_catch_variation[,order(match(colnames(Total_catch_variation), BSAI_data$Cluster))]
+		Total_catch_variation <- 1700000*Total_catch_variation/apply(Total_catch_variation,1,sum,na.rm=T)
+			
+		### If we decide to put a bound on variability based on cluster
 		Weight_metier <- list()
 		Weight_metier[[1]] <- apply(Total_catch_variation,2,mean,na.rm=T)
 		Weight_metier[[1]] <- 1700000*apply(Total_catch_variation,2,mean,na.rm=T)/sum(apply(Total_catch_variation,2,mean,na.rm=T))
 		vals <- apply(Total_catch_variation, 2, function(x) x/mean(x, na.rm=T))
-		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),Bounds_strategy,na.rm=T))
-		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),(1-Bounds_strategy),na.rm=T))
+		max_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),1,na.rm=T))
+		min_dk_clust <- apply(Total_catch_variation, 2, function(x) quantile(x/mean(x, na.rm=T),0,na.rm=T))
 		max_dk_clust1 <- replace(max_dk_clust, max_dk_clust==1, mean(max_dk_clust))
 		min_dk_clust1 <- replace(min_dk_clust, min_dk_clust==1, mean(min_dk_clust))
 		
@@ -126,19 +94,7 @@
 
 		max_dk_clust <- ifelse(Flex_adj*fake_max[,'max_dk_clust'] >= 1.01, Flex_adj*fake_max[,'max_dk_clust'], 1.01)
 		min_dk_clust <- ifelse(1/Flex_adj*fake_min[,'min_dk_clust'] <= 0.99, 1/Flex_adj*fake_min[,'min_dk_clust'], 0.99)
-				
-################### Case 1: without the gear constraints:
-	Yr=NULL; 					## Whether fishing strategies are year based or based on the average of 2010-2014; default = NULL (average)
-	Bounds_base = "cluster";	## whether the bounds are based on total catch variation within a cluster ("cluster") or among_cluster based on gear type ("gear")
-	Change_strategy=TRUE;		## YES or NO
-	seed=1;						## Random seed for reproducibility	
-	price_min=0.2; 				## The minimum net price for a fish	
-	price_factor=0.5			## The slope of price change (which is a function of stock biomass)
-	price_change=TRUE 			## Whether net price changes over time		
-	price_sd = FALSE
-	
-	Without_gear_constraints <- function(Yr, Bounds_base = "cluster", Change_strategy=TRUE, seed=777, price_change=TRUE, price_sd=TRUE, ...)
-	{	
+		
 		##### Begin writing the file into a .dat file (not slack variables)
 
 		set.seed(seed)
@@ -327,5 +283,5 @@
 		
 	seed_val <- scan("seed.dat")
 	
-	Without_gear_constraints(Yr=NULL, Bounds_base = "cluster", Change_strategy=TRUE, seed=seed_val, price_change = TRUE, price_sd=FALSE)
+	Fishing_strategy(Choose_fish_strategies = "Average", Bounds_base = "cluster", Flex_adj = 1, Change_strategy=TRUE, seed=seed_val, price_change = TRUE, price_sd=FALSE)
 	
