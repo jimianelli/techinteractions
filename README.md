@@ -49,8 +49,8 @@ Below is the illustration of the full MSE cycle
 Creating a scenario requires changes to many nodes in the program:
 * the operating model: this specifies the underlying truth about the population dynamics (e.g. how they grow, recruit, fished)
 * the assessment model: this both defines the data that are collected to perform the assessment and the assessment model configuration itself
-* the quota allocation model: this defines/mimics the behavior of quota allocation process by fishery managers
-* the vessel dynamics: this defines/mimics fishers' behavior 
+* the management model: this defines/mimics the behavior of quota allocation process by fishery managers
+* the vessel dynamics model: this defines/mimics fishers' behavior 
 
 **ALL** these configurations are controlled by several important files in the program:
 * [`runs/OM.dat`] (https://github.com/Kotkot/techinteractions/blob/trial/runs/OM.DAT) : This file controls the operating model i.e. the underlying biological truth of the model (this includes growth, death, recruitment, but also fishing)
