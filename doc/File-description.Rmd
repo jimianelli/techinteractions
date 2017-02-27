@@ -94,7 +94,5 @@ This is the source code for performing the constrained linear optimization for e
 * [`Makefile`] (https://github.com/Kotkot/techinteractions/blob/trial/src/Makefile)
 This is a makefile that compiles all the source code and keeps only the `.exe` files. This code needs to be run first to perform the MSE. See more detail [here] (https://github.com/Kotkot/techinteractions/blob/trial/README.md).
 **VERY IMPORTANT FILE**
-* [`README.md`] (https://github.com/Kotkot/techinteractions/blob/trial/src/README.md)
-This file contains the general summary of the _techinteraction_ program
 * [`TechInteractions.FOR`] (https://github.com/Kotkot/techinteractions/blob/trial/src/TechInteractions.FOR)
 This is the **main** `fortran` code that put all pieces together and runs the MSE.
