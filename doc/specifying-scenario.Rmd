@@ -14,23 +14,23 @@ And **all** of this are controlled by few important files:
 
 We summarize in the table below the link between the two sections above.
 
-| Model section			     			 		| Files		    							  											|
-| ------------------------------- | -------------------------------------------------:| 
-| *Operating model* 							|  																									|
-| <subsub>.................</subsub>	Simulation number	| OM.dat										    										|
-| Burn-in/projection years				| OM.dat			 							   											|
-| Fish biology										| OM.dat			  							  										|
-| Fish movement										| OM.dat			     																	|
-| Fishery characteristics					| OM.dat			     																	|
-| *Assessment model*							|							     																	|
-| Data generation for assessment	|	OM.dat			     																	|
-| Fix/estimate parameters?				|	EM.dat																						| 
-| Effective sample size						|	EM.dat			     																	|
-| *Management model*							| 																									|
-| Harvest control rule						| CR.dat																						|
-| Quota allocation dynamics				| fishing strategy.r, OM.dat, Random_seed_EM.dat		|
-| *Vessel dynamics model*					| 
-| Vessel dynamis									| OM.dat, random_seed_EM														|
+| Model section	| Files	|
+| ---- | ----:| 
+| *Operating model* |  	|
+| <subsub>.................</subsub> Simulation number	| OM.dat|
+| <subsub>.................</subsub> Burn-in/projection years				| OM.dat |
+| <subsub>.................</subsub> Fish biology										| OM.dat |
+| <subsub>.................</subsub> Fish movement										| OM.dat |
+| <subsub>.................</subsub> Fishery characteristics					| OM.dat |
+| *Assessment model* 	|		|					     											  
+| <subsub>.................</subsub> Data generation for assessment	|	OM.dat |
+| <subsub>.................</subsub> Fix/estimate parameters?				|	EM.dat | 
+| <subsub>.................</subsub> Effective sample size						|	EM.dat |
+| *Management model*  |   |
+| <subsub>.................</subsub> Harvest control rule						| CR.dat |
+| <subsub>.................</subsub> Quota allocation dynamics				| fishing strategy.r, OM.dat, Random_seed_EM.dat |
+| *Vessel dynamics model*					|  |
+| <subsub>.................</subsub> Vessel dynamis									| OM.dat, random_seed_EM |
 
 
 
