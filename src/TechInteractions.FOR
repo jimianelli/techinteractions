@@ -7056,7 +7056,8 @@ C
       READ(540,('(40X,I5)')) Nconfigs
 
       READ(540,*)
-      DO 1278 Ispec = 1,Nspec
+      If (NConfigs.GT.0) THEN
+			DO 1278 Ispec = 1,Nspec
         READ(540,*)
         READ(540,('(40X,15(F5.3,1X))')) 
      +   (EstM(Ispec,Iconfig),Iconfig = 1,Nconfigs)
@@ -7066,6 +7067,15 @@ C
      +   (ConfigWts(Ispec,Iconfig),
      +Iconfig = 1,Nconfigs)
 1278  CONTINUE
+			ENDIF
+      If (NConfigs.EQ.0) THEN
+			DO 1278 Ispec = 1,Nspec
+        READ(540,*)
+        READ(540,*)
+        READ(540,*) 
+        READ(540,*)
+1278  CONTINUE
+			ENDIF
       
       READ(540,*)
       READ(540,*)
