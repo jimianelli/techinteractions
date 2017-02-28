@@ -7069,12 +7069,12 @@ C
 1278  CONTINUE
 			ENDIF
       If (NConfigs.EQ.0) THEN
-			DO 1278 Ispec = 1,Nspec
+			DO 1279 Ispec = 1,Nspec
         READ(540,*)
         READ(540,*)
         READ(540,*) 
         READ(540,*)
-1278  CONTINUE
+1279  CONTINUE
 			ENDIF
       
       READ(540,*)
