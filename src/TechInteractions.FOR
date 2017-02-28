@@ -20,11 +20,11 @@ C========================================================================
       INTEGER MaxSpec,MinPYr,MaxPYr,MaxAge,Nsex,MaxTime,MaxFleet
       INTEGER MaxNSBlk,MaxEWBlk,MaxSim,MaxLengthBins
       INTEGER MaxAssArea,MaxOpenArea,Max3StrataArea,MaxConfigs,MaxMVN
-      PARAMETER (MaxSpec=3,MinPYr=1,MaxPYr=200,MaxTime=1)
-      PARAMETER (MaxAge=50,Nsex=2,MaxNSBlk=30,MaxEWBlk=5)
+      PARAMETER (MaxSpec=10,MinPYr=1,MaxPYr=200,MaxTime=1)
+      PARAMETER (MaxAge=65,Nsex=2,MaxNSBlk=30,MaxEWBlk=5)
       PARAMETER (MaxAssArea=10,MaxOpenArea = 12, Max3StrataArea = 20)
-	PARAMETER (MaxSim = 102,Maxfleet=2)
-      PARAMETER (MaxLengthBins = 100)
+	PARAMETER (MaxSim = 110,Maxfleet=2)
+      PARAMETER (MaxLengthBins = 120)
       PARAMETER (MaxConfigs = 5)
       PARAMETER (MaxMVN = 1001)
 C
@@ -1077,7 +1077,7 @@ C		VERY important step: If the estimated TAC is above TruExp, then replace the T
 7575    CONTINUE 
 
       OPEN(UNIT=124,FILE="TAC.dat")       ! RE-write the TAC value so that it corrects the things above
-      WRITE(124,'(10(F15.5,1x))') QuotaAct/1000, Bycatch_val 
+      WRITE(124,'(99(F15.5,1x))') QuotaAct/1000, Bycatch_val 
       CLOSE(124)
 
 
@@ -1117,13 +1117,13 @@ C		VERY important step: If the estimated TAC is above TruExp, then replace the T
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out")
             write(1113,*) "Cod    Pollock    Yellowfin_sole    Bycatch"
-            write(1113,'(5(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+            write(1113,'(99(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
      +   Bycatch_val 
             CLOSE(1113)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=1113,FILE = "Realized_catch.out", access='APPEND')
-            write(1113,'(5(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
+            write(1113,'(99(F17.2,1x))') (QuotaAct(II),II=1,MaxSpec), 
      +   Bycatch_val 
             CLOSE(1113)
         ENDIF
@@ -1301,22 +1301,22 @@ C     Conduct stock assessments
 
 C 		Save the TRUE SSB
   	  OPEN(UNIT=714,FILE="TruSSB.dat")      ! this is needed in the technical interaction model for the realized catch
-      WRITE(714,'(10(F17.2,1x))') (SpBioTot(II,TheYr),II=1,MaxSpec) 
+      WRITE(714,'(99(F17.2,1x))') (SpBioTot(II,TheYr),II=1,MaxSpec) 
       CLOSE(714)       
       
 C 		Save the true exploitable biomass
   	  OPEN(UNIT=715,FILE="TruExp.dat")      ! this is needed in the technical interaction model for the realized catch
-      WRITE(715,'(10(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
+      WRITE(715,'(99(F17.2,1x))') (TruExp(II,1,TheYr),II=1,MaxSpec) 
       CLOSE(715)       
 
   	  OPEN(UNIT=716,FILE="TruExp_history.dat",ACCESS='APPEND')      ! this is needed in the technical interaction model for the realized catch
-      WRITE(716,'(I2,1x,I2,1x,10(F17.2,1x))') 
+      WRITE(716,'(I2,1x,I2,1x,99(F17.2,1x))') 
      + Isim, TheYr, (TruExp(II,1,TheYr),II=1,MaxSpec) 
       CLOSE(716)       
 		
 C      Save the ABC output
        OPEN(UNIT=765,FILE="results/ABC.dat", access='Append')       ! this is needed in the technical interaction model
-      WRITE(765,'(I2,10(F17.2,1x))') TheYr,QuotaAct,
+      WRITE(765,'(I2,99(F17.2,1x))') TheYr,QuotaAct,
      + Bycatch(TheYr-FinDepYr)
       CLOSE(765)       
        
@@ -1327,19 +1327,19 @@ C      Save the ABC output
      +MIN(1700000.0, sum(QuotaAct)/1000)
 5555  CONTINUE
       OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
-      WRITE(777,'(10(F17.2,1x))') TAC, Bycatch(TheYr-FinDepYr)
+      WRITE(777,'(99(F17.2,1x))') TAC, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
         ! Save the TAC values into a file 
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=1111,FILE = "TAC_statusquo.out")
             write(1111,*) "Cod    Pollock    Yellowfin_sole"
-            write(1111,'(5(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
+            write(1111,'(99(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
             CLOSE(1111)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=1111,FILE = "TAC_statusquo.out", access='APPEND')
-            write(1111,'(5(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
+            write(1111,'(99(F17.2,1x))') (TAC(II),II=1,MaxSpec)    
             CLOSE(1111)
         ENDIF        
      
@@ -1347,7 +1347,7 @@ C      Save the ABC output
       
       if (MS_HCR.EQ.1) THEN 
       OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
-      WRITE(777,'(10(F17.2,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
+      WRITE(777,'(99(F17.2,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       
         ! Run the technical interaction model to determine the QUOTA based on the EM_fish value
@@ -1381,17 +1381,17 @@ C      Save the ABC output
         if (TheProjYear.EQ.FinDepYr+1) THEN
             OPEN(UNIT=3111,FILE = "TAC_techint.out")
             write(3111,*) "Cod    Pollock    Yellowfin_sole"
-            write(3111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
+            write(3111,'(99(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec) 
             CLOSE(3111)
         ENDIF
         if (TheProjYear.GT.FinDepYr+1) THEN
             OPEN(UNIT=3111,FILE = "TAC_techint.out", access='APPEND')
-            write(3111,'(5(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
+            write(3111,'(99(F14.2,1x))') (QuotaAct(II),II=1,MaxSpec)  
             CLOSE(3111)
         ENDIF
 
       OPEN(UNIT=777,FILE="TAC.dat")       ! this is needed in the technical interaction model
-      WRITE(777,'(10(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
+      WRITE(777,'(99(F15.5,1x))') QuotaAct/1000, Bycatch(TheYr-FinDepYr)
       CLOSE(777)
       ENDIF 
       
@@ -1446,62 +1446,62 @@ C      IF (SolFinDepl.NE.1) FinDepYr = BaseYr
 
 	TotYrs=NProjYr+FinDepYr + 1 + (-MinPYr)
       
-      READ(13,'(40X,5(F13.2,1x))') (Kvec(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F4.2,1x))') (M(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(I4,1x))') (Amax(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F13.2,1x))') (Kvec(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F4.2,1x))') (M(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(I4,1x))') (Amax(Ispec),Ispec=1,Nspec)
       READ(13,'(40X,I4)') PlusGroup
-      READ(13,'(40X,5(F6.3,1x))') (InitDep(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F6.3,1x))') (FinalDep(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F6.3,1x))') (InitDep(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F6.3,1x))') (FinalDep(Ispec),Ispec=1,Nspec)
       READ(13,'(40X,I4)') QvalOne
-      READ(13,'(40X,5(F5.2,1x))') (Qvalseed(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.2,1x))') (Qvalseed(Ispec),Ispec=1,Nspec)
       READ(13,*)
       READ(13,'(40X,I4)') DoProcessError
-      READ(13,'(40X,5(F8.5,1x))') (SigmaR1(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F8.5,1x))') (SigmaR2(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F4.3,1x))') (Steep(ISpec),Ispec=1,Nspec)
-      READ(13,'(40X,5(  I4,1x))') (SrType(ISpec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F8.5,1x))') (Rec_add(Ispec),Ispec=1,Nspec)
-	READ(13,'(40X,5(  I4,1x))') (RecruitOpt(ISpec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (RecX(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (RecY(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (VRecXL(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (VRecYL(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (VRecXH(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (VRecYH(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.5,1x))') (SigmaR1(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.5,1x))') (SigmaR2(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F4.3,1x))') (Steep(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(  I4,1x))') (SrType(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.5,1x))') (Rec_add(Ispec),Ispec=1,Nspec)
+	READ(13,'(40X,99(  I4,1x))') (RecruitOpt(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (RecX(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (RecY(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (VRecXL(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (VRecYL(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (VRecXH(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (VRecYH(Ispec),Ispec=1,Nspec)
       READ(13,*)
-      READ(13,'(40X,5(F5.1,1x))') (Linf(Ispec,1),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.1,1x))') (Linf(Ispec,2),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.3,1x))') (kpar(Ispec,1),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.3,1x))') (kpar(Ispec,2),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.2,1x))') (t0(Ispec,1),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.2,1x))') (t0(Ispec,2),Ispec=1,Nspec)
-      READ(13,'(40X,5(F8.6,1x))') (Apar(Ispec,1),Ispec=1,Nspec)
-      READ(13,'(40X,5(F8.6,1x))') (Apar(Ispec,2),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.3,1x))') (Bpar(Ispec,1),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.3,1x))') (Bpar(Ispec,2),Ispec=1,Nspec)
-	READ(13,'(40X,5(  I4,1x))') (LengthBinIntervals(ISpec),Ispec=1,Nspec)
-	READ(13,'(40X,5(  I4,1x))') (NLengthBins(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.1,1x))') (Linf(Ispec,1),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.1,1x))') (Linf(Ispec,2),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.3,1x))') (kpar(Ispec,1),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.3,1x))') (kpar(Ispec,2),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.2,1x))') (t0(Ispec,1),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.2,1x))') (t0(Ispec,2),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.6,1x))') (Apar(Ispec,1),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.6,1x))') (Apar(Ispec,2),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.3,1x))') (Bpar(Ispec,1),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.3,1x))') (Bpar(Ispec,2),Ispec=1,Nspec)
+	READ(13,'(40X,99(  I4,1x))') (LengthBinIntervals(ISpec),Ispec=1,Nspec)
+	READ(13,'(40X,99(  I4,1x))') (NLengthBins(ISpec),Ispec=1,Nspec)
       READ(13,*)
 C     Fecundity 
-      READ(13,'(40X,5(F5.2,1x))') (L50(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F5.2,1x))') (L95(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.2,1x))') (L50(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F5.2,1x))') (L95(Ispec),Ispec=1,Nspec)
       READ(13,*)
-      READ(13,'(40X,5(F7.3,1x))') (MixN(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (MixE(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X1N(Ispec),V1N(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X2N(Ispec),V2N(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X1E(Ispec),V1E(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X2E(Ispec),V2E(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (MixN(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (MixE(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (X1N(Ispec),V1N(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (X2N(Ispec),V2N(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (X1E(Ispec),V1E(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (X2E(Ispec),V2E(Ispec),Ispec=1,Nspec)
       READ(13,*)
 C     Selectivity for the fishery 
-      READ(13,'(40X,5(F7.3,1x))') (SCL50(ISpec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (SCL95(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (SCL50(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (SCL95(ISpec),Ispec=1,Nspec)
       READ(13,*)
 C     Selectivity for the survey 
-      READ(13,'(40X,5(F7.3,1x))') (SSL50(ISpec),Ispec=1,Nspec)
-      READ(13,'(40X,5(F7.3,1x))') (SSL95(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (SSL50(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (SSL95(ISpec),Ispec=1,Nspec)
       READ(13,*)
-      READ(13,'(40X,5(F8.5,1x))') (SigmaSpat(ISpec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F8.5,1x))') (SigmaSpat(ISpec),Ispec=1,Nspec)
       READ(13,'(40X,I1)') Hyperstability
 !      READ(13,*)
 !      READ(13,'(40X,F15.10)') TotEffortSeed
@@ -1571,21 +1571,21 @@ C     Data-related inputs
       READ(13,'(40X,I5)') ImplOpt
 	READ(13,*)
       READ(13,*)
-      READ(13,'(40X,15(F7.3,1x))') (MixNLarval(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (MixELarval(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X1NLarval(Ispec),V1NLarval(Ispec),
+      READ(13,'(40X,99(F7.3,1x))') (MixNLarval(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (MixELarval(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F7.3,1x))') (X1NLarval(Ispec),V1NLarval(Ispec),
      +	Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X2NLarval(Ispec),V2NLarval(Ispec),
+      READ(13,'(40X,99(F7.3,1x))') (X2NLarval(Ispec),V2NLarval(Ispec),
      +	Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X1ELarval(Ispec),V1ELarval(Ispec),
+      READ(13,'(40X,99(F7.3,1x))') (X1ELarval(Ispec),V1ELarval(Ispec),
      +	Ispec=1,Nspec)
-      READ(13,'(40X,15(F7.3,1x))') (X2ELarval(Ispec),V2ELarval(Ispec),
+      READ(13,'(40X,99(F7.3,1x))') (X2ELarval(Ispec),V2ELarval(Ispec),
      +	Ispec=1,Nspec)
       READ(13,*)
       READ(13,'(40X,I5)') NTargetDepl
       READ(13,*)
       DO 3459 itarg = 1,NTargetDepl
-        READ(13,'(I4,5(1x,F5.2))') DeplYr(itarg), 
+        READ(13,'(I4,99(1x,F5.2))') DeplYr(itarg), 
      +    (TargetDeplVec(itarg,Ispec),Ispec = 1,Nspec)
 3459  CONTINUE
       READ(13,'(40X,I5)') MS_HCR
@@ -1851,11 +1851,11 @@ C     Read in the biological parameters
        IestIgR(Ispec) = 0
 10000 CONTINUE       
       READ(13,*)
-      READ(13,'(40X,10(I9,1x))') (AmaxEst(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,10(F9.2,1x))') (EstM(Ispec,0),Ispec=1,Nspec)
-      READ(13,'(40X,10(F9.2,1x))') (IestSigmaR(Ispec),Ispec=1,Nspec)
-      READ(13,'(40X,10(F9.2,1x))') (IestSteep(Ispec,0),ISpec=1,Nspec)
-      READ(13,'(40X,10(F9.6,1x))') (Iestln_S0(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(I9,1x))') (AmaxEst(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F9.2,1x))') (EstM(Ispec,0),Ispec=1,Nspec)
+      READ(13,'(40X,99(F9.2,1x))') (IestSigmaR(Ispec),Ispec=1,Nspec)
+      READ(13,'(40X,99(F9.2,1x))') (IestSteep(Ispec,0),ISpec=1,Nspec)
+      READ(13,'(40X,99(F9.6,1x))') (Iestln_S0(Ispec),Ispec=1,Nspec)
       READ(13,*)
       READ(13,'(40X,I2,1x,F9.4)') PhaseM,BoundM
       READ(13,'(40X,I2,1x,F9.4)') PhaseS0,BoundS0
@@ -2770,7 +2770,7 @@ C      Move animals around spatially
         DO 56 Jarea = 1,NArea
           DO 56 Iage = 0,Amax(1)
            !Write out SS-style movement
-           WRITE(79,'(5(I4,1x),F20.15)') Isim,Year,Iarea,Jarea,Iage,
+           WRITE(79,'(99(I4,1x),F20.15)') Isim,Year,Iarea,Jarea,Iage,
      +       PropN(Iarea,Jarea,Iage)
 56      CONTINUE
       ENDIF
@@ -3323,7 +3323,7 @@ C      Move animals around spatially
         DO 56 Jarea = 1,NArea
           DO 56 Iage = 0,Amax(1)
            !Write out SS-style movement
-           WRITE(79,'(5(I4,1x),F20.15)') Isim,Year,Iarea,Jarea,Iage,
+           WRITE(79,'(99(I4,1x),F20.15)') Isim,Year,Iarea,Jarea,Iage,
      +       PropN(Iarea,Jarea,Iage)
 56      CONTINUE
       ENDIF
@@ -3708,7 +3708,7 @@ C	ENDIF
       ENDIF
 C     Save those F values
       OPEN(UNIT=5678,FILE = "True_catch.out")
-      write(5678,'(5(F17.2,1x))') X(1)
+      write(5678,'(99(F17.2,1x))') X(1)
       if (Ispec.EQ.3) write(5678,*) ""
       CLOSE(5678)
       
@@ -5329,7 +5329,7 @@ C-----------------------------------------------------
      + each fleet catches only one pop)'/I2,1x,I2/
      +       '# Number of sexes'/I2/
      +       '# Number of age-classes'/I2/
-     +       '# Number of length-classes'/I2/
+     +       '# Number of length-classes'/I3/
      +       '# Start bin for length classes'/I2/
      +       '# Size of length bins'/I2/
      +       '# Age-specific selectivity (1=Yes;0=No)?'/I2/
@@ -5967,8 +5967,8 @@ C	Local Variables
 	WRITE(UNUM,'(I8)') Nsim_end			!Number of Simulations
 	WRITE(UNUM,'(I8)') NNSBlock		!Number of North-South Cells
 	WRITE(UNUM,'(I8)') NEWBlock		!Number of East-West Cells
-      WRITE(UNUM,'(5(F6.3,1x))') (InitDep(Ispec),Ispec=1,Nspec)	!Initial depletion level (year 0)
-      WRITE(UNUM,'(5(F6.3,1x))') (FinalDep(Ispec),Ispec=1,Nspec)	!Final depletion level (prior to implementing the control rule)
+      WRITE(UNUM,'(99(F6.3,1x))') (InitDep(Ispec),Ispec=1,Nspec)	!Initial depletion level (year 0)
+      WRITE(UNUM,'(99(F6.3,1x))') (FinalDep(Ispec),Ispec=1,Nspec)	!Final depletion level (prior to implementing the control rule)
 	WRITE(UNUM,'(I4)') BaseYr		!Base Year for depletion
 	WRITE(UNUM,'(I4)') FinDepYr		!Final Year for depletion
       WRITE(UNUM,'(100(I8,1x))') (MinCNS(Iarea),Iarea=1,NClosedAreas)  !Limits of MPAs
@@ -5979,74 +5979,74 @@ C	Local Variables
 	WRITE(UNUM,'(F8.4)') TotEffort(BaseYr) !Year 0 Effort (used as a seed)
 	WRITE(UNUM,*)
 	WRITE(UNUM,'(I8)') IsDeterm		!Is the sampling deterministic?
-	WRITE(UNUM,'(5(F8.5,1x))') (SigmaR1(Ispec),Ispec=1,Nspec)	!Global recruitment variation
-	WRITE(UNUM,'(5(F8.5,1x))') (SigmaR2(Ispec),Ispec=1,Nspec)	!Local recruitment variation
+	WRITE(UNUM,'(99(F8.5,1x))') (SigmaR1(Ispec),Ispec=1,Nspec)	!Global recruitment variation
+	WRITE(UNUM,'(99(F8.5,1x))') (SigmaR2(Ispec),Ispec=1,Nspec)	!Local recruitment variation
 	WRITE(UNUM,'(F8.2)') CpueCV		!CV of CPUE data	
 	WRITE(UNUM,'(I8)') FreqSurv		!Frequency of surveys 1 = every year; 3 = every third year
 	WRITE(UNUM,'(F8.2)') SurvCV		!CV of survey data
 	WRITE(UNUM,'(I8)') EffectSampSurvey2 !Effective survey sample size POST MPA
 	WRITE(UNUM,'(I8)') ImplOpt		!Is there implementation error (1 or 0)	
-	WRITE(UNUM,'(5(F8.5,1x))') (SigmaSpat(ISpec),Ispec=1,Nspec)  !SigmaQ = CV on catchability.
+	WRITE(UNUM,'(99(F8.5,1x))') (SigmaSpat(ISpec),Ispec=1,Nspec)  !SigmaQ = CV on catchability.
 	WRITE(UNUM,*)
-	WRITE(UNUM,'(5(F8.2,1x))') (M(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (Steep(ISpec),Ispec=1,Nspec)	!Steepness
-	WRITE(UNUM,'(5(I8,1x))') (SrType(ISpec),Ispec=1,Nspec)   !Type of Density 
+	WRITE(UNUM,'(99(F8.2,1x))') (M(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (Steep(ISpec),Ispec=1,Nspec)	!Steepness
+	WRITE(UNUM,'(99(I8,1x))') (SrType(ISpec),Ispec=1,Nspec)   !Type of Density 
 	WRITE(UNUM,*)
-      WRITE(UNUM,'(5(F8.1,1x))') (Linf(Ispec,1),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.1,1x))') (Linf(Ispec,2),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (kpar(Ispec,1),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (kpar(Ispec,2),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.2,1x))') (t0(Ispec,1),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.2,1x))') (t0(Ispec,2),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (Apar(Ispec,1),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (Apar(Ispec,2),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (Bpar(Ispec,1),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (Bpar(Ispec,2),Ispec=1,Nspec)	
+      WRITE(UNUM,'(99(F8.1,1x))') (Linf(Ispec,1),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.1,1x))') (Linf(Ispec,2),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (kpar(Ispec,1),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (kpar(Ispec,2),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.2,1x))') (t0(Ispec,1),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.2,1x))') (t0(Ispec,2),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (Apar(Ispec,1),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (Apar(Ispec,2),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (Bpar(Ispec,1),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (Bpar(Ispec,2),Ispec=1,Nspec)	
 	WRITE(UNUM,*)
-      WRITE(UNUM,'(5(F8.2,1x))') (L50(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.2,1x))') (L95(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.2,1x))') (L50(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.2,1x))') (L95(Ispec),Ispec=1,Nspec)
 	WRITE(UNUM,*)
-	WRITE(UNUM,'(5(I8,1x))') (RecruitOpt(ISpec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (RecX(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (RecY(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (VRecXL(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (VRecYL(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (VRecXH(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (VRecYH(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(I8,1x))') (RecruitOpt(ISpec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (RecX(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (RecY(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (VRecXL(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (VRecYL(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (VRecXH(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (VRecYH(Ispec),Ispec=1,Nspec)
       WRITE(UNUM,*)
-      WRITE(UNUM,'(5(F8.3,1x))') (MixN(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (MixE(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X1N(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X2N(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X1E(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X2E(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V1N(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V2N(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V1E(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V2E(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (MixN(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (MixE(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X1N(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X2N(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X1E(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X2E(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V1N(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V2N(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V1E(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V2E(Ispec),Ispec=1,Nspec)
 C     Selectivity for the fishery 
 	WRITE(UNUM,*)
-      WRITE(UNUM,'(5(F8.3,1x))') (SCL50(ISpec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (SCL95(ISpec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (SCL50(ISpec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (SCL95(ISpec),Ispec=1,Nspec)
       WRITE(UNUM,*)
 C     Selectivity for the survey 
-      WRITE(UNUM,'(5(F8.3,1x))') (SSL50(ISpec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (SSL95(ISpec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (SSL50(ISpec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (SSL95(ISpec),Ispec=1,Nspec)
 C	Optimal policy information
 C	Extras
 	WRITE(UNUM,'(I4)') MPAYear  !Year that MPA is implemented
-	WRITE(UNUM,'(5(I4,1x))') (Amax(Ispec),Ispec=1,Nspec)  !Oldest age in the model
+	WRITE(UNUM,'(99(I4,1x))') (Amax(Ispec),Ispec=1,Nspec)  !Oldest age in the model
             WRITE(UNUM,*)
-      WRITE(UNUM,'(5(F8.3,1x))') (MixNLarval(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (MixELarval(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X1NLarval(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X2NLarval(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X1ELarval(Ispec),Ispec=1,Nspec)
-      WRITE(UNUM,'(5(F8.3,1x))') (X2ELarval(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V1NLarval(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V2NLarval(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V1ELarval(Ispec),Ispec=1,Nspec)
-	WRITE(UNUM,'(5(F8.3,1x))') (V2ELarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (MixNLarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (MixELarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X1NLarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X2NLarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X1ELarval(Ispec),Ispec=1,Nspec)
+      WRITE(UNUM,'(99(F8.3,1x))') (X2ELarval(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V1NLarval(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V2NLarval(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V1ELarval(Ispec),Ispec=1,Nspec)
+	WRITE(UNUM,'(99(F8.3,1x))') (V2ELarval(Ispec),Ispec=1,Nspec)
 
 	RETURN
 	END
@@ -6768,8 +6768,8 @@ C     +,BioOut, Recruit, Hrate ') THEN
       CLOSE(959)
       CLOSE(960)
  
-801   FORMAT(3(1x,I5),1x,2(F15.5,1x),2(F15.6,1x))
-802   FORMAT(3(1x,I5),1x,F20.9,1x)
+801   FORMAT(3(1x,I5),1x,2(F15.2,1x),2(F15.6,1x))
+802   FORMAT(3(1x,I5),1x,F20.5,1x)
       END SUBROUTINE ReadCabRep
 
 C

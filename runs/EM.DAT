@@ -17,7 +17,7 @@ Phase / Bound S0 (cab)                  1  1.500
 Phase / Bound H                         -2 0.01
 Phase recdevs                           2
 Phase/Bounds SigmaR                     -4 0.01  5.0
-Phase / Bound Logistic Selex a50 slope  3  3.0   2.5       
+Phase / Bound Logistic Selex a50 slope  3  2.5   2.0       
 
 ---------------------------------------------- 
 Assumed CVs and effective sample sizes
