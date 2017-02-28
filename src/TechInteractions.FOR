@@ -546,11 +546,11 @@ C     Debugging variables:
 !      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: EstB_SPR
       REAL(8) :: EstSPR, EstB_SPR !can't have Ispec,Iconfig dimensions b.c. referred to within FUNK.
       INTEGER :: GlobalProjYr
-      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: EstF35,EstB35
-      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: EstF40,EstB40
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs) :: EstF35,EstB35
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs) :: EstF40,EstB40
       REAL(8) :: AFSC_alpha
       INTEGER :: AFSC_MinusYrs
-      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs,1:MaxMVN) 
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs,1:MaxMVN) 
      +:: EstFOFL,SSEstFOFL,EstFABC
       REAL(8),DIMENSION(1:MaxSpec,MinPYr:MaxPYr) :: TrueFOFL
       REAL(8),DIMENSION(1:MaxSpec,MinPYr:MaxPYr) :: TrueFABC
@@ -561,7 +561,7 @@ C     Debugging variables:
       REAL(8) :: Pstar
       REAL(8) :: EstimatedP
       INTEGER :: Nconfigs
-      REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: ConfigWts !,hConfigs, MConfigs
+      REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs) :: ConfigWts !,hConfigs, MConfigs
       REAL(8) :: TheM,TheX,QQ
       REAL(8), DIMENSION(1:Nsex,0:Maxage) :: ThoseNs
       REAL(8), DIMENSION(1:Nsex,0:Maxage) :: TheSelex
@@ -577,8 +577,8 @@ C     Debugging variables:
        INTEGER :: GlobalIspec
        INTEGER :: Funk2_MinOpt
        REAL(8) :: TrialQuota
-       REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: EstSPR35,SSEstspr35
-       REAL(8),DIMENSION(1:MaxSpec,1:MaxConfigs) :: EstSPR40,SSEstspr40
+       REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs) :: EstSPR35,SSEstspr35
+       REAL(8),DIMENSION(1:MaxSpec,0:MaxConfigs) :: EstSPR40,SSEstspr40
        REAL(8),DIMENSION(1:MaxSpec) :: TrueSPR35,SSTrueSPR35,
      +TrueSPR40,SSTrueSPR40
       LOGICAL :: cor_exists
@@ -5678,7 +5678,7 @@ C           Carey is calculating Catch in numbers
           OverfishNum = 0
           WeightedOverfishNum = 0.0
           WeightedAllNum = 0.0
-          DO 303 Iconfig = 1,Nconfigs
+          DO 303 Iconfig = 0,Nconfigs
               !ADD a line: skip this loop if cor_exists is false
               !set Fdistn to -1.0 and reconfigure Nmvn to take into account the missing configuration.
               DO 304 Ivec = 1,Nmvn
@@ -7060,12 +7060,12 @@ C
 			DO 1278 Ispec = 1,Nspec
         READ(540,*)
         READ(540,('(40X,15(F5.3,1X))')) 
-     +   (EstM(Ispec,Iconfig),Iconfig = 1,Nconfigs)
+     +   (EstM(Ispec,Iconfig),Iconfig = 0,Nconfigs)
         READ(540,('(40X,15(F5.3,1X))')) 
-     +   (IEstSteep(Ispec,Iconfig),Iconfig = 1,Nconfigs)
+     +   (IEstSteep(Ispec,Iconfig),Iconfig = 0,Nconfigs)
         READ(540,('(40X,15(F5.3,1X))')) 
      +   (ConfigWts(Ispec,Iconfig),
-     +Iconfig = 1,Nconfigs)
+     +Iconfig = 0,Nconfigs)
 1278  CONTINUE
 			ENDIF
       If (NConfigs.EQ.0) THEN
@@ -7253,7 +7253,7 @@ C
        !Local variables
        INTEGER :: Iconfig,Ivec,Isex,Iage,Yr,i
                  
-      DO 100 Iconfig = 1,Nconfigs
+      DO 100 Iconfig = 0,Nconfigs
        ! Loading the estimates from CAB.rep and else
           MyWeight(:,:) = Wght(Ispec,:,:,1) 
           TheM = EstM(Ispec,Iconfig)
@@ -7378,7 +7378,7 @@ C This is the subroutine that set up the MinOpt rule for the FUNK function in or
       
 !      Ispec = 1  !eventually a loop
         MinOpt = 12 !Find F35% and B35%
-      DO 1033 Iconfig = 1,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
+      DO 1033 Iconfig = 0,Nconfigs !loop over Iconfig; no Ivec here because EstRec is only config-specific, but would be iVec loop if switch to MCMC; don't include true (iconfig = 0)
         !ADD A LINE HERE TO SKIP TO NEXT ICONFIG IF COR_EXISTS(ICONFIG) = .FALSE.
         X = 0.0
         X(1) = 0.05
@@ -7695,7 +7695,7 @@ C
       ENDIF
       
       DO 100 Ispec = 1,Nspec
-          DO 100 Iconfig = 1,Nconfigs
+          DO 100 Iconfig = 0,Nconfigs
               DO 100 Ivec = 1,Nmvn
       WRITE(400,1) Isim,IYear-1,Ispec,Iconfig,Ivec,
      +             FDistn(Ispec,IYear-1,Iconfig,Ivec),
@@ -7720,7 +7720,7 @@ C
       ENDIF
       
       DO 101 Ispec = 1,Nspec
-          DO 101 Iconfig = 1,Nconfigs
+          DO 101 Iconfig = 0,Nconfigs
       WRITE(401,2) Isim,IYear-1,Ispec,Iconfig,EstF35(Ispec,Iconfig),
      +EstB35(Ispec,Iconfig),EstSPR35(Ispec,Iconfig),
      +SSEstSPR35(Ispec,Iconfig),EstF40(Ispec,Iconfig),
@@ -7742,7 +7742,7 @@ C
       ENDIF
       
       DO 102 Ispec = 1,Nspec
-          DO 102 Iconfig = 1,Nconfigs
+          DO 102 Iconfig = 0,Nconfigs
       WRITE(5000,3) Isim,IYear-1,Ispec,Iconfig,EstFOFL(Ispec,Iconfig,1),
      +EstF35(Ispec,Iconfig),EstB35(Ispec,Iconfig),
      +EstSPR35(Ispec,Iconfig),
@@ -7791,7 +7791,7 @@ C
       ENDIF
       
       DO 100 Ispec = 1,Nspec
-          DO 100 Iconfig = 1,Nconfigs
+          DO 100 Iconfig = 0,Nconfigs
               DO 100 Ivec = 1,Nmvn
       WRITE(4000,1) Isim,IYear-1,Ispec,Iconfig,Ivec,
      +             FDistn(Ispec,IYear-1,Iconfig,Ivec),
@@ -7815,7 +7815,7 @@ C
       ENDIF
       
       DO 101 Ispec = 1,Nspec
-          DO 101 Iconfig = 1,Nconfigs
+          DO 101 Iconfig = 0,Nconfigs
       WRITE(4001,2) Isim,IYear-1,Ispec,Iconfig,EstF35(Ispec,Iconfig),
      +EstB35(Ispec,Iconfig),EstSPR35(Ispec,Iconfig),
      +SSEstSPR35(Ispec,Iconfig),EstF40(Ispec,Iconfig),
