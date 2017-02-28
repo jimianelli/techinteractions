@@ -13,7 +13,7 @@ Number of species                       10
 Number of time-steps during the year    1            !Have never changed this value - untested.
 Number of North-south Blocks            1            
 Number of East-west Blocks              1            
-Carrying Capacity (SSB total)           0800000000.0   5200000000.0   1000000000.0   0340000000.0   0320000000.0   0680000000.0   0500000000.0   0555000000.0   0330000000.0   0190000000.0   
+Carrying Capacity (SSB total)           0800000000.0  5200000000.0  1000000000.0  0340000000.0  0320000000.0  0680000000.0  0500000000.0  0555000000.0  0330000000.0  0190000000.0   
 Natural mortality                       0.34 0.38 0.12 0.30 0.20 0.15 0.06 0.20 0.13 0.13
 Maximum Age                             20   20   40   20   30   25   60   30   40   20  
 Plus groups? (1=Yes; 0=No)              1 

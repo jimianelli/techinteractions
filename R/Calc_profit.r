@@ -16,15 +16,16 @@
 ##############################################################################	
 ##############################################################################	
 
+	Nspec = as.numeric(scan("OM.dat", skip=11, nlines=1, what = "character")[4])
 	### how much they fished in specific metier
 	Weight_strategy <- scan("coeff.dat")
 
 	N_Strategy <- length(Weight_strategy)
 	price <- scan("main_code.dat", skip=5, nlines=1)
-	Catch_proportion <- matrix(scan("main_code.dat", skip=7, nlines=4), nrow=4, byrow=T)
+	Catch_proportion <- matrix(scan("main_code.dat", skip=7, nlines=(Nspec+1)), nrow=(Nspec+1), byrow=T)
 	
 	### Info on the simulation number
-	Sim_info <-  matrix(scan("TruExp_history.dat"), ncol=5, byrow=T)
+	Sim_info <-  matrix(scan("TruExp_history.dat"), ncol=(Nspec+2), byrow=T)
 	Sim_info <- Sim_info[nrow(Sim_info),c(1,2)]
 	
 	### Metier-sector attribute

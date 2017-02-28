@@ -11,7 +11,6 @@ Natural mortality (M)                   0.34      0.38      0.12      0.30      
 SigmaR                                  0.57      0.90      0.41      0.46      0.62      0.70      0.70      0.65      0.42      0.40  
 Steepness                               0.99      0.99      0.99      0.80      0.99      0.58      0.95      0.57      0.99      0.99
 Log S0  (log(2*SSB0) in cab)            21.19327  23.06507  21.41641  20.33760  20.27698  21.03075  20.72327  20.82763  20.30775  19.75568
-
 Phases and bounds
 Phase/Bound M                           -1 0.01                  !Block is implemented in base year for initial depl. (same as yr of MPA implementation - 51 in MPA & assessments)
 Phase / Bound S0 (cab)                  1  1.500
