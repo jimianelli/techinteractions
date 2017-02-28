@@ -9,63 +9,63 @@ First yr fishing (NA if finding Qvals)  1
 Solve Effort for final depl (1=Yes)     0                    !0,1,2: 0=no (read from OM.dat), 1=yes, 2=read from SaveConstEff.all. Correct SaveConstantEff.all for 1x1 tech interact model has effort = 0.008443367447227 to get 39.9% depletion.
 Set final depl (if not solving)         -2.30258509299405          !This seems outdated
 Year MPA is implemented                 300
-Number of species                       3
+Number of species                       10
 Number of time-steps during the year    1            !Have never changed this value - untested.
 Number of North-south Blocks            1            
 Number of East-west Blocks              1            
-Carrying Capacity (SSB total)           0800000000.0   5200000000.0   1000000000.00   
-Natural mortality                       0.34 0.38 0.12
-Maximum Age                             20   20   40  
+Carrying Capacity (SSB total)           0800000000.0   5200000000.0   1000000000.0   0340000000.0   0320000000.0   0680000000.0   0500000000.0   0555000000.0   0330000000.0   0190000000.0   
+Natural mortality                       0.34 0.38 0.12 0.30 0.20 0.15 0.06 0.20 0.13 0.13
+Maximum Age                             20   20   40   20   30   25   60   30   40   20  
 Plus groups? (1=Yes; 0=No)              1 
-Initial Dep (used to FindQVals)         50.0   55.0   65.0
-Final Dep (out of date; see below)      40.0   40.0   40.0   
+Initial Dep (used to FindQVals)         50.0   55.0   65.0   50.0   75.0   85.0   55.0   95.0   60.0   60.0
+Final Dep (out of date; see below)      40.0   40.0   40.0   40.0   40.0   40.0   40.0   40.0   40.0   40.0   
 Does Qval equal 1 (DR project)?         0
-Qval Seeds (if finding Qvals)           1.000 1.000 1.000    !0.001 for 18x5 model   
+Qval Seeds (if finding Qvals)           1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000    !0.001 for 18x5 model   
 Recruitment specifications
  Include process error? (1=yes;0=no)    1
- Sigma(Global)                          0.57      0.90      0.41  
- Sigma (Local)                          0.000001 0.000001 0.000001 
- Steepness                              0.99 0.99 0.99 
- Type of SR relationship 1,2,3,4        1    1    1
- R0 change (in year 11)                 0.25      0.25      0.25
- RecDistn(0=even;1=params;2pat)         0    0    0
- Centre of gravity recruitment (X)      10.00   10.000   10.000
- Centre of gravity recruitment (Y)      0.500   0.500   0.500
- Left direction variance (X)            10000.0 10000.0 10000.0									! these values need to be the same
- Left direction variance (Y)            10000.0 10000.0 10000.0                 ! these values need to be the same
- Right direction variance (X)           10000.0 10000.0 10000.0                 ! these values need to be the same
- Right direction variance (Y)           10000.0 10000.0 10000.0                 ! these values need to be the same
+ Sigma(Global)                          0.57      0.90      0.41      0.46      0.62      0.70      0.70      0.65      0.42      0.40  
+ Sigma (Local)                          0.000001 0.000001 0.000001 0.000001 0.000001 0.000001 0.000001 0.000001 0.000001 0.000001 
+ Steepness                              0.99 0.99 0.99 0.80 0.99 0.58 0.95 0.57 0.99 0.99 
+ Type of SR relationship 1,2,3,4        1    1    1    1    1    1    1    1    11    1
+ R0 change (in year 11)                 0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+ RecDistn(0=even;1=params;2pat)         0    0    0    0    0    0    0    0    0    0
+ Centre of gravity recruitment (X)      10.00   10.000   10.000   10.000   10.000   10.000   10.000   10.000   10.000   10.000
+ Centre of gravity recruitment (Y)      0.500   0.500   0.500   0.500   0.500   0.500   0.500   0.500   0.500   0.500
+ Left direction variance (X)            10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0									! these values need to be the same
+ Left direction variance (Y)            10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0                 ! these values need to be the same
+ Right direction variance (X)           10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0                 ! these values need to be the same
+ Right direction variance (Y)           10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0 10000.0                 ! these values need to be the same
 Growth parameters
- Linf (F)                               92.3  70.6  37.8 
- Linf (M)                               92.3  70.6  33.7 
- K (F)                                  0.240 0.176 0.137
- K (M)                                  0.240 0.176 0.161
- To (F)                                 0.00 0.00 0.00 
- To (M)                                 0.00 0.00 0.00  
- a (F)                                  0.000006 0.000007 0.000005
- a (M)                                  0.000006 0.000007 0.000009
- b (F)                                  3.160 3.018 3.227
- b (M)                                  3.160 3.018 3.081
- Length Bin Intervals                   1    1    1          !Defined here b.c. of length calcs in the readspec function
- Number of length bins                  93   71   38          
+ Linf (F)                               92.3  70.6  37.8  41.3  47.12 41.3  41.6  85.0  50.1  110.0 
+ Linf (M)                               92.3  70.6  33.7  41.3  38.84 33.1  41.6  57.9  49.9  110.0 
+ K (F)                                  0.240 0.176 0.137 0.670 0.130 0.155 0.140 0.160 0.127 0.110
+ K (M)                                  0.240 0.176 0.161 0.670 0.170 0.190 0.140 0.170 0.060 0.110
+ To (F)                                 0.00  0.00  0.11  0.79  -0.56 0.06  -1.27 -0.81 0.35  0.10 
+ To (M)                                 0.00  0.00  -0.11 0.79  -0.56 -0.22 -1.27 -2.17 -4.02 0.10   
+ a (F)                                  0.000006 0.000007 0.000005 0.000010 0.002980 0.006183 0.000010 0.000006 0.005500 0.000009
+ a (M)                                  0.000006 0.000007 0.000009 0.000010 0.002980 0.005056 0.000010 0.000006 0.124900 0.000009
+ b (F)                                  3.160 3.018 3.227 3.091 3.327 3.117 3.070 3.103 3.230 2.962
+ b (M)                                  3.160 3.018 3.081 3.091 3.327 3.224 3.070 3.103 3.980 2.962
+ Length Bin Intervals                   1    1    1    1    1    1    1    1    1    1          !Defined here b.c. of length calcs in the readspec function
+ Number of length bins                  93   71   38   42   48   41   42   85   51   110          
 Maturity parameters 
- L50                                    4.88  3.69  10.27
- L95                                    7.93  5.75  13.11
+ L50                                    4.88  3.69  10.27 3.61  9.70  9.07  9.10  5.23  8.53  17.2   
+ L95                                    7.93  5.75  13.11 5.06  12.8  11.58 12.5  6.52  11.88 18.0  
 Dispersal
- Mix (north-south)                      0.01    0.01    0.01   
- Mix (east-west)                        0.01    0.01    0.01   
- X1N (and V1N)                          10.00   1.000   10.00   1.000   10.00   1.000   
- X2N (and V2N)                          17.50   1.000   17.50   1.000   17.50   1.000   
- X1E (and V1E)                          2.50    1.000   2.50    1.000   2.50    1.000   
- X2E (and V2E)                          4.50    1.000   4.50    1.000   4.50    1.000   
+ Mix (north-south)                      0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01   
+ Mix (east-west)                        0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01    0.01   
+ X1N (and V1N)                          10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   10.00   1.000   
+ X2N (and V2N)                          17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   17.50   1.000   
+ X1E (and V1E)                          2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   2.50    1.000   
+ X2E (and V2E)                          4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   4.50    1.000   
 Selectivity commercial 
- Age-at-at-50%-recruitment              3.770   5.000   8.720  
- Age-at-at-95%-recruitment              5.560   6.500   9.330 
+ Age-at-at-50%-recruitment              3.770   5.000   8.720   3.800   13.50   8.400   13.00   5.150   9.000   4.000     
+ Age-at-at-95%-recruitment              5.560   6.500   9.330   6.000   16.00   9.050   23.00   7.640   12.50   5.400    
 Selectivity survey     
- Age-at-at-50%-recruitment              3.400   4.500   7.850  
- Age-at-at-95%-recruitment              5.190   6.000   8.460  
+ Age-at-at-50%-recruitment              3.400   4.500   7.850   2.500   9.500   3.540   12.00   2.600   7.300   4.500     
+ Age-at-at-95%-recruitment              5.190   6.000   8.460   6.800   18.00   3.900   17.00   4.000   10.40   5.800     
 Spatial catchability
- SigmaQ                                 0.001   0.001   0.001      
+ SigmaQ                                 0.001   0.001   0.001   0.001   0.001   0.001   0.001   0.001   0.001   0.001      
  Hyperstability                         1
  
 Total Effort (Year, effort)
@@ -153,15 +153,15 @@ Years for historical assessments        300    Used to be 51 66 81 for MPA asses
 ImplOpt - implementation error (0=no)   0
 
 Larval Dispersal
- MixLarval (north-south)                1.00    1.00    1.00   
- MixLarval (east-west)                  0.50    0.50    0.50   
- X1NLarval (and V1NLarval)              10.00   1.00    10.00   1.00    10.00   1.00  
- X2NLarval (and V2NLarval)              17.50   1.00    17.50   1.00    17.50   1.00  
- X1ELarval (and V1ELarval)              2.50    3.00    2.50    3.00    2.50    3.00  
- X2ELarval (and V2ELarval)              4.50    0.001   4.50    0.001   4.50    0.001 
+ MixLarval (north-south)                1.00    1.00    1.00    1.00    1.00    1.00    1.00    1.00    1.00    1.00   
+ MixLarval (east-west)                  0.50    0.50    0.50    0.50    0.50    0.50    0.50    0.50    0.50    0.50   
+ X1NLarval (and V1NLarval)              10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00    10.00   1.00  
+ X2NLarval (and V2NLarval)              17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00    17.50   1.00  
+ X1ELarval (and V1ELarval)              2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00    2.50    3.00  
+ X2ELarval (and V2ELarval)              4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001   4.50    0.001 
  
 Number of target depletions             1
 Target Year, Target Depletion(by species)
-51   50.0  55.0  65.0
+51   50.0  55.0  65.0  50.0  75.0  85.0  55.0  95.0  60.0  60.0
 Management strategy                     1       	! 0 = "naive" approach   1 = Multi-species quota adjustment (LP)
 OM fishing strategy (fleet dynamics)    1       	! 0 = fixed over time 	1 = changing over time	  2 = none (no LP in the fleet dynamics i.e Catch = TAC)

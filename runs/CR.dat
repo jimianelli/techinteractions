@@ -3,20 +3,48 @@ Pstar approach? (1=yes,0=AFSC tier 3)   0
 Pstar HCR:
 Pstar                                   0.10
 Number MVN draws of ln(N-at-age)        1000
-Number of alt assess configs            1
+Number of alt assess configs            0    ! if zero, the following lines are ignored
 The configs species 1 to 3 (M + h make one config, paired vertically):
 config sp 1
-M configs      1                        0.34
-h configs      1                        0.99
-config weights 1                        1.00
-config sp 2
-M configs      2                        0.38
-h configs      2                        0.99
-config weights 2                        1.00
-config sp 3
-M configs      3                        0.12
-h configs      3                        0.99
-config weights 3                        1.00
+M configs                               0.34
+h configs                               0.99
+config weights                          1.00
+config sp 2     
+M configs                               0.38
+h configs                               0.99
+config weights                          1.00
+config sp 3     
+M configs                               0.12
+h configs                               0.99
+config weights                          1.00
+config sp 4     
+M configs                               0.30
+h configs                               0.80
+config weights                          1.00
+config sp 5     
+M configs                               0.20
+h configs                               0.99
+config weights                          1.00
+config sp 6     
+M configs                               0.15
+h configs                               0.58
+config weights                          1.00
+config sp 7     
+M configs                               0.06
+h configs                               0.95
+config weights                          1.00
+config sp 8     
+M configs                               0.20
+h configs                               0.57
+config weights                          1.00
+config sp 9     
+M configs                               0.13
+h configs                               0.99
+config weights                          1.00
+config sp 10     
+M configs                               0.13
+h configs                               0.99
+config weights                          1.00
 
 AFSC Tier 3 HCR:
 alpha (OFL)                             0.05
