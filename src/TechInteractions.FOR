@@ -868,7 +868,7 @@ C      Reset the quotas and all areas to open
 
 C      Read the seeds for this simulation 
        SEED1 = rand_file(Isim, 1)
-	   SEED2 = rand_file(Isim, 2)
+	 SEED2 = rand_file(Isim, 2)
        ISEEDP = SEED1 !ISEEDP = seed for Process error
        ISEEDO = SEED2 !ISEEDO = seed for Observation error
 C
@@ -886,7 +886,7 @@ C      Find the catchability coefficients
           CALL FindQvalsInd(Ispec)
 1000   CONTINUE
 C          CALL FindQvals()
-       WRITE(22,'(2(I10,1x),3F20.15,1x)') SEED1,SEED2,
+       WRITE(22,'(2(I10,1x),99F20.15,1x)') SEED1,SEED2,
      +      (QVAL(Ispec),ISpec=1,NSpec)
 	    WRITE(39,'(1x,A)') 'Qval(Ispec),ISpec=1,NSpec)'
 	    WRITE(39,*) (QVAL(Ispec),Ispec=1,NSpec)
@@ -3619,16 +3619,22 @@ C     correct depletion.
 
       ! Second round to check convergence
       if (SS.GT.1) THEN
-      X(1) = 0.1
+      X(1) = 0.000001
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
       ! Third round to check convergence
       if (SS.GT.1) THEN
+      X(1) = 0.1
+      CareyGRD = 1.001 
+      CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
+      SS = FUNK3(X,Ispec)
+      if (SS.GT.1) THEN
       X(1) = 0.5
       CareyGRD = 1.001 
       CALL FIT7(X,SS,NeffortAreas,CareyGRD,Ispec)
       SS = FUNK3(X,Ispec)
+      ENDIF
       ENDIF
       ENDIF
       
