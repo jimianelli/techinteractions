@@ -385,7 +385,7 @@ PARAMETER_SECTION
 
 PRELIMINARY_CALCS_SECTION
   int Iseries;
-  float total,length;
+  double total,length;
   
   //This will guarantee that the vectors are set = 0  at the beginning of the run
   age_length_pop.initialize();
